@@ -184,6 +184,7 @@ void Init(App* app)
     app->opengl_info.renderer = glGetString(GL_RENDERER);
     app->opengl_info.vendor = glGetString(GL_VENDOR);
     app->opengl_info.glsl_version = glGetString(GL_SHADING_LANGUAGE_VERSION);
+    // add opengl extensions
 
     // TODO: Initialize your resources here!
     // - vertex buffers
@@ -191,6 +192,47 @@ void Init(App* app)
     // - vaos
     // - programs (and retrieve uniform indices)
     // - textures
+    const VertexV3V2 vertices[] = {
+        { vec3(-0.5f, -0.5f, 0.0f), vec2(0.0f, 0.0f) },
+        { vec3( 0.5f, -0.5f, 0.0f), vec2(1.0f, 0.0f) },
+        { vec3( 0.5f,  0.5f, 0.0f), vec2(1.0f, 1.0f) },
+        { vec3(-0.5f,  0.5f, 0.0f), vec2(0.0f, 1.0f) }
+    };
+
+    const u16 indices[] = {
+        0, 1, 2,
+        0, 2, 3
+    };
+
+    glGenBuffers(1, &app->embeddedVertices);
+    glBindBuffer(GL_ARRAY_BUFFER, app->embeddedVertices);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    glGenBuffers(1, &app->embeddedElements);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, app->embeddedElements);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    glGenVertexArrays(1, &app->vao);
+    glBindVertexArray(app->vao);
+    glBindBuffer(GL_ARRAY_BUFFER, app->embeddedVertices);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexV3V2), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VertexV3V2), (void*)0);
+    glEnableVertexAttribArray(1);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, app->embeddedElements);
+    glBindVertexArray(0);
+
+    app->texturedGeometryProgramIdx = LoadProgram(app, "shaders.glsl", "TEXTURED_GEOMETRY");
+    Program& texturedGeometryProgram = app->programs[app->texturedGeometryProgramIdx];
+    app->programUniformTexture = glGetUniformLocation(texturedGeometryProgram.handle, "uTexture");
+
+    app->diceTexIdx = LoadTexture2D(app, "dice.png");
+    app->whiteTexIdx = LoadTexture2D(app, "color_white.png");
+    app->blackTexIdx = LoadTexture2D(app, "color_black.png");
+    app->normalTexIdx = LoadTexture2D(app, "color_normal.png");
+    app->magentaTexIdx = LoadTexture2D(app, "color_magenta.png");
 
     app->mode = Mode_TexturedQuad;
 }

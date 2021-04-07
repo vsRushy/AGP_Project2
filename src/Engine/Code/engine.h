@@ -22,6 +22,12 @@ struct OpenGLInfo
     const unsigned char* glsl_version;
 };
 
+struct VertexV3V2
+{
+    vec3 pos;
+    vec2 uv;
+};
+
 struct Image
 {
     void* pixels;
