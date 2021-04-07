@@ -114,14 +114,35 @@ void OnGlfwCloseWindow(GLFWwindow* window)
     app->isRunning = false;
 }
 
+RENDERDOC_API_1_4_1* rdoc_api = nullptr;
+
 int main()
 {
+    // External hooks
+    LoadLibraryA("renderdoc.dll");
+
+    if (HMODULE mod = GetModuleHandleA("renderdoc.dll"))
+    {
+        pRENDERDOC_GetAPI RENDERDOC_GetAPI = (pRENDERDOC_GetAPI)GetProcAddress(mod, "RENDERDOC_GetAPI");
+
+        int ret = RENDERDOC_GetAPI(eRENDERDOC_API_Version_1_4_1, (void**)&rdoc_api);
+        assert(ret == 1);
+
+        std::cout << "Hooked to renderdoc.dll correctly." << std::endl;
+    }
+    else
+    {
+        std::cout << "Can't hook to renderdoc.dll." << std::endl;
+    }
+
+    rdoc_api->SetCaptureFilePathTemplate("./RenderDoc/capture");
+
     App app         = {};
     app.deltaTime   = 1.0f/60.0f;
     app.displaySize = ivec2(WINDOW_WIDTH, WINDOW_HEIGHT);
     app.isRunning   = true;
 
-		glfwSetErrorCallback(OnGlfwError);
+    glfwSetErrorCallback(OnGlfwError);
 
     if (!glfwInit())
     {

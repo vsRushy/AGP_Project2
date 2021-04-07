@@ -6,6 +6,7 @@
 #pragma once
 
 #define _CRT_SECURE_NO_WARNINGS
+#include <iostream>
 #include <stdio.h>
 #include <assert.h>
 #include <math.h>
@@ -14,6 +15,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <vector>
 #include <string>
+
+#include "renderdoc_app.h"
 
 #pragma warning(disable : 4267) // conversion from X to Y, possible loss of data
 
@@ -107,3 +110,5 @@ LogString(logBuffer);             \
 #define PI  3.14159265359f
 #define TAU 6.28318530718f
 
+// External hooks declarations
+extern RENDERDOC_API_1_4_1* rdoc_api;

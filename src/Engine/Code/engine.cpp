@@ -242,10 +242,19 @@ void Gui(App* app)
     ImGui::Begin("Info");
 
     ImGui::Text("FPS: %f", 1.0f / app->deltaTime); ImGui::NewLine();
+
+    ImGui::Separator();
+
     ImGui::Text("OpenGL version: %s", app->opengl_info.version); ImGui::NewLine();
     ImGui::Text("OpenGL renderer: %s", app->opengl_info.renderer); ImGui::NewLine();
     ImGui::Text("OpenGL vendor: %s", app->opengl_info.vendor); ImGui::NewLine();
     ImGui::Text("OpenGL GLSL version: %s", app->opengl_info.glsl_version); ImGui::NewLine();
+
+    ImGui::Separator();
+
+    if(ImGui::Button("RenderDoc Capture")) {
+        rdoc_api->TriggerCapture();
+    }
 
     ImGui::End();
 }

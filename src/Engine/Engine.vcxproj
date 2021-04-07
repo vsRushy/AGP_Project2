@@ -147,7 +147,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)ThirdParty\glfw\include;$(ProjectDir)ThirdParty\glad\include;$(ProjectDir)ThirdParty\glm\include;$(ProjectDir)ThirdParty\imgui-docking;$(ProjectDir)ThirdParty\stb;$(ProjectDir)ThirdParty\Assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)ThirdParty\RenderDoc\include;$(ProjectDir)ThirdParty\glfw\include;$(ProjectDir)ThirdParty\glad\include;$(ProjectDir)ThirdParty\glm\include;$(ProjectDir)ThirdParty\imgui-docking;$(ProjectDir)ThirdParty\stb;$(ProjectDir)ThirdParty\Assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
