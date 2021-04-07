@@ -14,6 +14,14 @@ typedef glm::ivec2 ivec2;
 typedef glm::ivec3 ivec3;
 typedef glm::ivec4 ivec4;
 
+struct OpenGLInfo
+{
+    const unsigned char* version;
+    const unsigned char* renderer;
+    const unsigned char* vendor;
+    const unsigned char* glsl_version;
+};
+
 struct Image
 {
     void* pixels;
@@ -52,8 +60,7 @@ struct App
     Input input;
 
     // Graphics
-    char gpuName[64];
-    char openGlVersion[64];
+    OpenGLInfo opengl_info;
 
     ivec2 displaySize;
 
