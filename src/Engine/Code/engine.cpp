@@ -241,7 +241,7 @@ void Gui(App* app)
 {
     ImGui::Begin("Info");
 
-    ImGui::Text("FPS: %f", 1.0f/app->deltaTime); ImGui::NewLine();
+    ImGui::Text("FPS: %f", 1.0f / app->deltaTime); ImGui::NewLine();
     ImGui::Text("OpenGL version: %s", app->opengl_info.version); ImGui::NewLine();
     ImGui::Text("OpenGL renderer: %s", app->opengl_info.renderer); ImGui::NewLine();
     ImGui::Text("OpenGL vendor: %s", app->opengl_info.vendor); ImGui::NewLine();
@@ -260,20 +260,41 @@ void Render(App* app)
     switch (app->mode)
     {
         case Mode_TexturedQuad:
-            {
-                // TODO: Draw your textured quad here!
-                // - clear the framebuffer
-                // - set the viewport
-                // - set the blending state
-                // - bind the texture into unit 0
-                // - bind the program 
-                //   (...and make its texture sample from unit 0)
-                // - bind the vao
-                // - glDrawElements() !!!
-            }
-            break;
+        {
+            // TODO: Draw your textured quad here!
+            // - clear the framebuffer
+            // - set the viewport
+            // - set the blending state
+            // - bind the texture into unit 0
+            // - bind the program 
+            //   (...and make its texture sample from unit 0)
+            // - bind the vao
+            // - glDrawElements() !!!
+            glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        default:;
+            glViewport(0, 0, app->displaySize.x, app->displaySize.y);
+
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+            Program& programTexturedGeometry = app->programs[app->texturedGeometryProgramIdx];
+            glUseProgram(programTexturedGeometry.handle);
+            glBindVertexArray(app->vao);
+
+            glUniform1i(app->programUniformTexture, 0);
+            glActiveTexture(GL_TEXTURE0);
+            GLuint textureHandle = app->textures[app->diceTexIdx].handle;
+            glBindTexture(GL_TEXTURE_2D, textureHandle);
+
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
+
+            glBindVertexArray(0);
+            glUseProgram(0);
+        }
+        break;
+
+        default:
+        {} break;
     }
 }
-
