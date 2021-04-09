@@ -186,6 +186,8 @@ void Init(App* app)
     app->opengl_info.glsl_version = glGetString(GL_SHADING_LANGUAGE_VERSION);
     // add opengl extensions
 
+    app->debug_group_mode = true;
+
     // TODO: Initialize your resources here!
     // - vertex buffers
     // - element/index buffers
@@ -252,7 +254,12 @@ void Gui(App* app)
 
     ImGui::Separator();
 
-    if(ImGui::Button("RenderDoc Capture")) {
+    ImGui::Checkbox("Enable Debug Group Mode", &app->debug_group_mode);
+
+    ImGui::Separator();
+
+    if(ImGui::Button("RenderDoc Capture")) 
+    {
         rdoc_api->TriggerCapture();
     }
 
@@ -282,6 +289,9 @@ void Update(App* app)
 
 void Render(App* app)
 {
+    if (app->debug_group_mode)
+        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Shaded Model");
+
     switch (app->mode)
     {
         case Mode_TexturedQuad:
@@ -322,4 +332,7 @@ void Render(App* app)
         default:
         {} break;
     }
+
+    if (app->debug_group_mode)
+        glPopDebugGroup();
 }
