@@ -194,6 +194,15 @@ void Init(App* app)
     // - vaos
     // - programs (and retrieve uniform indices)
     // - textures
+
+    VertexBufferLayout vertex_buffer_layout = {};
+    vertex_buffer_layout.attributes.push_back(VertexBufferAttribute{ 0, 3, 0 });
+    vertex_buffer_layout.attributes.push_back(VertexBufferAttribute{ 2, 2, 3 * sizeof(float) });
+    vertex_buffer_layout.stride = 5 * sizeof(float);
+
+    
+
+
     const VertexV3V2 vertices[] = {
         { vec3(-0.5f, -0.5f, 0.0f), vec2(0.0f, 0.0f) },
         { vec3( 0.5f, -0.5f, 0.0f), vec2(1.0f, 0.0f) },
@@ -235,6 +244,11 @@ void Init(App* app)
     app->blackTexIdx = LoadTexture2D(app, "color_black.png");
     app->normalTexIdx = LoadTexture2D(app, "color_normal.png");
     app->magentaTexIdx = LoadTexture2D(app, "color_magenta.png");
+
+    app->texturedMeshProgramIdx = LoadProgram(app, "shaders.glsl", "SHOW_TEXTURED_MESH");
+    Program& texturedMeshProgram = app->programs[app->texturedGeometryProgramIdx];
+    texturedMeshProgram.vertex_input_layout.attributes.push_back({ 0, 3 });
+    texturedMeshProgram.vertex_input_layout.attributes.push_back({ 2, 2 });
 
     app->mode = Mode_TexturedQuad;
 }

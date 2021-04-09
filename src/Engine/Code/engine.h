@@ -78,6 +78,8 @@ struct Program
     std::string        filepath;
     std::string        programName;
     u64                lastWriteTimestamp; // What is this for?
+
+    VertexShaderLayout vertex_input_layout;
 };
 
 enum Mode
@@ -105,6 +107,7 @@ struct App
 
     // program indices
     u32 texturedGeometryProgramIdx;
+    u32 texturedMeshProgramIdx;
     
     // texture indices
     u32 diceTexIdx;
