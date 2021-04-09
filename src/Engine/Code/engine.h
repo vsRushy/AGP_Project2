@@ -28,6 +28,36 @@ struct VertexV3V2
     vec2 uv;
 };
 
+struct VertexBufferAttribute
+{
+    u8 location;
+    u8 component_count;
+    u8 offset;
+};
+
+struct VertexBufferLayout
+{
+    std::vector<VertexBufferAttribute> attributes;
+    u8 stride;
+};
+
+struct VertexShaderAttribute
+{
+    u8 location;
+    u8 component_count;
+};
+
+struct VertexShaderLayout
+{
+    std::vector<VertexShaderAttribute> attributes;
+};
+
+struct Vao
+{
+    GLuint handle;
+    GLuint program_handle;
+};
+
 struct Image
 {
     void* pixels;
