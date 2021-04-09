@@ -31,13 +31,15 @@ typedef unsigned long long int u64;
 typedef float                  f32;
 typedef double                 f64;
 
-enum MouseButton {
+enum MouseButton
+{
     LEFT,
     RIGHT,
     MOUSE_BUTTON_COUNT
 };
 
-enum Key {
+enum Key
+{
     K_SPACE,
     K_0, K_1, K_2, K_3, K_4, K_5, K_6, K_7, K_8, K_9,
     K_A, K_B, K_C, K_D, K_E, K_F, K_G, K_H, K_I, K_J, K_K, K_L, K_M,
@@ -46,14 +48,16 @@ enum Key {
     KEY_COUNT
 };
 
-enum ButtonState {
+enum ButtonState
+{
     BUTTON_IDLE,
     BUTTON_PRESS,
     BUTTON_PRESSED,
     BUTTON_RELEASE
 };
 
-struct Input {
+struct Input
+{
     glm::vec2   mousePos;
     glm::vec2   mouseDelta;
     ButtonState mouseButtons[MOUSE_BUTTON_COUNT];
@@ -103,9 +107,9 @@ LogString(logBuffer);             \
 
 #define ASSERT(condition, message) assert((condition) && message)
 
-#define KB(count) (1024*(count))
-#define MB(count) (1024*KB(count))
-#define GB(count) (1024*MB(count))
+#define KB(count) (1024 * (count))
+#define MB(count) (1024 * KB(count))
+#define GB(count) (1024 * MB(count))
 
 #define PI  3.14159265359f
 #define TAU 6.28318530718f
