@@ -81,9 +81,7 @@ GLuint CreateProgramFromSource(String programSource, const char* shaderName)
     else
     {
         GLint attributeCount;
-
-        const GLint length = 32;
-        GLchar attribute_name[length];
+        GLchar attribute_name[32];
         GLsizei attribute_length;
         GLint attribute_size;
         GLenum attribute_type;
