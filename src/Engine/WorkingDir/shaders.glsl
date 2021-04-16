@@ -52,7 +52,7 @@ void main()
 
 	gl_Position = vec4(aPosition, clipping_scale);
 
-	gl_Position.z = -gl_Position.z;
+	gl_Position.z = gl_Position.z;
 }
 
 #elif defined(FRAGMENT) ///////////////////////////////////////////////

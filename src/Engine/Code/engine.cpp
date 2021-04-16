@@ -260,10 +260,11 @@ void Init(App* app)
 
     LoadModel(app, "Patrick/Patrick.obj");
 
-    VertexBufferLayout vertex_buffer_layout = {};
+    // TODO: primitive meshes
+    /*VertexBufferLayout vertex_buffer_layout = {};
     vertex_buffer_layout.attributes.push_back(VertexBufferAttribute{ 0, 3, 0 });
     vertex_buffer_layout.attributes.push_back(VertexBufferAttribute{ 2, 2, 3 * sizeof(float) });
-    vertex_buffer_layout.stride = 5 * sizeof(float);
+    vertex_buffer_layout.stride = 5 * sizeof(float);*/
 
     app->texturedMeshProgramIdx = LoadProgram(app, "shaders.glsl", "SHOW_TEXTURED_MESH");
     Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
