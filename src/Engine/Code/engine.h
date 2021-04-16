@@ -120,7 +120,7 @@ struct Program
     GLuint             handle;
     std::string        filepath;
     std::string        programName;
-    u64                lastWriteTimestamp; // What is this for?
+    u64                lastWriteTimestamp;
 
     VertexShaderLayout vertex_input_layout;
 };
@@ -175,6 +175,9 @@ struct App
 
     // Location of the texture uniform in the textured quad shader
     GLuint programUniformTexture;
+
+    // More Uniforms
+    GLint texturedMeshProgram_uTexture;
 
     // VAO object to link our screen filling quad with our textured quad shader
     GLuint vao;

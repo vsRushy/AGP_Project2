@@ -267,6 +267,7 @@ void Init(App* app)
     Program& texturedMeshProgram = app->programs[app->texturedGeometryProgramIdx];
     texturedMeshProgram.vertex_input_layout.attributes.push_back({ 0, 3 });
     texturedMeshProgram.vertex_input_layout.attributes.push_back({ 2, 2 });
+    app->texturedMeshProgram_uTexture = glGetUniformLocation(texturedMeshProgram.handle, "uTexture");
 
     app->mode = Mode_Count;
 }
@@ -383,7 +384,14 @@ void Render(App* app)
                 glBindVertexArray(vao);
 
                 u32 submesh_material_index = model.material_index[i];
+                Material& submesh_material = app->materials[submesh_material_index];
 
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, app->textures[submesh_material.albedo_texture_index].handle);
+                glUniform1i(app->texturedMeshProgram_uTexture, 0);
+                
+                Submesh& submesh = mesh.submeshes[i];
+                glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.index_offset);
             }
 
             glUniform1i(app->programUniformTexture, 0);
