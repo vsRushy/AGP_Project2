@@ -192,3 +192,5 @@ void Update(App* app);
 void Render(App* app);
 
 GLuint FindVao(Mesh& mesh, u32 submesh_index, const Program& program);
+
+u32 LoadTexture2D(App* app, const char* filepath);
