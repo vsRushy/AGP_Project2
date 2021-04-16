@@ -146,9 +146,9 @@ struct App
     ivec2 displaySize;
 
     std::vector<Texture>  textures;
-    std::vector<Program>  materials;
-    std::vector<Program>  meshes;
-    std::vector<Program>  models;
+    std::vector<Material>  materials;
+    std::vector<Mesh>  meshes;
+    std::vector<Model>  models;
     std::vector<Program>  programs;
 
     // program indices
@@ -188,3 +188,4 @@ void Update(App* app);
 
 void Render(App* app);
 
+GLuint FindVao(Mesh& mesh, u32 submesh_index, const Program& program);

@@ -268,7 +268,7 @@ void Init(App* app)
     texturedMeshProgram.vertex_input_layout.attributes.push_back({ 0, 3 });
     texturedMeshProgram.vertex_input_layout.attributes.push_back({ 2, 2 });
 
-    app->mode = Mode_TexturedQuad;
+    app->mode = Mode_Count;
 }
 
 void Gui(App* app)
@@ -361,10 +361,105 @@ void Render(App* app)
         }
         break;
 
+        case Mode_Count:
+        {
+            glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            glViewport(0, 0, app->displaySize.x, app->displaySize.y);
+
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+            Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
+            glUseProgram(texturedMeshProgram.handle);
+            
+            Model& model = app->models[0]; // TODO change 0
+            Mesh& mesh = app->meshes[model.mesh_index];
+
+            for (u32 i = 0; i < mesh.submeshes.size(); ++i)
+            {
+                GLuint vao = FindVao(mesh, i, texturedMeshProgram);
+                glBindVertexArray(vao);
+
+                u32 submesh_material_index = model.material_index[i];
+
+            }
+
+            glUniform1i(app->programUniformTexture, 0);
+            glActiveTexture(GL_TEXTURE0);
+            GLuint textureHandle = app->textures[app->diceTexIdx].handle;
+            glBindTexture(GL_TEXTURE_2D, textureHandle);
+
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
+
+            glBindVertexArray(0);
+            glUseProgram(0);
+        }
+        break;
+
         default:
         {} break;
     }
 
     if (app->debug_group_mode)
         glPopDebugGroup();
+}
+
+GLuint FindVao(Mesh& mesh, u32 submesh_index, const Program& program)
+{
+    Submesh& submesh = mesh.submeshes[submesh_index];
+
+    // Try to find a vao for this submesh/program
+    for (u32 i = 0; i < (u32)submesh.vaos.size(); ++i)
+    {
+        if (submesh.vaos[i].program_handle == program.handle)
+        {
+            return submesh.vaos[i].handle;
+        }
+    }
+
+    GLuint vao_handle = 0;
+
+    // Create a new VAO for this submesh/program
+    {
+        glGenVertexArrays(1, &vao_handle);
+        glBindVertexArray(vao_handle);
+
+        glBindBuffer(GL_ARRAY_BUFFER, mesh.vertex_buffer_handle);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.index_buffer_handle);
+
+        // Link all vertex input attributes to attributes in the vertex buffer
+        for (u32 i = 0; i < program.vertex_input_layout.attributes.size(); ++i)
+        {
+            bool attribute_was_linked = false;
+
+            for (u32 j = 0; j < submesh.vertex_buffer_layout.attributes.size(); ++j)
+            {
+                if (program.vertex_input_layout.attributes[i].location == submesh.vertex_buffer_layout.attributes[j].location)
+                {
+                    const u32 index = submesh.vertex_buffer_layout.attributes[j].location;
+                    const u32 ncomp = submesh.vertex_buffer_layout.attributes[j].component_count;
+                    const u32 offset = submesh.vertex_buffer_layout.attributes[j].offset + submesh.vertex_offset;
+                    const u32 stride = submesh.vertex_buffer_layout.stride;
+
+                    glVertexAttribPointer(index, ncomp, GL_FLOAT, GL_FALSE, stride, (void*)(u64)offset);
+                    glEnableVertexAttribArray(index);
+
+                    attribute_was_linked = true;
+
+                    break;
+                }
+            }
+
+            assert(attribute_was_linked);
+        }
+
+        glBindVertexArray(0);
+    }
+
+    Vao vao = { vao_handle, program.handle };
+    submesh.vaos.push_back(vao);
+
+    return vao_handle;
 }
