@@ -72,6 +72,49 @@ struct Texture
     std::string filepath;
 };
 
+struct Material
+{
+    std::string name;
+
+    vec3 albedo;
+    vec3 emissive;
+
+    f32 smoothness;
+
+    u32 albedo_texture_index;
+    u32 emissive_texture_index;
+    u32 specular_texture_index;
+    u32 normals_texture_index;
+    u32 bump_texture_index;
+};
+
+struct Model
+{
+    u32 mesh_index;
+    std::vector<u32> material_index;
+};
+
+struct Submesh
+{
+    VertexBufferLayout vertex_buffer_layout;
+
+    std::vector<float> vertices;
+    std::vector<u32> indices;
+
+    u32 vertex_offset;
+    u32 index_offset;
+
+    std::vector<Vao> vaos;
+};
+
+struct Mesh
+{
+    std::vector<Submesh> submeshes;
+
+    GLuint vertex_buffer_handle;
+    GLuint index_buffer_handle;
+};
+
 struct Program
 {
     GLuint             handle;
@@ -103,6 +146,9 @@ struct App
     ivec2 displaySize;
 
     std::vector<Texture>  textures;
+    std::vector<Program>  materials;
+    std::vector<Program>  meshes;
+    std::vector<Program>  models;
     std::vector<Program>  programs;
 
     // program indices
