@@ -5,10 +5,12 @@
 // graphics related GUI options, and so on.
 //
 
-#include "engine.h"
 #include <imgui.h>
 #include <stb_image.h>
 #include <stb_image_write.h>
+
+#include "engine.h"
+#include "assimp_model_loading.h"
 
 GLuint CreateProgramFromSource(String programSource, const char* shaderName)
 {
@@ -19,7 +21,7 @@ GLuint CreateProgramFromSource(String programSource, const char* shaderName)
 
     char versionString[] = "#version 430\n";
     char shaderNameDefine[128];
-    sprintf(shaderNameDefine, "#define %s\n", shaderName);
+    sprintf_s(shaderNameDefine, "#define %s\n", shaderName);
     char vertexShaderDefine[] = "#define VERTEX\n";
     char fragmentShaderDefine[] = "#define FRAGMENT\n";
 
@@ -212,15 +214,6 @@ void Init(App* app)
     // - vaos
     // - programs (and retrieve uniform indices)
     // - textures
-
-    VertexBufferLayout vertex_buffer_layout = {};
-    vertex_buffer_layout.attributes.push_back(VertexBufferAttribute{ 0, 3, 0 });
-    vertex_buffer_layout.attributes.push_back(VertexBufferAttribute{ 2, 2, 3 * sizeof(float) });
-    vertex_buffer_layout.stride = 5 * sizeof(float);
-
-    
-
-
     const VertexV3V2 vertices[] = {
         { vec3(-0.5f, -0.5f, 0.0f), vec2(0.0f, 0.0f) },
         { vec3( 0.5f, -0.5f, 0.0f), vec2(1.0f, 0.0f) },
@@ -262,6 +255,15 @@ void Init(App* app)
     app->blackTexIdx = LoadTexture2D(app, "color_black.png");
     app->normalTexIdx = LoadTexture2D(app, "color_normal.png");
     app->magentaTexIdx = LoadTexture2D(app, "color_magenta.png");
+
+    // --------------------------------
+
+    LoadModel(app, "Patrick/Patrick.obj");
+
+    VertexBufferLayout vertex_buffer_layout = {};
+    vertex_buffer_layout.attributes.push_back(VertexBufferAttribute{ 0, 3, 0 });
+    vertex_buffer_layout.attributes.push_back(VertexBufferAttribute{ 2, 2, 3 * sizeof(float) });
+    vertex_buffer_layout.stride = 5 * sizeof(float);
 
     app->texturedMeshProgramIdx = LoadProgram(app, "shaders.glsl", "SHOW_TEXTURED_MESH");
     Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
