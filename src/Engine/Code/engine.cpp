@@ -78,6 +78,26 @@ GLuint CreateProgramFromSource(String programSource, const char* shaderName)
         glGetProgramInfoLog(programHandle, infoLogBufferSize, &infoLogSize, infoLogBuffer);
         ELOG("glLinkProgram() failed with program %s\nReported message:\n%s\n", shaderName, infoLogBuffer);
     }
+    else
+    {
+        GLint attributeCount;
+
+        const GLint length = 32;
+        GLchar attribute_name[length];
+        GLsizei attribute_length;
+        GLint attribute_size;
+        GLenum attribute_type;
+
+        glGetProgramiv(programHandle, GL_ACTIVE_ATTRIBUTES, &attributeCount);
+
+        for (int i = 0; i < attributeCount; ++i)
+        {
+            glGetActiveAttrib(programHandle, i, ARRAY_COUNT(attribute_name), &attribute_length, &attribute_size, &attribute_type, attribute_name);
+            printf("Attribute #%d Type: %u Name: %s\n", i, attribute_type, attribute_name);
+        }
+
+        // With the previous code, we should be allowed to call attribute_location = glGetAttribLocation(programHandle, "attribute name"); from anywhere
+    }
 
     glUseProgram(0);
 
