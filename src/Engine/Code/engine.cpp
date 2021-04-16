@@ -264,7 +264,7 @@ void Init(App* app)
     app->magentaTexIdx = LoadTexture2D(app, "color_magenta.png");
 
     app->texturedMeshProgramIdx = LoadProgram(app, "shaders.glsl", "SHOW_TEXTURED_MESH");
-    Program& texturedMeshProgram = app->programs[app->texturedGeometryProgramIdx];
+    Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
     texturedMeshProgram.vertex_input_layout.attributes.push_back({ 0, 3 });
     texturedMeshProgram.vertex_input_layout.attributes.push_back({ 2, 2 });
     app->texturedMeshProgram_uTexture = glGetUniformLocation(texturedMeshProgram.handle, "uTexture");
