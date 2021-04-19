@@ -80,24 +80,6 @@ GLuint CreateProgramFromSource(String programSource, const char* shaderName)
         glGetProgramInfoLog(programHandle, infoLogBufferSize, &infoLogSize, infoLogBuffer);
         ELOG("glLinkProgram() failed with program %s\nReported message:\n%s\n", shaderName, infoLogBuffer);
     }
-    else
-    {
-        GLint attributeCount;
-        GLchar attribute_name[32];
-        GLsizei attribute_length;
-        GLint attribute_size;
-        GLenum attribute_type;
-
-        glGetProgramiv(programHandle, GL_ACTIVE_ATTRIBUTES, &attributeCount);
-
-        for (int i = 0; i < attributeCount; ++i)
-        {
-            glGetActiveAttrib(programHandle, i, ARRAY_COUNT(attribute_name), &attribute_length, &attribute_size, &attribute_type, attribute_name);
-            printf("Attribute #%d Type: %u Name: %s\n", i, attribute_type, attribute_name);
-        }
-
-        // With the previous code, we should be allowed to call attribute_location = glGetAttribLocation(programHandle, "attribute name"); from anywhere
-    }
 
     glUseProgram(0);
 
@@ -198,6 +180,27 @@ u32 LoadTexture2D(App* app, const char* filepath)
     }
 }
 
+u8 GetAttributeComponentCount(const GLenum& type)
+{
+    switch (type)
+    {
+    case GL_FLOAT: return 1; break; case GL_FLOAT_VEC2: return 2; break; case GL_FLOAT_VEC3: return 3; break; case GL_FLOAT_VEC4: return 4; break;
+    case GL_FLOAT_MAT2: return 4; break; case GL_FLOAT_MAT3: return 9; break; case GL_FLOAT_MAT4: return 16;
+    case GL_FLOAT_MAT2x3: return 6; break; case GL_FLOAT_MAT2x4: return 8; break;
+    case GL_FLOAT_MAT3x2: return 6; break; case GL_FLOAT_MAT3x4: return 12; break;
+    case GL_FLOAT_MAT4x2: return 8; break; case GL_FLOAT_MAT4x3: return 12; break;
+    case GL_INT: return 1; break; case GL_INT_VEC2: return 2; break; case GL_INT_VEC3: return 3; break; case GL_INT_VEC4: return 4; break;
+    case GL_UNSIGNED_INT: return 1; break; case GL_UNSIGNED_INT_VEC2: return 2; break; case GL_UNSIGNED_INT_VEC3: return 3; break; case GL_UNSIGNED_INT_VEC4: return 4; break;
+    case GL_DOUBLE: return 1; break; case GL_DOUBLE_VEC2: return 2; break; case GL_DOUBLE_VEC3: return 3; break; case GL_DOUBLE_VEC4: return 4; break;
+    case GL_DOUBLE_MAT2: return 4; break; case GL_DOUBLE_MAT3: return 9; break; case GL_DOUBLE_MAT4: return 16;
+    case GL_DOUBLE_MAT2x3: return 6; break; case GL_DOUBLE_MAT2x4: return 8; break;
+    case GL_DOUBLE_MAT3x2: return 6; break; case GL_DOUBLE_MAT3x4: return 12; break;
+    case GL_DOUBLE_MAT4x2: return 8; break; case GL_DOUBLE_MAT4x3: return 12; break;
+
+    default: return 0; break;
+    }
+}
+
 void Init(App* app)
 {
     app->opengl_info.version = glGetString(GL_VERSION);
@@ -268,8 +271,25 @@ void Init(App* app)
 
     app->texturedMeshProgramIdx = LoadProgram(app, "shaders.glsl", "SHOW_TEXTURED_MESH");
     Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
-    texturedMeshProgram.vertex_input_layout.attributes.push_back({ 0, 3 });
-    texturedMeshProgram.vertex_input_layout.attributes.push_back({ 2, 2 });
+
+    GLint attribute_count;
+    glGetProgramiv(texturedMeshProgram.handle, GL_ACTIVE_ATTRIBUTES, &attribute_count);
+
+    for (int i = 0; i < attribute_count; ++i)
+    {
+        GLchar attribute_name[32];
+        GLsizei attribute_length;
+        GLint attribute_size;
+        GLenum attribute_type;
+
+        glGetActiveAttrib(texturedMeshProgram.handle, i, ARRAY_COUNT(attribute_name), &attribute_length, &attribute_size, &attribute_type, attribute_name);
+        GLint attribute_location = glGetAttribLocation(texturedMeshProgram.handle, attribute_name);
+        
+        ELOG("Attribute %s. Location: %d Type: %d", attribute_name, attribute_location, attribute_type);
+
+        texturedMeshProgram.vertex_input_layout.attributes.push_back({ (u8)attribute_location, GetAttributeComponentCount(attribute_type) });
+    }
+
     app->texturedMeshProgram_uTexture = glGetUniformLocation(texturedMeshProgram.handle, "uTexture");
 
     app->mode = Mode_Count;

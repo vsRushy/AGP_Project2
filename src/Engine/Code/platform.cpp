@@ -426,6 +426,8 @@ void LogString(const char* str)
 #ifdef _WIN32
     OutputDebugStringA(str);
     OutputDebugStringA("\n");
+    printf(str);
+    printf("\n");
 #else
     fprintf(stderr, "%s\n", str);
 #endif
