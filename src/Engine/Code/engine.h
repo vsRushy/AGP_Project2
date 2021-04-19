@@ -182,6 +182,9 @@ struct App
 
     // VAO object to link our screen filling quad with our textured quad shader
     GLuint vao;
+
+    // Uniform buffer
+    GLuint uniform_buffer_handle;
 };
 
 void Init(App* app);

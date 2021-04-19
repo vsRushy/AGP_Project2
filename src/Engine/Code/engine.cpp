@@ -290,9 +290,8 @@ void Init(App* app)
     glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &max_uniform_buffer_size);
     glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &uniform_block_alignment);
 
-    GLuint uniform_buffer_handle;
-    glGenBuffers(1, &uniform_buffer_handle);
-    glBindBuffer(GL_UNIFORM_BUFFER, uniform_buffer_handle);
+    glGenBuffers(1, &app->uniform_buffer_handle);
+    glBindBuffer(GL_UNIFORM_BUFFER, app->uniform_buffer_handle);
     glBufferData(GL_UNIFORM_BUFFER, max_uniform_buffer_size, NULL, GL_STREAM_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
@@ -328,7 +327,23 @@ void Gui(App* app)
 
 void Update(App* app)
 {
-    // You can handle app->input keyboard/mouse here
+    // TODO: Handle app->input keyboard/mouse here
+
+
+    glm::mat4 worldMatrix, worldViewProjectionMatrix;
+
+    glBindBuffer(GL_UNIFORM_BUFFER, app->uniform_buffer_handle);
+    u8* bufferData = (u8*)glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
+    u32 bufferHead = 0;
+
+    memcpy(bufferData + bufferHead, glm::value_ptr(worldMatrix), sizeof(glm::mat4));
+    bufferHead += sizeof(glm::mat4);
+
+    memcpy(bufferData + bufferHead, glm::value_ptr(worldViewProjectionMatrix), sizeof(glm::mat4));
+    bufferHead += sizeof(glm::mat4);
+
+    glUnmapBuffer(GL_UNIFORM_BUFFER);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     // Check timestamp & reload
     for (u64 i = 0; i < app->programs.size(); ++i)
