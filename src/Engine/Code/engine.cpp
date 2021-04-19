@@ -286,6 +286,16 @@ void Init(App* app)
 
     app->texturedMeshProgram_uTexture = glGetUniformLocation(texturedMeshProgram.handle, "uTexture");
 
+    GLint max_uniform_buffer_size, uniform_block_alignment;
+    glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &max_uniform_buffer_size);
+    glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &uniform_block_alignment);
+
+    GLuint uniform_buffer_handle;
+    glGenBuffers(1, &uniform_buffer_handle);
+    glBindBuffer(GL_UNIFORM_BUFFER, uniform_buffer_handle);
+    glBufferData(GL_UNIFORM_BUFFER, max_uniform_buffer_size, NULL, GL_STREAM_DRAW);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
     app->mode = Mode_Count;
 }
 

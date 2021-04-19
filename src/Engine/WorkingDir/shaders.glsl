@@ -42,22 +42,32 @@ layout(location = 2) in vec2 aTexCoord;
 // layout(location = 3) in vec3 aTangent;
 // layout(location = 4) in vec3 aBitangent;
 
+layout(binding = 1, std140) uniform LocalParams
+{
+	mat4 uWorldMatrix;
+	mat4 uWorldViewProjectionMatrix;
+}
+
 out vec2 vTexCoord;
+out vec3 vPosition; // In worldspace
+out vec3 vNormal; // In worldspace
+out vViewDir;
 
 void main()
 {
 	vTexCoord = aTexCoord;
+	vPosition = vec3(uWorldMatrix * vec4(aPosition, 1.0));
+	vNormal = vec3(uWorldMatrix * vec4(aNormal, 1.0));
 
-	float clipping_scale = 5.0;
-
-	gl_Position = vec4(aPosition, clipping_scale);
-
-	gl_Position.z = gl_Position.z;
+	gl_Position = uWorldViewProjectionMatrix * vec4(aPosition, 1.0);
 }
 
 #elif defined(FRAGMENT) ///////////////////////////////////////////////
 
 in vec2 vTexCoord;
+in vec3 vPosition;
+in vec3 vNormal;
+in vec3 vViewDir;
 
 uniform sampler2D uTexture;
 
