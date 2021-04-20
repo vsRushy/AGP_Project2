@@ -66,10 +66,7 @@ void OnGlfwMouseEvent(GLFWwindow* window, int button, int event, int modifiers)
 void OnGlfwScrollEvent(GLFWwindow* window, double xoffset, double yoffset)
 {
     App* app = (App*)glfwGetWindowUserPointer(window);
-    app->camera.fov -= (float)yoffset * 2.0f;
-
-    if (app->camera.fov < 2.0f) app->camera.fov = 2.0f;
-    if (app->camera.fov > 178.0f) app->camera.fov = 178.0f;
+    app->camera.Zoom((float)yoffset);
 }
 
 void OnGlfwKeyboardEvent(GLFWwindow* window, int key, int scancode, int action, int mods)

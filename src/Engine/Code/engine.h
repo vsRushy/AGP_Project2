@@ -193,6 +193,19 @@ struct Camera
         default: break;
         }
     }
+
+    void Rotate()
+    {
+
+    }
+
+    void Zoom(const float& yoffset)
+    {
+        fov -= yoffset * 2.0f;
+
+        if (fov < 2.0f) fov = 2.0f;
+        if (fov > 178.0f) fov = 178.0f;
+    }
 };
 
 struct Entity
