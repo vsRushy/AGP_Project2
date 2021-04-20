@@ -351,8 +351,10 @@ void Update(App* app)
     glm::mat4 projection = glm::perspective(glm::radians(app->camera.fov), aspect_ratio, app->camera.near_plane, app->camera.far_plane);
     glm::mat4 view = glm::lookAt(app->camera.position, app->camera.target, vec3(0, 1, 0));
 
-    glm::mat4 worldMatrix = TransformPositionScale(vec3(0.0, 0.0, 0.0), vec3(1.0));
+    glm::mat4 worldMatrix = TransformPositionScale(vec3(0.0, 0.0, -20.0), vec3(1.0));
     glm::mat4 worldViewProjectionMatrix = projection * view * worldMatrix;
+
+    app->camera.position = vec3(0, 0, 10);
 
     glBindBuffer(GL_UNIFORM_BUFFER, app->uniform_buffer_handle);
     u8* bufferData = (u8*)glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
