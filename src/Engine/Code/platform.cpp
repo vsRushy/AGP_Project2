@@ -128,11 +128,11 @@ int main()
         int ret = RENDERDOC_GetAPI(eRENDERDOC_API_Version_1_4_1, (void**)&rdoc_api);
         assert(ret == 1);
 
-        std::cout << "Hooked to renderdoc.dll correctly." << std::endl;
+        ELOG("Hooked to renderdoc.dll correctly.");
     }
     else
     {
-        std::cout << "Can't hook to renderdoc.dll." << std::endl;
+        ELOG("Can't hook to renderdoc.dll.");
     }
 
     rdoc_api->SetCaptureFilePathTemplate("./RenderDoc/capture");
