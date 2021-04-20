@@ -394,21 +394,21 @@ void Gui(App* app)
 void Update(App* app)
 {
     // TODO: Handle app->input keyboard/mouse here
-    if (app->input.keys[K_A] == BUTTON_PRESSED)
-    {
-        
-    }
-    if (app->input.keys[K_A] == BUTTON_PRESSED)
-    {
-        
-    }
     if (app->input.keys[K_W] == BUTTON_PRESSED)
     {
-        
+        app->camera.Move(Camera::MOVE::FORWARD);
     }
     if (app->input.keys[K_S] == BUTTON_PRESSED)
     {
-        
+        app->camera.Move(Camera::MOVE::BACK);
+    }
+    if (app->input.keys[K_A] == BUTTON_PRESSED)
+    {
+        app->camera.Move(Camera::MOVE::LEFT);
+    }
+    if (app->input.keys[K_D] == BUTTON_PRESSED)
+    {
+        app->camera.Move(Camera::MOVE::RIGHT);
     }
 
     app->camera.SetAspectRatio((float)app->displaySize.x, (float)app->displaySize.y);

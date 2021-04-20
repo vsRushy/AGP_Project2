@@ -142,6 +142,10 @@ struct Camera
     float near_plane = 0.1f;
     float far_plane = 1000.0f;
 
+    float speed;
+
+    enum class MOVE { FORWARD, BACK, LEFT, RIGHT };
+
     Camera() {}
 
     Camera(const vec3& pos, const float& fv = 60.0f, const float& znear = 0.1f, const float& zfar = 1000.0f)
@@ -149,8 +153,8 @@ struct Camera
         position = pos;
         front = vec3(0.0f, 0.0f, -1.0f);
         up = vec3(0.0f, 1.0f, 0.0f);
-        right = glm::cross(front, world_up);
         world_up = up;
+        right = glm::cross(front, world_up);
 
         yaw = -90.0f;
         pitch = 0.0f;
@@ -158,6 +162,8 @@ struct Camera
         fov = fv;
         near_plane = znear;
         far_plane = zfar;
+
+        speed = 1.0f;
     }
 
     void SetAspectRatio(const float& display_size_x, const float& display_size_y)
@@ -173,6 +179,19 @@ struct Camera
     glm::mat4 GetProjectionMatrix()
     {
         return glm::perspective(glm::radians(fov), aspect_ratio, near_plane, far_plane);
+    }
+
+    void Move(const MOVE& movement)
+    {
+        switch (movement)
+        {
+        case MOVE::FORWARD:    position += front * speed;   break;
+        case MOVE::BACK:       position -= front * speed;   break;
+        case MOVE::LEFT:       position -= right * speed;   break;
+        case MOVE::RIGHT:      position += right * speed;   break;
+
+        default: break;
+        }
     }
 };
 
