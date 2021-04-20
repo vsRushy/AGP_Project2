@@ -203,6 +203,21 @@ u8 GetAttributeComponentCount(const GLenum& type)
     }
 }
 
+glm::mat4 TransformPositionScale(const vec3& position, const vec3& scale)
+{
+    glm::mat4 transform = glm::translate(position);
+    transform = glm::scale(transform, scale);
+
+    return transform;
+}
+
+glm::mat4 TransformScale(const vec3& scale)
+{
+    glm::mat4 transform = glm::scale(scale);
+    
+    return transform;
+}
+
 void Init(App* app)
 {
     app->opengl_info.version = glGetString(GL_VERSION);
@@ -331,8 +346,13 @@ void Update(App* app)
 {
     // TODO: Handle app->input keyboard/mouse here
 
+    float aspect_ratio = (float)app->displaySize.x / (float)app->displaySize.y;
+    
+    glm::mat4 projection = glm::perspective(glm::radians(app->camera.fov), aspect_ratio, app->camera.near_plane, app->camera.far_plane);
+    glm::mat4 view = glm::lookAt(app->camera.position, app->camera.target, vec3(0, 1, 0));
 
-    glm::mat4 worldMatrix, worldViewProjectionMatrix;
+    glm::mat4 worldMatrix = TransformPositionScale(vec3(0.0, 0.0, 0.0), vec3(1.0));
+    glm::mat4 worldViewProjectionMatrix = projection * view * worldMatrix;
 
     glBindBuffer(GL_UNIFORM_BUFFER, app->uniform_buffer_handle);
     u8* bufferData = (u8*)glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);

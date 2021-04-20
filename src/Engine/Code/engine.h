@@ -126,6 +126,17 @@ struct Program
     VertexShaderLayout vertex_input_layout;
 };
 
+struct Camera
+{
+    vec3 position;
+    vec3 rotation;
+    vec3 target;
+
+    float fov = 65.0f;
+    float far_plane = 1000.0f;
+    float near_plane = 0.1f;
+};
+
 enum Mode
 {
     Mode_TexturedQuad,
@@ -163,6 +174,9 @@ struct App
     u32 normalTexIdx;
     u32 magentaTexIdx;
 
+    // Camera
+    Camera camera;
+
     // Mode
     Mode mode;
 
@@ -198,5 +212,3 @@ void Render(App* app);
 GLuint FindVao(Mesh& mesh, u32 submesh_index, const Program& program);
 
 u32 LoadTexture2D(App* app, const char* filepath);
-
-u8 GetAttributeComponentCount(const GLenum& type);
