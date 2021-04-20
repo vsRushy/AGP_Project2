@@ -321,7 +321,10 @@ void Init(App* app)
 
     app->patrick_index = LoadModel(app, "Patrick/Patrick.obj");
 
-    app->entities.push_back({ TransformPositionRotationScale(vec3(0.0, 0.0, -20.0), 60.0, vec3(0.0, 1.0, 0.0), vec3(2.0)),
+    app->entities.push_back({ TransformPositionRotationScale(vec3(0.0f, 0.0f, -20.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)),
+                              app->patrick_index });
+
+    app->entities.push_back({ TransformPositionRotationScale(vec3(5.0f, 0.0f, -20.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)),
                               app->patrick_index });
 
     app->texturedMeshProgramIdx = LoadProgram(app, "shaders.glsl", "SHOW_TEXTURED_MESH");
@@ -527,16 +530,9 @@ void Render(App* app)
 
                     Submesh& submesh = mesh.submeshes[i];
                     glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.index_offset);
+                
+                    glBindVertexArray(0);
                 }
-
-                glUniform1i(app->programUniformTexture, 0);
-                glActiveTexture(GL_TEXTURE0);
-                GLuint textureHandle = app->textures[app->diceTexIdx].handle;
-                glBindTexture(GL_TEXTURE_2D, textureHandle);
-
-                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
-
-                glBindVertexArray(0);
             }
 
             glUseProgram(0);
