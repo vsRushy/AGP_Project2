@@ -142,8 +142,6 @@ struct Camera
     float near_plane = 0.1f;
     float far_plane = 1000.0f;
 
-    float zoom;
-
     Camera() {}
 
     Camera(const vec3& pos, const float& fv = 60.0f, const float& znear = 0.1f, const float& zfar = 1000.0f)
@@ -160,8 +158,6 @@ struct Camera
         fov = fv;
         near_plane = znear;
         far_plane = zfar;
-
-        zoom = 45.0f;
     }
 
     void SetAspectRatio(const float& display_size_x, const float& display_size_y)
