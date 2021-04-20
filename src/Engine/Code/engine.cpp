@@ -12,6 +12,8 @@
 #include "engine.h"
 #include "assimp_model_loading.h"
 
+#define BINDING(b) b
+
 GLuint CreateProgramFromSource(String programSource, const char* shaderName)
 {
     GLchar  infoLogBuffer[1024] = {};
@@ -341,6 +343,10 @@ void Update(App* app)
 
     memcpy(bufferData + bufferHead, glm::value_ptr(worldViewProjectionMatrix), sizeof(glm::mat4));
     bufferHead += sizeof(glm::mat4);
+
+    u32 block_offset = 0;
+    u32 block_size = sizeof(glm::mat4) * 2;
+    glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(1), app->uniform_buffer_handle, block_offset, block_size);
 
     glUnmapBuffer(GL_UNIFORM_BUFFER);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
