@@ -411,6 +411,16 @@ void Update(App* app)
         app->camera.Move(Camera::MOVE::RIGHT);
     }
 
+    if (app->input.mouseButtons[LEFT] == BUTTON_PRESSED)
+    {
+        app->camera.mouse_pressed = true;
+    }
+
+    if (app->input.mouseButtons[LEFT] == BUTTON_RELEASE)
+    {
+        app->camera.mouse_pressed = false;
+    }
+
     app->camera.SetAspectRatio((float)app->displaySize.x, (float)app->displaySize.y);
     
     glm::mat4 view = app->camera.GetViewMatrix();

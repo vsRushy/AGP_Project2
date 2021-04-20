@@ -143,6 +143,9 @@ struct Camera
     float far_plane = 1000.0f;
 
     float speed;
+    float mouse_sensitivity;
+
+    bool mouse_pressed = false;
 
     enum class MOVE { FORWARD, BACK, LEFT, RIGHT };
 
@@ -164,6 +167,7 @@ struct Camera
         far_plane = zfar;
 
         speed = 1.0f;
+        mouse_sensitivity = 0.25f;
     }
 
     void SetAspectRatio(const float& display_size_x, const float& display_size_y)
@@ -194,9 +198,24 @@ struct Camera
         }
     }
 
-    void Rotate()
+    void Rotate(float xoffset, float yoffset)
     {
+        if (mouse_pressed)
+        {
+            xoffset *= mouse_sensitivity;
+            yoffset *= mouse_sensitivity;
 
+            yaw += xoffset;
+            pitch += yoffset;
+
+            if (true)
+            {
+                if (pitch > 89.0f) pitch = 89.0f;
+                if (pitch < -89.0f) pitch = -89.0f;
+            }
+
+            UpdateCameraValues();
+        }
     }
 
     void Zoom(const float& yoffset)
@@ -205,6 +224,18 @@ struct Camera
 
         if (fov < 2.0f) fov = 2.0f;
         if (fov > 178.0f) fov = 178.0f;
+    }
+
+    void UpdateCameraValues()
+    {
+        glm::vec3 f;
+        f.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+        f.y = sin(glm::radians(pitch));
+        f.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+        front = glm::normalize(f);
+
+        right = glm::normalize(glm::cross(front, world_up));
+        up = glm::normalize(glm::cross(right, front));
     }
 };
 
