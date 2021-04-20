@@ -203,6 +203,11 @@ u8 GetAttributeComponentCount(const GLenum& type)
     }
 }
 
+u32 Align(const u32& value, const u32& alignment)
+{
+    return (value + alignment - 1) & ~(alignment - 1);
+}
+
 glm::mat4 TransformPosition(const vec3& position)
 {
     glm::mat4 transform = glm::translate(position);
@@ -311,7 +316,10 @@ void Init(App* app)
 
     // --------------------------------
 
-    LoadModel(app, "Patrick/Patrick.obj");
+    app->patrick_index = LoadModel(app, "Patrick/Patrick.obj");
+
+    app->entities.push_back({ TransformPositionRotationScale(vec3(0.0, 0.0, -20.0), 60.0, vec3(0.0, 1.0, 0.0), vec3(2.0)),
+                              app->patrick_index });
 
     app->texturedMeshProgramIdx = LoadProgram(app, "shaders.glsl", "SHOW_TEXTURED_MESH");
     Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
@@ -330,19 +338,18 @@ void Init(App* app)
         GLint attribute_location = glGetAttribLocation(texturedMeshProgram.handle, attribute_name);
         
         ELOG("Attribute %s. Location: %d Type: %d", attribute_name, attribute_location, attribute_type);
-
+        
         texturedMeshProgram.vertex_input_layout.attributes.push_back({ (u8)attribute_location, GetAttributeComponentCount(attribute_type) });
     }
 
     app->texturedMeshProgram_uTexture = glGetUniformLocation(texturedMeshProgram.handle, "uTexture");
 
-    GLint max_uniform_buffer_size, uniform_block_alignment;
-    glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &max_uniform_buffer_size);
-    glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &uniform_block_alignment);
+    glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &app->max_uniform_buffer_size);
+    glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &app->uniform_block_alignment);
 
     glGenBuffers(1, &app->uniform_buffer_handle);
     glBindBuffer(GL_UNIFORM_BUFFER, app->uniform_buffer_handle);
-    glBufferData(GL_UNIFORM_BUFFER, max_uniform_buffer_size, NULL, GL_STREAM_DRAW);
+    glBufferData(GL_UNIFORM_BUFFER, app->max_uniform_buffer_size, NULL, GL_STREAM_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     app->mode = Mode_Count;
@@ -394,15 +401,22 @@ void Update(App* app)
     u8* bufferData = (u8*)glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
     u32 bufferHead = 0;
 
-    memcpy(bufferData + bufferHead, glm::value_ptr(worldMatrix), sizeof(glm::mat4));
-    bufferHead += sizeof(glm::mat4);
+    for (Entity entity : app->entities)
+    {
+        bufferHead = Align(bufferHead, app->uniform_block_alignment);
 
-    memcpy(bufferData + bufferHead, glm::value_ptr(worldViewProjectionMatrix), sizeof(glm::mat4));
-    bufferHead += sizeof(glm::mat4);
+        entity.localParamsOffset = bufferHead;
 
-    u32 block_offset = 0;
-    u32 block_size = sizeof(glm::mat4) * 2;
-    glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(1), app->uniform_buffer_handle, block_offset, block_size);
+        memcpy(bufferData + bufferHead, glm::value_ptr(worldMatrix), sizeof(glm::mat4));
+        bufferHead += sizeof(glm::mat4);
+
+        memcpy(bufferData + bufferHead, glm::value_ptr(worldViewProjectionMatrix), sizeof(glm::mat4));
+        bufferHead += sizeof(glm::mat4);
+
+        entity.localParamsSize = bufferHead - entity.localParamsOffset;
+
+        glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(1), app->uniform_buffer_handle, entity.localParamsOffset, entity.localParamsSize);
+    }
 
     glUnmapBuffer(GL_UNIFORM_BUFFER);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
@@ -479,33 +493,37 @@ void Render(App* app)
             Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
             glUseProgram(texturedMeshProgram.handle);
             
-            Model& model = app->models[0]; // TODO change 0
-            Mesh& mesh = app->meshes[model.mesh_index];
-
-            for (u32 i = 0; i < mesh.submeshes.size(); ++i)
+            for (const Entity& entity : app->entities)
             {
-                GLuint vao = FindVao(mesh, i, texturedMeshProgram);
-                glBindVertexArray(vao);
+                Model& model = app->models[entity.modelIndex];
+                Mesh& mesh = app->meshes[model.mesh_index];
 
-                u32 submesh_material_index = model.material_index[i];
-                Material& submesh_material = app->materials[submesh_material_index];
+                for (u32 i = 0; i < mesh.submeshes.size(); ++i)
+                {
+                    GLuint vao = FindVao(mesh, i, texturedMeshProgram);
+                    glBindVertexArray(vao);
 
+                    u32 submesh_material_index = model.material_index[i];
+                    Material& submesh_material = app->materials[submesh_material_index];
+
+                    glActiveTexture(GL_TEXTURE0);
+                    glBindTexture(GL_TEXTURE_2D, app->textures[submesh_material.albedo_texture_index].handle);
+                    glUniform1i(app->texturedMeshProgram_uTexture, 0);
+
+                    Submesh& submesh = mesh.submeshes[i];
+                    glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.index_offset);
+                }
+
+                glUniform1i(app->programUniformTexture, 0);
                 glActiveTexture(GL_TEXTURE0);
-                glBindTexture(GL_TEXTURE_2D, app->textures[submesh_material.albedo_texture_index].handle);
-                glUniform1i(app->texturedMeshProgram_uTexture, 0);
-                
-                Submesh& submesh = mesh.submeshes[i];
-                glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.index_offset);
+                GLuint textureHandle = app->textures[app->diceTexIdx].handle;
+                glBindTexture(GL_TEXTURE_2D, textureHandle);
+
+                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
+
+                glBindVertexArray(0);
             }
 
-            glUniform1i(app->programUniformTexture, 0);
-            glActiveTexture(GL_TEXTURE0);
-            GLuint textureHandle = app->textures[app->diceTexIdx].handle;
-            glBindTexture(GL_TEXTURE_2D, textureHandle);
-
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
-
-            glBindVertexArray(0);
             glUseProgram(0);
         }
         break;

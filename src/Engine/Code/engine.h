@@ -137,6 +137,14 @@ struct Camera
     float near_plane = 0.1f;
 };
 
+struct Entity
+{
+    glm::mat4 worldMatrix;
+    u32 modelIndex;
+    u32 localParamsOffset;
+    u32 localParamsSize;
+};
+
 enum Mode
 {
     Mode_TexturedQuad,
@@ -157,11 +165,12 @@ struct App
 
     ivec2 displaySize;
 
-    std::vector<Texture>  textures;
-    std::vector<Material>  materials;
-    std::vector<Mesh>  meshes;
-    std::vector<Model>  models;
-    std::vector<Program>  programs;
+    std::vector<Texture>    textures;
+    std::vector<Material>   materials;
+    std::vector<Mesh>       meshes;
+    std::vector<Model>      models;
+    std::vector<Program>    programs;
+    std::vector<Entity>     entities;
 
     // program indices
     u32 texturedGeometryProgramIdx;
@@ -197,8 +206,13 @@ struct App
     // VAO object to link our screen filling quad with our textured quad shader
     GLuint vao;
 
+    // Model indices
+    u32 patrick_index;
+
     // Uniform buffer
     GLuint uniform_buffer_handle;
+    GLint max_uniform_buffer_size;
+    GLint uniform_block_alignment;
 };
 
 void Init(App* app);
