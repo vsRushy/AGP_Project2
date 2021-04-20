@@ -410,6 +410,14 @@ void Update(App* app)
     {
         app->camera.Move(Camera::MOVE::RIGHT);
     }
+    if (app->input.keys[K_R] == BUTTON_PRESSED)
+    {
+        app->camera.Move(Camera::MOVE::UP);
+    }
+    if (app->input.keys[K_F] == BUTTON_PRESSED)
+    {
+        app->camera.Move(Camera::MOVE::DOWN);
+    }
 
     if (app->input.mouseButtons[LEFT] == BUTTON_PRESSED)
     {

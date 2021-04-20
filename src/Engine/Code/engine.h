@@ -147,7 +147,7 @@ struct Camera
 
     bool mouse_pressed = false;
 
-    enum class MOVE { FORWARD, BACK, LEFT, RIGHT };
+    enum class MOVE { FORWARD, BACK, LEFT, RIGHT, UP, DOWN };
 
     Camera() {}
 
@@ -166,7 +166,7 @@ struct Camera
         near_plane = znear;
         far_plane = zfar;
 
-        speed = 1.0f;
+        speed = 0.25f;
         mouse_sensitivity = 0.25f;
     }
 
@@ -189,10 +189,12 @@ struct Camera
     {
         switch (movement)
         {
-        case MOVE::FORWARD:    position += front * speed;   break;
-        case MOVE::BACK:       position -= front * speed;   break;
-        case MOVE::LEFT:       position -= right * speed;   break;
-        case MOVE::RIGHT:      position += right * speed;   break;
+        case MOVE::FORWARD:    position += front * speed;    break;
+        case MOVE::BACK:       position -= front * speed;    break;
+        case MOVE::LEFT:       position -= right * speed;    break;
+        case MOVE::RIGHT:      position += right * speed;    break;
+        case MOVE::UP:         position += up * speed;       break;
+        case MOVE::DOWN:       position -= up * speed;       break;
 
         default: break;
         }
