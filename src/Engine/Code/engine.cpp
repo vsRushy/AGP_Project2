@@ -203,6 +203,37 @@ u8 GetAttributeComponentCount(const GLenum& type)
     }
 }
 
+glm::mat4 TransformPosition(const vec3& position)
+{
+    glm::mat4 transform = glm::translate(position);
+
+    return transform;
+}
+
+glm::mat4 TransformRotate(const float& angle, const vec3& axis)
+{
+    glm::mat4 transform = glm::mat4(1.0f);
+    transform = glm::rotate(transform, glm::radians(angle), axis);
+
+    return transform;
+}
+
+glm::mat4 TransformScale(const vec3& scale)
+{
+    glm::mat4 transform = glm::mat4(1.0f);
+    transform = glm::scale(transform, scale);
+    
+    return transform;
+}
+
+glm::mat4 TransformPositionRotation(const vec3& position, const float& angle, const vec3& axis)
+{
+    glm::mat4 transform = glm::translate(position);
+    transform = glm::rotate(transform, glm::radians(angle), axis);
+
+    return transform;
+}
+
 glm::mat4 TransformPositionScale(const vec3& position, const vec3& scale)
 {
     glm::mat4 transform = glm::translate(position);
@@ -211,10 +242,12 @@ glm::mat4 TransformPositionScale(const vec3& position, const vec3& scale)
     return transform;
 }
 
-glm::mat4 TransformScale(const vec3& scale)
+glm::mat4 TransformPositionRotationScale(const vec3& position, const float& angle, const vec3& axis, const vec3& scale)
 {
-    glm::mat4 transform = glm::scale(scale);
-    
+    glm::mat4 transform = glm::translate(position);
+    transform = glm::rotate(transform, glm::radians(angle), axis);
+    transform = glm::scale(transform, scale);
+
     return transform;
 }
 
