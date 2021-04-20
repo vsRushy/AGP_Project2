@@ -324,6 +324,9 @@ void Init(App* app)
     app->entities.push_back({ TransformPositionRotationScale(vec3(0.0f, 0.0f, -20.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)),
                               app->patrick_index });
 
+    app->entities.push_back({ TransformPositionRotationScale(vec3(-5.0f, 0.0f, -20.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)),
+                              app->patrick_index });
+
     app->entities.push_back({ TransformPositionRotationScale(vec3(5.0f, 0.0f, -20.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)),
                               app->patrick_index });
 
@@ -417,7 +420,7 @@ void Update(App* app)
     u8* bufferData = (u8*)glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
     u32 bufferHead = 0;
 
-    for (Entity entity : app->entities)
+    for (Entity& entity : app->entities)
     {
         glm::mat4 worldViewProjectionMatrix = projection * view * entity.worldMatrix;
 
@@ -432,8 +435,6 @@ void Update(App* app)
         bufferHead += sizeof(glm::mat4);
 
         entity.localParamsSize = bufferHead - entity.localParamsOffset;
-
-        glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(1), app->uniform_buffer_handle, entity.localParamsOffset, entity.localParamsSize);
     }
 
     glUnmapBuffer(GL_UNIFORM_BUFFER);
@@ -515,6 +516,8 @@ void Render(App* app)
             {
                 Model& model = app->models[entity.modelIndex];
                 Mesh& mesh = app->meshes[model.mesh_index];
+
+                glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(1), app->uniform_buffer_handle, entity.localParamsOffset, entity.localParamsSize);
 
                 for (u32 i = 0; i < mesh.submeshes.size(); ++i)
                 {
