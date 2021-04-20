@@ -129,12 +129,55 @@ struct Program
 struct Camera
 {
     vec3 position;
-    vec3 rotation;
-    vec3 target;
+    vec3 front;
+    vec3 up;
+    vec3 right;
+    vec3 world_up;
+
+    float yaw;
+    float pitch;
 
     float fov = 65.0f;
-    float far_plane = 1000.0f;
+    float aspect_ratio;
     float near_plane = 0.1f;
+    float far_plane = 1000.0f;
+
+    float zoom;
+
+    Camera() {}
+
+    Camera(const vec3& pos, const float& fv = 60.0f, const float& znear = 0.1f, const float& zfar = 1000.0f)
+    {
+        position = pos;
+        front = vec3(0.0f, 0.0f, -1.0f);
+        up = vec3(0.0f, 1.0f, 0.0f);
+        right = glm::cross(front, world_up);
+        world_up = up;
+
+        yaw = -90.0f;
+        pitch = 0.0f;
+
+        fov = fv;
+        near_plane = znear;
+        far_plane = zfar;
+
+        zoom = 45.0f;
+    }
+
+    void SetAspectRatio(const float& display_size_x, const float& display_size_y)
+    {
+        aspect_ratio = display_size_x / display_size_y;
+    }
+
+    glm::mat4 GetViewMatrix()
+    {
+        return glm::lookAt(position, position + front, up);
+    }
+
+    glm::mat4 GetProjectionMatrix()
+    {
+        return glm::perspective(glm::radians(fov), aspect_ratio, near_plane, far_plane);
+    }
 };
 
 struct Entity

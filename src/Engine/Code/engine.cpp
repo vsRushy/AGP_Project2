@@ -266,6 +266,9 @@ void Init(App* app)
 
     app->debug_group_mode = true;
 
+    // Camera
+    app->camera = Camera(vec3(0.0f));
+
     // TODO: Initialize your resources here!
     // - vertex buffers
     // - element/index buffers
@@ -385,17 +388,27 @@ void Gui(App* app)
 void Update(App* app)
 {
     // TODO: Handle app->input keyboard/mouse here
+    if (app->input.keys[K_A] == BUTTON_PRESSED)
+    {
+        
+    }
+    if (app->input.keys[K_A] == BUTTON_PRESSED)
+    {
+        
+    }
+    if (app->input.keys[K_W] == BUTTON_PRESSED)
+    {
+        
+    }
+    if (app->input.keys[K_S] == BUTTON_PRESSED)
+    {
+        
+    }
 
-    float aspect_ratio = (float)app->displaySize.x / (float)app->displaySize.y;
+    app->camera.SetAspectRatio((float)app->displaySize.x, (float)app->displaySize.y);
     
-    glm::mat4 projection = glm::perspective(glm::radians(app->camera.fov), aspect_ratio, app->camera.near_plane, app->camera.far_plane);
-    glm::mat4 view = glm::lookAt(app->camera.position, app->camera.target, vec3(0, 1, 0));
-
-    //glm::mat4 worldMatrix = TransformPositionScale(vec3(0.0, 0.0, -20.0), vec3(1.0));
-    glm::mat4 worldMatrix = TransformPositionRotationScale(vec3(0.0, 0.0, -20.0), 60.0, vec3(0.0, 1.0, 0.0), vec3(2.0));
-    glm::mat4 worldViewProjectionMatrix = projection * view * worldMatrix;
-
-    app->camera.position = vec3(0, 0, 10);
+    glm::mat4 view = app->camera.GetViewMatrix();
+    glm::mat4 projection = app->camera.GetProjectionMatrix();
 
     glBindBuffer(GL_UNIFORM_BUFFER, app->uniform_buffer_handle);
     u8* bufferData = (u8*)glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
@@ -403,11 +416,13 @@ void Update(App* app)
 
     for (Entity entity : app->entities)
     {
+        glm::mat4 worldViewProjectionMatrix = projection * view * entity.worldMatrix;
+
         bufferHead = Align(bufferHead, app->uniform_block_alignment);
 
         entity.localParamsOffset = bufferHead;
 
-        memcpy(bufferData + bufferHead, glm::value_ptr(worldMatrix), sizeof(glm::mat4));
+        memcpy(bufferData + bufferHead, glm::value_ptr(entity.worldMatrix), sizeof(glm::mat4));
         bufferHead += sizeof(glm::mat4);
 
         memcpy(bufferData + bufferHead, glm::value_ptr(worldViewProjectionMatrix), sizeof(glm::mat4));
