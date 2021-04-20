@@ -210,7 +210,7 @@ glm::mat4 TransformPosition(const vec3& position)
     return transform;
 }
 
-glm::mat4 TransformRotate(const float& angle, const vec3& axis)
+glm::mat4 TransformRotation(const float& angle, const vec3& axis)
 {
     glm::mat4 transform = glm::mat4(1.0f);
     transform = glm::rotate(transform, glm::radians(angle), axis);
@@ -384,7 +384,8 @@ void Update(App* app)
     glm::mat4 projection = glm::perspective(glm::radians(app->camera.fov), aspect_ratio, app->camera.near_plane, app->camera.far_plane);
     glm::mat4 view = glm::lookAt(app->camera.position, app->camera.target, vec3(0, 1, 0));
 
-    glm::mat4 worldMatrix = TransformPositionScale(vec3(0.0, 0.0, -20.0), vec3(1.0));
+    //glm::mat4 worldMatrix = TransformPositionScale(vec3(0.0, 0.0, -20.0), vec3(1.0));
+    glm::mat4 worldMatrix = TransformPositionRotationScale(vec3(0.0, 0.0, -20.0), 60.0, vec3(0.0, 1.0, 0.0), vec3(2.0));
     glm::mat4 worldViewProjectionMatrix = projection * view * worldMatrix;
 
     app->camera.position = vec3(0, 0, 10);
