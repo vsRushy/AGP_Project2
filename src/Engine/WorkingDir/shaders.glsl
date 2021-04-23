@@ -42,6 +42,13 @@ layout(location = 2) in vec2 aTexCoord;
 // layout(location = 3) in vec3 aTangent;
 // layout(location = 4) in vec3 aBitangent;
 
+layout(binding = 0, std140) uniform GlobalParams
+{
+	vec3 uCameraPosition;
+	unsigned int uLightCount;
+	//Light uLight[16];
+};
+
 layout(binding = 1, std140) uniform LocalParams
 {
 	mat4 uWorldMatrix;
@@ -51,12 +58,14 @@ layout(binding = 1, std140) uniform LocalParams
 out vec2 vTexCoord;
 out vec3 vPosition; // In worldspace
 out vec3 vNormal; // In worldspace
+out vec3 vViewDir; // In worldspace
 
 void main()
 {
 	vTexCoord = aTexCoord;
 	vPosition = vec3(uWorldMatrix * vec4(aPosition, 1.0));
 	vNormal = vec3(transpose(inverse(uWorldMatrix)) * vec4(aNormal, 1.0));
+	vViewDir = uCameraPosition - vPosition;
 
 	gl_Position = uWorldViewProjectionMatrix * vec4(aPosition, 1.0);
 }
