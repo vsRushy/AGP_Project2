@@ -42,11 +42,19 @@ layout(location = 2) in vec2 aTexCoord;
 // layout(location = 3) in vec3 aTangent;
 // layout(location = 4) in vec3 aBitangent;
 
+struct Light
+{
+	unsigned int type;
+	vec3 color;
+	vec3 direction;
+	vec3 position;
+};
+
 layout(binding = 0, std140) uniform GlobalParams
 {
 	vec3 uCameraPosition;
 	unsigned int uLightCount;
-	//Light uLight[16];
+	Light uLight[16];
 };
 
 layout(binding = 1, std140) uniform LocalParams

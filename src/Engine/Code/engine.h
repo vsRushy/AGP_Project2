@@ -249,6 +249,20 @@ struct Entity
     u32 localParamsSize;
 };
 
+enum LightType
+{
+    LightType_Directional,
+    LightType_Point
+};
+
+struct Light
+{
+    LightType type;
+    vec3 color;
+    vec3 direction;
+    vec3 position;
+};
+
 enum Mode
 {
     Mode_TexturedQuad,
