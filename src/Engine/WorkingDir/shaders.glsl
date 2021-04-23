@@ -56,7 +56,7 @@ void main()
 {
 	vTexCoord = aTexCoord;
 	vPosition = vec3(uWorldMatrix * vec4(aPosition, 1.0));
-	vNormal = vec3(uWorldMatrix * vec4(aNormal, 1.0));
+	vNormal = vec3(transpose(inverse(uWorldMatrix)) * vec4(aNormal, 1.0));
 
 	gl_Position = uWorldViewProjectionMatrix * vec4(aPosition, 1.0);
 }
@@ -73,6 +73,11 @@ layout(location = 0) out vec4 oColor;
 
 void main()
 {
+	 vec3 N = normalize(vNormal);
+ 
+    
+   //oColor = vec4(N, 1.0);
+ 
 	oColor = texture(uTexture, vTexCoord);
 }
 
