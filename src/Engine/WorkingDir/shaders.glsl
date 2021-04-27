@@ -106,12 +106,30 @@ layout(location = 0) out vec4 oColor;
 
 vec3 CalculateDirectionalLight()
 {
-	return vec3(0.0);
+	return vec3(1.0);
 }
 
-vec3 CalculatePointLight()
+vec3 CalculatePointLight(Light light, vec3 normal, vec3 fragPosition, vec3 viewPos)
 {
-	return vec3(0.0);
+	// Ambient
+    float ambientStrength = 0.1;
+    vec3 ambient = ambientStrength * light.color;
+      
+    // Diffuse 
+    vec3 n = normalize(normal);
+    vec3 lightDir = normalize(light.position - fragPosition);
+    float diff = max(dot(n, lightDir), 0.0);
+    vec3 diffuse = diff * light.color;
+    
+    // Specular
+    float specularStrength = 0.5;
+    vec3 viewDir = normalize(viewPos - fragPosition);
+    //vec3 viewDir = vViewDir;
+    vec3 reflectDir = reflect(-lightDir, n);  
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+    vec3 specular = specularStrength * spec * light.color;  
+        
+    return (ambient + diffuse + specular);
 }
 
 void main()
@@ -131,8 +149,8 @@ void main()
 
 		case 1: // Point
 		{
-			//result += CalculatePointLight();
-			result = vec3(1.0);
+			result += CalculatePointLight(uLight[i], vNormal, vPosition, uCameraPosition);
+			//result = vec3(1.0);
 		}
 		break;
 
