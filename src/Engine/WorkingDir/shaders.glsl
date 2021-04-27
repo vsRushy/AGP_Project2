@@ -85,16 +85,63 @@ in vec3 vPosition;
 in vec3 vNormal;
 in vec3 vViewDir;
 
+struct Light
+{
+	unsigned int type;
+	vec3 color;
+	vec3 direction;
+	vec3 position;
+};
+
+layout(binding = 0, std140) uniform GlobalParams
+{
+	vec3 uCameraPosition;
+	unsigned int uLightCount;
+	Light uLight[16];
+};
+
 uniform sampler2D uTexture;
 
 layout(location = 0) out vec4 oColor;
 
 void main()
 {
-	//vec3 N = normalize(vNormal);
-	//oColor = vec4(N, 1.0);
- 
 	oColor = texture(uTexture, vTexCoord);
+
+	/*vec3 result;
+
+	for(int i = 0; i < uLightCount; ++i)
+	{
+		switch(uLight[i].type)
+		{
+		case 0: // Directional
+		{
+			result += CalculateDirectionalLight();
+		}
+		break;
+
+		case 1: // Point
+		{
+			result += CalculatePointLight();
+		}
+		break;
+
+		default:
+		{
+			break;
+		}
+		}
+	}*/
+}
+
+void CalculateDirectionalLight()
+{
+
+}
+
+void CalculatePointLight()
+{
+
 }
 
 #endif
