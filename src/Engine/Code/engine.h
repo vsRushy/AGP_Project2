@@ -263,6 +263,15 @@ struct Light
     vec3 position;
 };
 
+struct Buffer
+{
+    GLuint handle;
+    GLenum type;
+    u32 size;
+    u32 head;
+    void* data;
+};
+
 enum Mode
 {
     Mode_TexturedQuad,
