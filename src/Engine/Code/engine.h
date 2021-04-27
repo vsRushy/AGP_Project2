@@ -342,7 +342,7 @@ struct App
     Buffer cbuffer;
     
     u32 globalParamsOffset;
-    u32 blobalParamsSize;
+    u32 globalParamsSize;
 
     // Uniform buffer
     GLuint uniform_buffer_handle;

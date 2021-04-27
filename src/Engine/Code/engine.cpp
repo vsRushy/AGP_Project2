@@ -459,7 +459,7 @@ void Update(App* app)
         PushVec3(app->cbuffer, light.position);
     }
 
-    app->globalParamsOffset = app->cbuffer.head - app->globalParamsOffset;
+    app->globalParamsSize = app->cbuffer.head - app->globalParamsOffset;
 
     // Local parameters
     for (u32 i = 0; i < app->entities.size(); ++i)
