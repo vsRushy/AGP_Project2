@@ -298,6 +298,7 @@ struct App
     std::vector<Model>      models;
     std::vector<Program>    programs;
     std::vector<Entity>     entities;
+    std::vector<Light>      lights;
 
     // program indices
     u32 texturedGeometryProgramIdx;

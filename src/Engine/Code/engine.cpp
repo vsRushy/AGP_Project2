@@ -323,12 +323,15 @@ void Init(App* app)
 
     app->entities.push_back({ TransformPositionRotationScale(vec3(0.0f, 0.0f, -20.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)),
                               app->patrick_index });
-
     app->entities.push_back({ TransformPositionRotationScale(vec3(-5.0f, 0.0f, -20.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)),
                               app->patrick_index });
-
     app->entities.push_back({ TransformPositionRotationScale(vec3(5.0f, 0.0f, -20.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)),
                               app->patrick_index });
+
+    // Max number allowed in the shader is 16, so be careful
+    app->lights.push_back({ LightType_Point, vec3(1.0f, 1.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(0.0f, 5.0f, 0.0f) });
+    app->lights.push_back({ LightType_Point, vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(5.0f, 7.0f, 0.0f) });
+    app->lights.push_back({ LightType_Directional, vec3(1.0f, 1.0f, 1.0f), vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, 10.0f, -3.0f) });
 
     app->texturedMeshProgramIdx = LoadProgram(app, "shaders.glsl", "SHOW_TEXTURED_MESH");
     Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
@@ -454,7 +457,7 @@ void Update(App* app)
 
         entity.localParamsSize = bufferHead - entity.localParamsOffset;
     }
-
+    
     glUnmapBuffer(GL_UNIFORM_BUFFER);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
