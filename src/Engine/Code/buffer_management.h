@@ -3,12 +3,13 @@
 #include "platform.h"
 #include "engine.h"
 
-static Buffer CreateBuffer(u32 size, GLenum type, GLenum usage);
-static void PushAlignedData(Buffer& buffer, const void* data, u32 size, u32 alignment);
+Buffer CreateBuffer(u32 size, GLenum type, GLenum usage);
+void PushAlignedData(Buffer& buffer, const void* data, u32 size, u32 alignment);
 
 void BindBuffer(const Buffer& buffer);
 void MapBuffer(Buffer& buffer, GLenum access);
 void UnmapBuffer(Buffer& buffer);
+void AlignHead(Buffer& buffer, u32 alignment);
 
 #define CreateConstantBuffer(size) CreateBuffer(size, GL_UNIFORM_BUFFER, GL_STREAM_DRAW)
 #define CreateStaticVertexBuffer(size) CreateBuffer(size, GL_ARRAY_BUFFER, GL_STATIC_DRAW)

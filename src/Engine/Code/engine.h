@@ -8,6 +8,7 @@
 
 #include "platform.h"
 
+
 typedef glm::vec2  vec2;
 typedef glm::vec3  vec3;
 typedef glm::vec4  vec4;
@@ -336,6 +337,12 @@ struct App
 
     // Model indices
     u32 patrick_index;
+
+    // Buffer
+    Buffer cbuffer;
+    
+    u32 globalParamsOffset;
+    u32 blobalParamsSize;
 
     // Uniform buffer
     GLuint uniform_buffer_handle;

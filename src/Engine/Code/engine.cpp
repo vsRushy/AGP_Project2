@@ -11,6 +11,7 @@
 
 #include "engine.h"
 #include "assimp_model_loading.h"
+#include "buffer_management.h"
 
 #define BINDING(b) b
 
@@ -328,7 +329,6 @@ void Init(App* app)
     app->entities.push_back({ TransformPositionRotationScale(vec3(5.0f, 0.0f, -20.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)),
                               app->patrick_index });
 
-    // Max number allowed in the shader is 16, so be careful
     app->lights.push_back({ LightType_Point, vec3(1.0f, 1.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(0.0f, 5.0f, 0.0f) });
     app->lights.push_back({ LightType_Point, vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(5.0f, 7.0f, 0.0f) });
     app->lights.push_back({ LightType_Directional, vec3(1.0f, 1.0f, 1.0f), vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, 10.0f, -3.0f) });
@@ -438,24 +438,45 @@ void Update(App* app)
     glm::mat4 projection = app->camera.GetProjectionMatrix();
 
     glBindBuffer(GL_UNIFORM_BUFFER, app->uniform_buffer_handle);
-    u8* bufferData = (u8*)glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
-    u32 bufferHead = 0;
+    app->cbuffer.data = (u8*)glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
+    app->cbuffer.head = 0;
 
-    for (Entity& entity : app->entities)
+    // Global parameters
+    app->globalParamsOffset = app->cbuffer.head;
+
+    PushVec3(app->cbuffer, app->camera.position);
+    PushUInt(app->cbuffer, app->lights.size());
+
+    for (u32 i = 0; i < app->lights.size(); ++i)
     {
-        glm::mat4 worldViewProjectionMatrix = projection * view * entity.worldMatrix;
+        AlignHead(app->cbuffer, sizeof(vec4));
 
-        bufferHead = Align(bufferHead, app->uniform_block_alignment);
+        Light& light = app->lights[i];
 
-        entity.localParamsOffset = bufferHead;
+        PushUInt(app->cbuffer, light.type);
+        PushVec3(app->cbuffer, light.color);
+        PushVec3(app->cbuffer, light.direction);
+        PushVec3(app->cbuffer, light.position);
+    }
 
-        memcpy(bufferData + bufferHead, glm::value_ptr(entity.worldMatrix), sizeof(glm::mat4));
-        bufferHead += sizeof(glm::mat4);
+    app->globalParamsOffset = app->cbuffer.head - app->globalParamsOffset;
 
-        memcpy(bufferData + bufferHead, glm::value_ptr(worldViewProjectionMatrix), sizeof(glm::mat4));
-        bufferHead += sizeof(glm::mat4);
+    // Local parameters
+    for (u32 i = 0; i < app->entities.size(); ++i)
+    {
+        AlignHead(app->cbuffer, app->uniform_block_alignment); // TODO correct name?
 
-        entity.localParamsSize = bufferHead - entity.localParamsOffset;
+        Entity& entity = app->entities[i];
+
+        glm::mat4 world = entity.worldMatrix;
+        glm::mat4 worldViewProjectionMatrix = projection * view * world;
+
+        entity.localParamsOffset = app->cbuffer.head;
+
+        PushMat4(app->cbuffer, world);
+        PushMat4(app->cbuffer, worldViewProjectionMatrix);
+
+        entity.localParamsSize = app->cbuffer.head - entity.localParamsOffset;
     }
     
     glUnmapBuffer(GL_UNIFORM_BUFFER);

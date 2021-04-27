@@ -10,7 +10,7 @@ u32 Align(u32 value, u32 alignment)
     return (value + alignment - 1) & ~(alignment - 1);
 }
 
-static Buffer CreateBuffer(u32 size, GLenum type, GLenum usage)
+Buffer CreateBuffer(u32 size, GLenum type, GLenum usage)
 {
     Buffer buffer = {};
     buffer.size = size;
@@ -48,7 +48,7 @@ void AlignHead(Buffer& buffer, u32 alignment)
     buffer.head = Align(buffer.head, alignment);
 }
 
-static void PushAlignedData(Buffer& buffer, const void* data, u32 size, u32 alignment)
+void PushAlignedData(Buffer& buffer, const void* data, u32 size, u32 alignment)
 {
     ASSERT(buffer.data != NULL, "The buffer must be mapped first");
     AlignHead(buffer, alignment);
