@@ -83,6 +83,7 @@ void main()
 in vec2 vTexCoord;
 in vec3 vPosition;
 in vec3 vNormal;
+in vec3 vViewDir;
 
 uniform sampler2D uTexture;
 
@@ -90,10 +91,8 @@ layout(location = 0) out vec4 oColor;
 
 void main()
 {
-	 vec3 N = normalize(vNormal);
- 
-    
-   //oColor = vec4(N, 1.0);
+	//vec3 N = normalize(vNormal);
+	//oColor = vec4(N, 1.0);
  
 	oColor = texture(uTexture, vTexCoord);
 }
