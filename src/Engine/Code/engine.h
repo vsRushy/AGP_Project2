@@ -345,7 +345,6 @@ struct App
     u32 globalParamsSize;
 
     // Uniform buffer
-    GLuint uniform_buffer_handle;
     GLint max_uniform_buffer_size;
     GLint uniform_block_alignment;
 };

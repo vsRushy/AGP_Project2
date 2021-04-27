@@ -104,12 +104,21 @@ uniform sampler2D uTexture;
 
 layout(location = 0) out vec4 oColor;
 
+vec3 CalculateDirectionalLight()
+{
+	return vec3(0.0);
+}
+
+vec3 CalculatePointLight()
+{
+	return vec3(0.0);
+}
+
 void main()
 {
-	oColor = texture(uTexture, vTexCoord);
+	vec4 objectColor = texture(uTexture, vTexCoord);
 
-	/*vec3 result;
-
+	vec3 result = vec3(0.0);
 	for(int i = 0; i < uLightCount; ++i)
 	{
 		switch(uLight[i].type)
@@ -122,7 +131,8 @@ void main()
 
 		case 1: // Point
 		{
-			result += CalculatePointLight();
+			//result += CalculatePointLight();
+			result = vec3(1.0);
 		}
 		break;
 
@@ -131,18 +141,11 @@ void main()
 			break;
 		}
 		}
-	}*/
+	}
+
+	oColor = vec4(result, 1.0) * objectColor;
 }
 
-void CalculateDirectionalLight()
-{
-
-}
-
-void CalculatePointLight()
-{
-
-}
 
 #endif
 #endif
