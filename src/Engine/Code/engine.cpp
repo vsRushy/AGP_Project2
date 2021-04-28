@@ -388,6 +388,24 @@ void Gui(App* app)
         rdoc_api->TriggerCapture();
     }
 
+    ImGui::Separator();
+
+    const char* items[] = { "Final Render", "Depth", "Normals"};
+    static const char* current_item = "Final Render";
+
+    if (ImGui::BeginCombo("##combo", current_item)) 
+    {
+        for (int n = 0; n < IM_ARRAYSIZE(items); n++)
+        {
+            bool is_selected = (current_item == items[n]);
+            if (ImGui::Selectable(items[n], is_selected))
+                current_item = items[n];
+                if (is_selected)
+                    ImGui::SetItemDefaultFocus();   
+        }
+        ImGui::EndCombo();
+    }
+
     ImGui::End();
 }
 
