@@ -359,10 +359,7 @@ void Init(App* app)
     glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &app->max_uniform_buffer_size);
     glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &app->uniform_block_alignment);
 
-    glGenBuffers(1, &app->cbuffer.handle);
-    glBindBuffer(GL_UNIFORM_BUFFER, app->cbuffer.handle);
-    glBufferData(GL_UNIFORM_BUFFER, app->max_uniform_buffer_size, NULL, GL_STREAM_DRAW);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    app->cbuffer = CreateConstantBuffer(app->max_uniform_buffer_size);
 
     app->mode = Mode_Count;
 }
