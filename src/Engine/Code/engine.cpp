@@ -455,6 +455,12 @@ void Gui(App* app)
     }
 
     ImGui::End();
+
+    ImGui::Begin("Scene");
+
+    ImGui::Image((ImTextureID)app->colorAttachmentHandle, { 500, 500 }, { 0, 1 }, { 1, 0 });
+
+    ImGui::End();
 }
 
 void Update(App* app)
@@ -610,7 +616,7 @@ void Render(App* app)
 
         case Mode_Count:
         {
-            //glBindFramebuffer(GL_FRAMEBUFFER, app->frameBufferHandle);
+            glBindFramebuffer(GL_FRAMEBUFFER, app->frameBufferHandle);
 
             GLuint drawBuffers[] = { app->colorAttachmentHandle };
             glDrawBuffers(ARRAY_COUNT(drawBuffers), drawBuffers);
@@ -657,7 +663,7 @@ void Render(App* app)
 
             glUseProgram(0);
 
-            //glBindFramebuffer(GL_FRAMEBUFFER, app->frameBufferHandle);
+            glBindFramebuffer(GL_FRAMEBUFFER, app->frameBufferHandle);
         }
         break;
 
