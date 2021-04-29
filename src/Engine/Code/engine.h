@@ -338,6 +338,11 @@ struct App
     // Model indices
     u32 patrick_index;
 
+    // Framebuffer
+    GLuint frameBufferHandle;
+    GLuint colorAttachmentHandle;
+    GLuint depthAttachmentHandle;
+
     // Buffer
     Buffer cbuffer;
     

@@ -362,9 +362,8 @@ void Init(App* app)
     app->cbuffer = CreateConstantBuffer(app->max_uniform_buffer_size);
 
     // Framebuffer
-    GLuint colorAttachmentHandle;
-    glGenTextures(1, &colorAttachmentHandle);
-    glBindTexture(GL_TEXTURE_2D, colorAttachmentHandle);
+    glGenTextures(1, &app->colorAttachmentHandle);
+    glBindTexture(GL_TEXTURE_2D, app->colorAttachmentHandle);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, app->displaySize.x, app->displaySize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -373,9 +372,8 @@ void Init(App* app)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    GLuint depthAttachmentHandle;
-    glGenTextures(1, &depthAttachmentHandle);
-    glBindTexture(GL_TEXTURE_2D, depthAttachmentHandle);
+    glGenTextures(1, &app->depthAttachmentHandle);
+    glBindTexture(GL_TEXTURE_2D, app->depthAttachmentHandle);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, app->displaySize.x, app->displaySize.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -384,11 +382,10 @@ void Init(App* app)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    GLuint frameBufferHandle;
-    glGenFramebuffers(1, &frameBufferHandle);
-    glBindFramebuffer(GL_FRAMEBUFFER, frameBufferHandle);
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, colorAttachmentHandle, 0);
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthAttachmentHandle, 0);
+    glGenFramebuffers(1, &app->frameBufferHandle);
+    glBindFramebuffer(GL_FRAMEBUFFER, app->frameBufferHandle);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, app->colorAttachmentHandle, 0);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, app->depthAttachmentHandle, 0);
 
     GLenum frameBufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (frameBufferStatus != GL_FRAMEBUFFER_COMPLETE)
@@ -408,7 +405,7 @@ void Init(App* app)
         }
     }
 
-    glDrawBuffers(1, &colorAttachmentHandle);
+    glDrawBuffers(1, &app->colorAttachmentHandle);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
@@ -583,6 +580,8 @@ void Render(App* app)
             //   (...and make its texture sample from unit 0)
             // - bind the vao
             // - glDrawElements() !!!
+            glBindFramebuffer(GL_FRAMEBUFFER, app->frameBufferHandle);
+
             glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -611,6 +610,11 @@ void Render(App* app)
 
         case Mode_Count:
         {
+            //glBindFramebuffer(GL_FRAMEBUFFER, app->frameBufferHandle);
+
+            GLuint drawBuffers[] = { app->colorAttachmentHandle };
+            glDrawBuffers(ARRAY_COUNT(drawBuffers), drawBuffers);
+
             glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -639,19 +643,21 @@ void Render(App* app)
 
                     u32 submesh_material_index = model.material_index[i];
                     Material& submesh_material = app->materials[submesh_material_index];
-
+                    
                     glActiveTexture(GL_TEXTURE0);
                     glBindTexture(GL_TEXTURE_2D, app->textures[submesh_material.albedo_texture_index].handle);
                     glUniform1i(app->texturedMeshProgram_uTexture, 0);
 
                     Submesh& submesh = mesh.submeshes[i];
                     glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.index_offset);
-                
+                    
                     glBindVertexArray(0);
                 }
             }
 
             glUseProgram(0);
+
+            //glBindFramebuffer(GL_FRAMEBUFFER, app->frameBufferHandle);
         }
         break;
 
