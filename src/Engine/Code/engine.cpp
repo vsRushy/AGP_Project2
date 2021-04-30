@@ -664,6 +664,17 @@ void Render(App* app)
             glUseProgram(0);
 
             glBindFramebuffer(GL_FRAMEBUFFER, app->frameBufferHandle);
+
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, app->frameBufferHandle);
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+            glBlitFramebuffer(0, 0, app->displaySize.x, app->displaySize.y,
+                0, 0, app->displaySize.x, app->displaySize.y,
+                GL_COLOR_BUFFER_BIT,
+                GL_LINEAR);
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+
+            //glReadBuffer(GL_COLOR_ATTACHMENT0);
+            //glBlitFramebuffer(0, 0, app->displaySize.x, app->displaySize.y, 0, 0, app->displaySize.x, app->displaySize.y, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
         }
         break;
 
