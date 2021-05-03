@@ -414,6 +414,35 @@ void Init(App* app)
 
 void Gui(App* app)
 {
+    if (ImGui::BeginMainMenuBar())
+    {
+        if (ImGui::BeginMenu("Menu"))
+        {
+            if (ImGui::MenuItem("Test", "Esc"))
+            {
+                
+            }
+
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Misc"))
+        {
+            if (ImGui::MenuItem("Test2", "Ctrl"))
+            {
+                
+            }
+            ImGui::Separator();
+            if (ImGui::MenuItem("Test3", "Shift"))
+            {
+
+            }
+            
+            ImGui::EndMenu();
+        }
+
+        ImGui::EndMainMenuBar();
+    }
+
     ImGui::Begin("Info");
 
     ImGui::Text("FPS: %f", 1.0f / app->deltaTime);
@@ -456,11 +485,11 @@ void Gui(App* app)
 
     ImGui::End();
 
-    ImGui::Begin("Scene");
+    /*ImGui::Begin("Scene");
 
     ImGui::Image((ImTextureID)app->colorAttachmentHandle, { 500, 500 }, { 0, 1 }, { 1, 0 });
 
-    ImGui::End();
+    ImGui::End();*/
 }
 
 void Update(App* app)
@@ -616,7 +645,7 @@ void Render(App* app)
 
         case Mode_Count:
         {
-            glBindFramebuffer(GL_FRAMEBUFFER, app->frameBufferHandle);
+            //glBindFramebuffer(GL_FRAMEBUFFER, app->frameBufferHandle);
 
             GLuint drawBuffers[] = { app->colorAttachmentHandle };
             glDrawBuffers(ARRAY_COUNT(drawBuffers), drawBuffers);
@@ -663,7 +692,7 @@ void Render(App* app)
 
             glUseProgram(0);
 
-            glBindFramebuffer(GL_FRAMEBUFFER, app->frameBufferHandle);
+            /*glBindFramebuffer(GL_FRAMEBUFFER, app->frameBufferHandle);
 
             glBindFramebuffer(GL_READ_FRAMEBUFFER, app->frameBufferHandle);
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -671,7 +700,7 @@ void Render(App* app)
                 0, 0, app->displaySize.x, app->displaySize.y,
                 GL_COLOR_BUFFER_BIT,
                 GL_LINEAR);
-            glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);*/
 
             //glReadBuffer(GL_COLOR_ATTACHMENT0);
             //glBlitFramebuffer(0, 0, app->displaySize.x, app->displaySize.y, 0, 0, app->displaySize.x, app->displaySize.y, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
