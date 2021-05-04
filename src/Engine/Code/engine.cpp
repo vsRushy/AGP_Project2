@@ -603,29 +603,27 @@ void Update(App* app)
         app->camera.Move(Camera::MOVE::DOWN);
     }
 
-    static bool first_mouse = true;
-    static float last_x = 0.0f, last_y = 0.0f;
     if (app->input.mouseButtons[LEFT] == BUTTON_PRESSED)
     {
-        if (first_mouse)
+        if (app->first_mouse)
         {
-            last_x = app->input.mousePos.x;
-            last_y = app->input.mousePos.y;
-            first_mouse = false;
+            app->last_x = app->input.mousePos.x;
+            app->last_y = app->input.mousePos.y;
+            app->first_mouse = false;
         }
 
-        float xoffset = app->input.mousePos.x - last_x;
-        float yoffset = last_y - app->input.mousePos.y;
+        float xoffset = app->input.mouseDelta.x;
+        float yoffset = -app->input.mouseDelta.y;
 
-        last_x = app->input.mousePos.x;
-        last_y = app->input.mousePos.y;
+        app->last_x = app->input.mousePos.x;
+        app->last_y = app->input.mousePos.y;
 
         app->camera.Rotate(xoffset, yoffset);
     }
 
     if (app->input.mouseButtons[LEFT] == BUTTON_RELEASE)
     {
-
+        app->first_mouse = true;
     }
 
     app->camera.SetAspectRatio((float)app->displaySize.x, (float)app->displaySize.y);
