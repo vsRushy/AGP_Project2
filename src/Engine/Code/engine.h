@@ -310,9 +310,6 @@ struct App
     // Camera
     Camera camera;
 
-    bool first_mouse = true;
-    float last_x = 0.0f, last_y = 0.0f;
-
     // Mode
     Mode mode;
 
