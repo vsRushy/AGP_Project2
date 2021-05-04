@@ -530,6 +530,13 @@ void Gui(App* app)
 
     ImGui::End();
 
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
+    ImGui::Begin("Scene");
+    ImVec2 size = ImGui::GetContentRegionAvail();
+    ImGui::Image((ImTextureID)app->colorAttachmentHandle, size, { 0, 1 }, { 1, 0 });
+    ImGui::End();
+    ImGui::PopStyleVar();
+
     ImGui::End(); // End dockspace
 
     /*if (ImGui::BeginMainMenuBar())
@@ -721,7 +728,7 @@ void Render(App* app)
 
         case Mode_Count:
         {
-            //glBindFramebuffer(GL_FRAMEBUFFER, app->frameBufferHandle);
+            glBindFramebuffer(GL_FRAMEBUFFER, app->frameBufferHandle);
 
             GLuint drawBuffers[] = { app->colorAttachmentHandle };
             glDrawBuffers(ARRAY_COUNT(drawBuffers), drawBuffers);
@@ -767,6 +774,8 @@ void Render(App* app)
             }
 
             glUseProgram(0);
+
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
             /*glBindFramebuffer(GL_FRAMEBUFFER, app->frameBufferHandle);
 
