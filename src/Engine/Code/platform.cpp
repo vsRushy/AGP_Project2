@@ -209,6 +209,9 @@ int main()
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
     //io.ConfigViewportsNoAutoMerge = true;
     //io.ConfigViewportsNoTaskBarIcon = true;
+    io.WantSetMousePos = false;
+    io.WantCaptureKeyboard = false;
+    io.WantCaptureMouse = false;
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
@@ -249,6 +252,11 @@ int main()
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+
+        io.WantSetMousePos = false;
+        io.WantCaptureKeyboard = false;
+        io.WantCaptureMouse = false;
+
         Gui(&app);
         ImGui::Render();
 
@@ -261,21 +269,25 @@ int main()
             for (u32 i = 0; i < MOUSE_BUTTON_COUNT; ++i)
                 app.input.mouseButtons[i] = BUTTON_IDLE;
 
-        // Update
-        Update(&app);
-
         // Transition input key/button states
         if (!ImGui::GetIO().WantCaptureKeyboard)
             for (u32 i = 0; i < KEY_COUNT; ++i)
-                if      (app.input.keys[i] == BUTTON_PRESS)   app.input.keys[i] = BUTTON_PRESSED;
-                else if (app.input.keys[i] == BUTTON_RELEASE) app.input.keys[i] = BUTTON_IDLE;
+                if      (app.input.keys[i] == BUTTON_PRESS)
+                    app.input.keys[i] = BUTTON_PRESSED;
+                else if (app.input.keys[i] == BUTTON_RELEASE)
+                    app.input.keys[i] = BUTTON_IDLE;
 
         if (!ImGui::GetIO().WantCaptureMouse)
             for (u32 i = 0; i < MOUSE_BUTTON_COUNT; ++i)
-                if      (app.input.mouseButtons[i] == BUTTON_PRESS)   app.input.mouseButtons[i] = BUTTON_PRESSED;
-                else if (app.input.mouseButtons[i] == BUTTON_RELEASE) app.input.mouseButtons[i] = BUTTON_IDLE;
+                if      (app.input.mouseButtons[i] == BUTTON_PRESS)
+                    app.input.mouseButtons[i] = BUTTON_PRESSED;
+                else if (app.input.mouseButtons[i] == BUTTON_RELEASE)
+                    app.input.mouseButtons[i] = BUTTON_IDLE;
 
-        app.input.mouseDelta = glm::vec2(0.0f, 0.0f);
+        // Update
+        Update(&app);
+
+       app.input.mouseDelta = glm::vec2(0.0f, 0.0f);
 
         // Render
         Render(&app);
