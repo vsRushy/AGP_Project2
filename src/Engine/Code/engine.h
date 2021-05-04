@@ -146,8 +146,6 @@ struct Camera
     float speed;
     float mouse_sensitivity;
 
-    bool mouse_pressed = false;
-
     enum class MOVE { FORWARD, BACK, LEFT, RIGHT, UP, DOWN };
 
     Camera() {}
@@ -203,22 +201,19 @@ struct Camera
 
     void Rotate(float xoffset, float yoffset)
     {
-        if (mouse_pressed)
+        xoffset *= mouse_sensitivity;
+        yoffset *= mouse_sensitivity;
+
+        yaw += xoffset;
+        pitch += yoffset;
+
+        if (true)
         {
-            xoffset *= mouse_sensitivity;
-            yoffset *= mouse_sensitivity;
-
-            yaw += xoffset;
-            pitch += yoffset;
-
-            if (true)
-            {
-                if (pitch > 89.0f) pitch = 89.0f;
-                if (pitch < -89.0f) pitch = -89.0f;
-            }
-
-            UpdateCameraValues();
+            if (pitch > 89.0f) pitch = 89.0f;
+            if (pitch < -89.0f) pitch = -89.0f;
         }
+
+        UpdateCameraValues();
     }
 
     void Zoom(const float& yoffset)

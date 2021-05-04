@@ -43,23 +43,6 @@ void OnGlfwMouseMoveEvent(GLFWwindow* window, double xpos, double ypos)
     app->input.mouseDelta.y = ypos - app->input.mousePos.y;
     app->input.mousePos.x = xpos;
     app->input.mousePos.y = ypos;
-
-    static bool first_mouse = true;
-    static float last_x = 0.0f, last_y = 0.0f;
-    if (first_mouse)
-    {
-        last_x = xpos;
-        last_y = ypos;
-        first_mouse = false;
-    }
-
-    float xoffset = xpos - last_x;
-    float yoffset = last_y - ypos;
-
-    last_x = xpos;
-    last_y = ypos;
-
-    app->camera.Rotate(xoffset, yoffset);
 }
 
 void OnGlfwMouseEvent(GLFWwindow* window, int button, int event, int modifiers)
