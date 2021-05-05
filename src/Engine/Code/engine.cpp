@@ -537,42 +537,8 @@ void Gui(App* app)
     ImGui::End();
     ImGui::PopStyleVar();
 
-    ImGui::End(); // End dockspace
-
-    /*if (ImGui::BeginMainMenuBar())
-    {
-        if (ImGui::BeginMenu("Menu"))
-        {
-            if (ImGui::MenuItem("Test", "Esc"))
-            {
-                
-            }
-
-            ImGui::EndMenu();
-        }
-        if (ImGui::BeginMenu("Misc"))
-        {
-            if (ImGui::MenuItem("Test2", "Ctrl"))
-            {
-                
-            }
-            ImGui::Separator();
-            if (ImGui::MenuItem("Test3", "Shift"))
-            {
-
-            }
-            
-            ImGui::EndMenu();
-        }
-
-        ImGui::EndMainMenuBar();
-    }*/
-
-    /*ImGui::Begin("Scene");
-
-    ImGui::Image((ImTextureID)app->colorAttachmentHandle, { 500, 500 }, { 0, 1 }, { 1, 0 });
-
-    ImGui::End();*/
+    // End dockspace
+    ImGui::End();
 }
 
 void Update(App* app)
