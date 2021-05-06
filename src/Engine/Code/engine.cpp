@@ -543,7 +543,7 @@ void Gui(App* app)
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
     ImGui::Begin("Scene");
     ImVec2 size = ImGui::GetContentRegionAvail();
-    ImGui::Image((ImTextureID)app->colorAttachmentHandle1, size, { 0, 1 }, { 1, 0 });
+    ImGui::Image((ImTextureID)app->colorAttachmentHandle, size, { 0, 1 }, { 1, 0 });
     ImGui::End();
     ImGui::PopStyleVar();
 
