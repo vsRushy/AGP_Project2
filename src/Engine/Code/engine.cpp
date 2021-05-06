@@ -265,6 +265,8 @@ void Init(App* app)
     app->opengl_info.glsl_version = glGetString(GL_SHADING_LANGUAGE_VERSION);
     // add opengl extensions
 
+    glEnable(GL_DEPTH_TEST);
+
     app->debug_group_mode = true;
 
     // Camera
@@ -543,7 +545,7 @@ void Gui(App* app)
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
     ImGui::Begin("Scene");
     ImVec2 size = ImGui::GetContentRegionAvail();
-    ImGui::Image((ImTextureID)app->colorAttachmentHandle, size, { 0, 1 }, { 1, 0 });
+    ImGui::Image((ImTextureID)app->depthAttachmentHandle, size, { 0, 1 }, { 1, 0 });
     ImGui::End();
     ImGui::PopStyleVar();
 
@@ -709,7 +711,7 @@ void Render(App* app)
         {
             glBindFramebuffer(GL_FRAMEBUFFER, app->frameBufferHandle);
 
-            //GLuint drawBuffers[] = { app->colorAttachmentHandle, app->colorAttachmentHandle1 };
+            //GLuint drawBuffers[] = { app->colorAttachmentHandle, app->colorAttachmentHandle1, app->depthAttachmentHandle1 };
             GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
             glDrawBuffers(ARRAY_COUNT(drawBuffers), drawBuffers);
 
