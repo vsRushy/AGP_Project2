@@ -102,8 +102,8 @@ layout(binding = 0, std140) uniform GlobalParams
 
 uniform sampler2D uTexture;
 
-layout(location = 0) out vec4 oColor;
-layout(location = 1) out vec4 oColor1;
+layout(location = 0) out vec4 oFinalRender;
+layout(location = 1) out vec4 oNormals;
 out float gl_FragDepth;
 
 vec3 CalculateDirectionalLight()
@@ -147,8 +147,8 @@ void main()
 		}
 	}
 
-	oColor = vec4(result, 1.0) * objectColor;
-	oColor1 = vec4(1.0, 0.0, 0.0, 1.0);
+	oFinalRender = vec4(result, 1.0) * objectColor;
+	oNormals = vec4(1.0, 0.0, 0.0, 1.0);
 
 	gl_FragDepth = gl_FragCoord.z;
 }

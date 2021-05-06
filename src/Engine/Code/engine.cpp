@@ -364,6 +364,8 @@ void Init(App* app)
     app->cbuffer = CreateConstantBuffer(app->max_uniform_buffer_size);
 
     // Framebuffer
+    app->currentFboAttachment = FboAttachmentType::FinalRender;
+
     glGenTextures(1, &app->colorAttachmentHandle);
     glBindTexture(GL_TEXTURE_2D, app->colorAttachmentHandle);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, app->displaySize.x, app->displaySize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
@@ -526,7 +528,6 @@ void Gui(App* app)
 
     const char* items[] = { "Final Render", "Depth", "Normals" };
     static const char* current_item = "Final Render";
-
     if (ImGui::BeginCombo("##combo", current_item))
     {
         for (int n = 0; n < IM_ARRAYSIZE(items); n++)
@@ -535,7 +536,16 @@ void Gui(App* app)
             if (ImGui::Selectable(items[n], is_selected))
                 current_item = items[n];
             if (is_selected)
+            {
                 ImGui::SetItemDefaultFocus();
+            }
+
+            if (strcmp(current_item, "Final Render") == 0)
+                app->currentFboAttachment = FboAttachmentType::FinalRender;
+            if (strcmp(current_item, "Normals") == 0)
+                app->currentFboAttachment = FboAttachmentType::Normals;
+            if (strcmp(current_item, "Depth") == 0)
+                app->currentFboAttachment = FboAttachmentType::Depth;
         }
         ImGui::EndCombo();
     }
@@ -545,7 +555,34 @@ void Gui(App* app)
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
     ImGui::Begin("Scene");
     ImVec2 size = ImGui::GetContentRegionAvail();
-    ImGui::Image((ImTextureID)app->depthAttachmentHandle, size, { 0, 1 }, { 1, 0 });
+
+    GLuint currentAttachment = 0;
+    switch (app->currentFboAttachment)
+    {
+        case FboAttachmentType::FinalRender:
+        {
+            currentAttachment = app->colorAttachmentHandle;
+        }
+        break;
+
+        case FboAttachmentType::Normals:
+        {
+            currentAttachment = app->colorAttachmentHandle1;
+        }
+        break;
+
+        case FboAttachmentType::Depth:
+        {
+            currentAttachment = app->depthAttachmentHandle;
+        }
+        break;
+
+        default:
+        {} break;
+    }
+
+    ImGui::Image((ImTextureID)currentAttachment, size, { 0, 1 }, { 1, 0 });
+
     ImGui::End();
     ImGui::PopStyleVar();
 

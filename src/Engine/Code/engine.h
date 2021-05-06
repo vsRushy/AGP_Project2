@@ -274,6 +274,13 @@ enum Mode
     Mode_Count
 };
 
+enum class FboAttachmentType
+{
+    FinalRender,
+    Normals,
+    Depth,
+};
+
 struct App
 {
     // Loop
@@ -338,6 +345,8 @@ struct App
     GLuint colorAttachmentHandle;
     GLuint colorAttachmentHandle1;
     GLuint depthAttachmentHandle;
+
+    FboAttachmentType currentFboAttachment;
 
     // Buffer
     Buffer cbuffer;
