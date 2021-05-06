@@ -336,6 +336,7 @@ struct App
     // Framebuffer
     GLuint frameBufferHandle;
     GLuint colorAttachmentHandle;
+    GLuint colorAttachmentHandle1;
     GLuint depthAttachmentHandle;
 
     // Buffer

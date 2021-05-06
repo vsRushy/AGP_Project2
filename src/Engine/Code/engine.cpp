@@ -372,6 +372,16 @@ void Init(App* app)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glBindTexture(GL_TEXTURE_2D, 0);
 
+    glGenTextures(1, &app->colorAttachmentHandle1);
+    glBindTexture(GL_TEXTURE_2D, app->colorAttachmentHandle1);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, app->displaySize.x, app->displaySize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
     glGenTextures(1, &app->depthAttachmentHandle);
     glBindTexture(GL_TEXTURE_2D, app->depthAttachmentHandle);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, app->displaySize.x, app->displaySize.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
@@ -385,6 +395,7 @@ void Init(App* app)
     glGenFramebuffers(1, &app->frameBufferHandle);
     glBindFramebuffer(GL_FRAMEBUFFER, app->frameBufferHandle);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, app->colorAttachmentHandle, 0);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, app->colorAttachmentHandle1, 0);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, app->depthAttachmentHandle, 0);
 
     GLenum frameBufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -532,7 +543,7 @@ void Gui(App* app)
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
     ImGui::Begin("Scene");
     ImVec2 size = ImGui::GetContentRegionAvail();
-    ImGui::Image((ImTextureID)app->colorAttachmentHandle, size, { 0, 1 }, { 1, 0 });
+    ImGui::Image((ImTextureID)app->colorAttachmentHandle1, size, { 0, 1 }, { 1, 0 });
     ImGui::End();
     ImGui::PopStyleVar();
 
@@ -698,7 +709,8 @@ void Render(App* app)
         {
             glBindFramebuffer(GL_FRAMEBUFFER, app->frameBufferHandle);
 
-            GLuint drawBuffers[] = { app->colorAttachmentHandle };
+            //GLuint drawBuffers[] = { app->colorAttachmentHandle, app->colorAttachmentHandle1 };
+            GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
             glDrawBuffers(ARRAY_COUNT(drawBuffers), drawBuffers);
 
             glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
