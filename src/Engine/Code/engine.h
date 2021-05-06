@@ -150,7 +150,7 @@ struct Camera
 
     Camera() {}
 
-    Camera(const vec3& pos, const float& fv = 60.0f, const float& znear = 0.1f, const float& zfar = 10.0f)
+    Camera(const vec3& pos, const float& fv = 60.0f, const float& znear = 0.1f, const float& zfar = 1000.0f)
     {
         position = pos;
         front = vec3(0.0f, 0.0f, -1.0f);
