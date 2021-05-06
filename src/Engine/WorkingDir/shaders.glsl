@@ -148,8 +148,7 @@ void main()
 	}
 
 	oFinalRender = vec4(result, 1.0) * objectColor;
-	oNormals = vec4(1.0, 0.0, 0.0, 1.0);
-
+	oNormals = vec4(normalize(vNormal), 1.0);
 	gl_FragDepth = gl_FragCoord.z;
 }
 
