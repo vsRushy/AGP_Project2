@@ -128,22 +128,22 @@ void main()
 	{
 		switch(uLight[i].type)
 		{
-		case 0: // Directional
-		{
-			result += CalculateDirectionalLight();
-		}
-		break;
-
-		case 1: // Point
-		{
-			result += CalculatePointLight(uLight[i]);
-		}
-		break;
-
-		default:
-		{
+			case 0: // Directional
+			{
+				result += CalculateDirectionalLight();
+			}
 			break;
-		}
+
+			case 1: // Point
+			{
+				result += CalculatePointLight(uLight[i]);
+			}
+			break;
+
+			default:
+			{
+				break;
+			}
 		}
 	}
 
