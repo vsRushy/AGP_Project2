@@ -118,7 +118,7 @@ vec3 CalculateDirectionalLight(Light light)
     float diffuseIntensity = max(0.0, dot(N,L));
 
 	// Specular
-    float specularIntensity = pow(max(0.0, dot(N, L)), 3.0);
+    float specularIntensity = pow(max(0.0, dot(N, L)), 1.0);
     vec3 specular = light.color * specularMat * specularIntensity;
 
 
@@ -127,10 +127,19 @@ vec3 CalculateDirectionalLight(Light light)
 
 vec3 CalculatePointLight(Light light)
 {
+	vec3 N = normalize(vNormal);
+	vec3 L = normalize(light.direction);
+	// Hardcoded specular parameter
+    vec3 specularMat = vec3(1.0);
+
 	vec3 lightVector = normalize(light.position - vPosition);
 	float brightness = dot(lightVector, vNormal);
 
-	return vec3(brightness) * light.color;
+	// Specular
+    float specularIntensity = pow(max(0.0, dot(N, L)), 1.0);
+    vec3 specular = light.color * specularMat * specularIntensity;
+
+	return vec3(brightness) * light.color * specular * specularMat ;
 }
 
 void main()
