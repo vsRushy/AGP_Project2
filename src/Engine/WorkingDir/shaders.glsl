@@ -106,9 +106,23 @@ layout(location = 0) out vec4 oFinalRender;
 layout(location = 1) out vec4 oNormals;
 out float gl_FragDepth;
 
-vec3 CalculateDirectionalLight()
+vec3 CalculateDirectionalLight(Light light)
 {
-	return vec3(1.0);
+	vec3 N = normalize(vNormal);
+    vec3 L = normalize(light.direction);
+
+	// Hardcoded specular parameter
+    vec3 specularMat = vec3(1.0);
+
+	// Diffuse
+    float diffuseIntensity = max(0.0, dot(N,L));
+
+	// Specular
+    float specularIntensity = pow(max(0.0, dot(N, L)), 3.0);
+    vec3 specular = light.color * specularMat * specularIntensity;
+
+
+	return light.color*diffuseIntensity*specularMat*specular;
 }
 
 vec3 CalculatePointLight(Light light)
@@ -122,21 +136,22 @@ vec3 CalculatePointLight(Light light)
 void main()
 {
 	vec4 objectColor = texture(uTexture, vTexCoord);
+	vec4 spec = vec4(0.0);
 
-	vec3 result = vec3(0.0);
+	vec3 lightFactor = vec3(0.0);
 	for(int i = 0; i < uLightCount; ++i)
 	{
 		switch(uLight[i].type)
 		{
 			case 0: // Directional
 			{
-				result += CalculateDirectionalLight();
+				lightFactor += CalculateDirectionalLight(uLight[i]);
 			}
 			break;
 
 			case 1: // Point
 			{
-				result += CalculatePointLight(uLight[i]);
+				lightFactor += CalculatePointLight(uLight[i]);
 			}
 			break;
 
@@ -147,7 +162,8 @@ void main()
 		}
 	}
 
-	oFinalRender = vec4(result, 1.0) * objectColor;
+
+	oFinalRender = vec4(lightFactor, 1.0) * objectColor;
 	oNormals = vec4(normalize(vNormal), 1.0);
 	gl_FragDepth = gl_FragCoord.z;
 }
