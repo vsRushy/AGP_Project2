@@ -128,7 +128,7 @@ vec3 CalculateDirectionalLight(Light light)
 vec3 CalculatePointLight(Light light)
 {
 	vec3 N = normalize(vNormal);
-	vec3 L = normalize(light.direction);
+	vec3 L = normalize(light.position - vPosition);
 	// Hardcoded specular parameter
     vec3 specularMat = vec3(1.0);
 
