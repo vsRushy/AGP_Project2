@@ -257,7 +257,7 @@ struct Light
     vec3 color;
     vec3 direction;
     vec3 position;
-    float radius;
+    int radius;
 };
 
 struct Buffer
