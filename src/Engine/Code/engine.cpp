@@ -332,9 +332,9 @@ void Init(App* app)
                               app->patrick_index });
 
 
-    app->lights.push_back({ LightType_Point, vec3(1.0f, 1.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(5.0f, 3.0f, -25.0f) });
-   app->lights.push_back({ LightType_Point, vec3(1.0f, 1.0f, 0.5f), vec3(0.0f, 1.0f, 0.0f), vec3(-15.0f, 0.0f, -20.0f) });
-    app->lights.push_back({ LightType_Directional, vec3(1.0f, 1.0f, 1.0f), vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, 10.0f, -3.0f) });
+    app->lights.push_back({ LightType_Point, vec3(1.0f, 1.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(5.0f, 3.0f, -25.0f), 20.0f });
+    //app->lights.push_back({ LightType_Point, vec3(1.0f, 1.0f, 0.5f), vec3(0.0f, 1.0f, 0.0f), vec3(-15.0f, 0.0f, -20.0f), 5.0f });
+    //app->lights.push_back({ LightType_Directional, vec3(1.0f, 1.0f, 1.0f), vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, 10.0f, -3.0f) });
 
     app->texturedMeshProgramIdx = LoadProgram(app, "shaders.glsl", "SHOW_TEXTURED_MESH");
     Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
@@ -654,9 +654,12 @@ void Update(App* app)
         Light& light = app->lights[i];
 
         PushUInt(app->cbuffer, light.type);
+        PushFloat(app->cbuffer, light.radius);
         PushVec3(app->cbuffer, light.color);
         PushVec3(app->cbuffer, light.direction);
         PushVec3(app->cbuffer, light.position);
+       
+        
     }
 
     app->globalParamsSize = app->cbuffer.head - app->globalParamsOffset;

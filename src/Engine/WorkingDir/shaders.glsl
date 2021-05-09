@@ -48,6 +48,7 @@ struct Light
 	vec3 color;
 	vec3 direction;
 	vec3 position;
+	float radius;
 };
 
 layout(binding = 0, std140) uniform GlobalParams
@@ -91,6 +92,7 @@ struct Light
 	vec3 color;
 	vec3 direction;
 	vec3 position;
+	float radius;
 };
 
 layout(binding = 0, std140) uniform GlobalParams
@@ -129,6 +131,10 @@ vec3 CalculatePointLight(Light light)
 {
 	vec3 N = normalize(vNormal);
 	vec3 L = normalize(light.position - vPosition);
+
+	if(distance(light.position, vPosition) > light.radius)
+		return vec3(0.0f);
+
 	// Hardcoded specular parameter
     vec3 specularMat = vec3(1.0);
 
