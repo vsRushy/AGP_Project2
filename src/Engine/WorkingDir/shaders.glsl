@@ -108,6 +108,8 @@ uniform sampler2D uTexture;
 
 layout(location = 0) out vec4 oFinalRender;
 layout(location = 1) out vec4 oNormals;
+layout(location = 2) out vec4 oDiffuse;
+
 out float gl_FragDepth;
 
 vec3 CalculateDirectionalLight(Light light)
@@ -192,6 +194,8 @@ void main()
 
 	oFinalRender = vec4(lightFactor, 1.0) * objectColor;
 	oNormals = vec4(normalize(vNormal), 1.0);
+	oDiffuse = objectColor;
+
 	gl_FragDepth = gl_FragCoord.z-0.2;
 }
 

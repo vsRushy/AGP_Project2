@@ -273,13 +273,15 @@ struct Buffer
 enum Mode
 {
     Mode_TexturedQuad,
-    Mode_Count
+    Mode_Count,
+    Mode_Deferred,
 };
 
 enum class FboAttachmentType
 {
     FinalRender,
     Normals,
+    Diffuse,
     Depth,
 };
 
@@ -343,9 +345,11 @@ struct App
     u32 patrick_index;
 
     // Framebuffer
-    GLuint frameBufferHandle;
-    GLuint colorAttachmentHandle;
-    GLuint colorAttachmentHandle1;
+    GLuint gBuffer;
+    GLuint finalRenderAttachmentHandle;
+    GLuint normalsAttachmentHandle;
+    GLuint diffuseAttachmentHandle;
+
     GLuint depthAttachmentHandle;
 
     FboAttachmentType currentFboAttachment;
