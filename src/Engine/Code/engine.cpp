@@ -658,9 +658,10 @@ void Update(App* app)
         PushUInt(app->cbuffer, light.type);
         PushVec3(app->cbuffer, light.color);
         PushVec3(app->cbuffer, light.direction);
+        PushFloat(app->cbuffer, light.intensity);
         PushVec3(app->cbuffer, light.position);
         PushUInt(app->cbuffer, light.radius);
-        PushFloat(app->cbuffer, light.intensity);
+        
        
         
     }

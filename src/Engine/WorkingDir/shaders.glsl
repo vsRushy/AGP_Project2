@@ -47,9 +47,9 @@ struct Light
 	unsigned int type;
 	vec3 color;
 	vec3 direction;
+	float intensity;
 	vec3 position;
 	int radius;
-	float intensity;
 };
 
 layout(binding = 0, std140) uniform GlobalParams
@@ -92,9 +92,9 @@ struct Light
 	unsigned int type;
 	vec3 color;
 	vec3 direction;
+	float intensity;
 	vec3 position;
 	int radius;
-	float intensity;
 };
 
 layout(binding = 0, std140) uniform GlobalParams
