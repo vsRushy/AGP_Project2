@@ -258,6 +258,7 @@ struct Light
     vec3 direction;
     vec3 position;
     int radius;
+    float intensity;
 };
 
 struct Buffer

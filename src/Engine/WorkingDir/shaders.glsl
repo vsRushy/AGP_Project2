@@ -48,7 +48,8 @@ struct Light
 	vec3 color;
 	vec3 direction;
 	vec3 position;
-	 int radius;
+	int radius;
+	float intensity;
 };
 
 layout(binding = 0, std140) uniform GlobalParams
@@ -92,7 +93,8 @@ struct Light
 	vec3 color;
 	vec3 direction;
 	vec3 position;
-	 int radius;
+	int radius;
+	float intensity;
 };
 
 layout(binding = 0, std140) uniform GlobalParams
@@ -114,7 +116,7 @@ vec3 CalculateDirectionalLight(Light light)
     vec3 L = normalize(light.direction);
 
 	// Hardcoded specular parameter
-    vec3 specularMat = vec3(1.0);
+    vec3 specularMat = vec3(0.5);
 
 	// Diffuse
     float diffuseIntensity = max(0.0, dot(N,L));
@@ -124,7 +126,7 @@ vec3 CalculateDirectionalLight(Light light)
     vec3 specular = light.color * specularMat * specularIntensity;
 
 
-	return light.color*diffuseIntensity*specularMat*specular;
+	return (diffuseIntensity + specular) * light.intensity;
 }
 
 vec3 CalculatePointLight(Light light)
@@ -132,20 +134,30 @@ vec3 CalculatePointLight(Light light)
 	vec3 N = normalize(vNormal);
 	vec3 L = normalize(light.position - vPosition);
 
-	if(distance(light.position, vPosition) > light.radius)
-		return vec3(0.0f);
+	float threshold = 1.0;
+
+	float shadowIntensity = 1.0;
+
+	float dist = distance(light.position, vPosition);
+
+	if(dist > light.radius)
+		shadowIntensity = 1.0 - ((dist - light.radius) / threshold);
+
 
 	// Hardcoded specular parameter
     vec3 specularMat = vec3(1.0);
 
-	vec3 lightVector = normalize(light.position - vPosition);
-	float brightness = dot(lightVector, vNormal);
+	// brightness
+	float brightness = dot(L, vNormal);
 
 	// Specular
     float specularIntensity = pow(max(0.0, dot(N, L)), 1.0);
     vec3 specular = light.color * specularMat * specularIntensity;
 
-	return vec3(brightness) * light.color * specular * specularMat ;
+	// Diffuse
+    float diffuseIntensity = max(0.0, dot(N,L));
+
+	return vec3(brightness) * (specular + diffuseIntensity) * shadowIntensity;
 }
 
 void main()
@@ -180,7 +192,7 @@ void main()
 
 	oFinalRender = vec4(lightFactor, 1.0) * objectColor;
 	oNormals = vec4(normalize(vNormal), 1.0);
-	gl_FragDepth = gl_FragCoord.z;
+	gl_FragDepth = gl_FragCoord.z-0.2;
 }
 
 
