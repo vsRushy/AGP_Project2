@@ -338,6 +338,8 @@ void Init(App* app)
     app->lights.push_back({ LightType_Point, vec3(0.0f, 0.0f, 1.0f), vec3(1.0f, 0.0f, 0.0f), vec3(15.0f, 3.0f, -10.0f), 20, 0.4 });
     app->lights.push_back({ LightType_Directional, vec3(1.0f, 1.0f, 1.0f), vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, 10.0f, -3.0f), 0, 0.7f });
 
+    /* FORWARD RENDERING SHADER */
+
     app->texturedMeshProgramIdx = LoadProgram(app, "shaders.glsl", "SHOW_TEXTURED_MESH");
     Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
 
@@ -360,6 +362,58 @@ void Init(App* app)
     }
 
     app->texturedMeshProgram_uTexture = glGetUniformLocation(texturedMeshProgram.handle, "uTexture");
+    
+    /* --------- */
+
+    /* DEFERRED RENDERING SHADERS */
+
+    app->deferredGeometryPassProgramIdx = LoadProgram(app, "shaders.glsl", "DEFERRED_GEOMETRY_PASS");
+    Program& deferredGeometryPassProgram = app->programs[app->deferredGeometryPassProgramIdx];
+
+    GLint deferred_geometry_attribute_count;
+    glGetProgramiv(deferredGeometryPassProgram.handle, GL_ACTIVE_ATTRIBUTES, &deferred_geometry_attribute_count);
+
+    for (int i = 0; i < deferred_geometry_attribute_count; ++i)
+    {
+        GLchar attribute_name[32];
+        GLsizei attribute_length;
+        GLint attribute_size;
+        GLenum attribute_type;
+
+        glGetActiveAttrib(deferredGeometryPassProgram.handle, i, ARRAY_COUNT(attribute_name), &attribute_length, &attribute_size, &attribute_type, attribute_name);
+        GLint attribute_location = glGetAttribLocation(deferredGeometryPassProgram.handle, attribute_name);
+
+        ELOG("Attribute %s. Location: %d Type: %d", attribute_name, attribute_location, attribute_type);
+
+        deferredGeometryPassProgram.vertex_input_layout.attributes.push_back({ (u8)attribute_location, GetAttributeComponentCount(attribute_type) });
+    }
+
+    app->deferredGeometryProgram_uTexture = glGetUniformLocation(deferredGeometryPassProgram.handle, "uTexture");
+
+    app->deferredLightingPassProgramIdx = LoadProgram(app, "shaders.glsl", "DEFERRED_LIGHTING_PASS");
+    Program& deferredLightingPassProgram = app->programs[app->deferredLightingPassProgramIdx];
+
+    GLint deferred_lighting_attribute_count;
+    glGetProgramiv(deferredLightingPassProgram.handle, GL_ACTIVE_ATTRIBUTES, &deferred_lighting_attribute_count);
+
+    for (int i = 0; i < deferred_lighting_attribute_count; ++i)
+    {
+        GLchar attribute_name[32];
+        GLsizei attribute_length;
+        GLint attribute_size;
+        GLenum attribute_type;
+
+        glGetActiveAttrib(deferredLightingPassProgram.handle, i, ARRAY_COUNT(attribute_name), &attribute_length, &attribute_size, &attribute_type, attribute_name);
+        GLint attribute_location = glGetAttribLocation(deferredLightingPassProgram.handle, attribute_name);
+
+        ELOG("Attribute %s. Location: %d Type: %d", attribute_name, attribute_location, attribute_type);
+
+        deferredLightingPassProgram.vertex_input_layout.attributes.push_back({ (u8)attribute_location, GetAttributeComponentCount(attribute_type) });
+    }
+
+    // TODO: uniforms (textures from G-buffer)
+
+    /* --------- */
 
     glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &app->max_uniform_buffer_size);
     glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &app->uniform_block_alignment);
@@ -863,7 +917,7 @@ void Render(App* app)
 
                     glActiveTexture(GL_TEXTURE0);
                     glBindTexture(GL_TEXTURE_2D, app->textures[submesh_material.albedo_texture_index].handle);
-                    glUniform1i(app->texturedMeshProgram_uTexture, 0);
+                    glUniform1i(app->deferredGeometryProgram_uTexture, 0);
 
                     Submesh& submesh = mesh.submeshes[i];
                     glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.index_offset);

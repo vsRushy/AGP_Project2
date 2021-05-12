@@ -310,6 +310,9 @@ struct App
     // program indices
     u32 texturedGeometryProgramIdx;
     u32 texturedMeshProgramIdx;
+
+    u32 deferredGeometryPassProgramIdx;
+    u32 deferredLightingPassProgramIdx;;
     
     // texture indices
     u32 diceTexIdx;
@@ -336,7 +339,9 @@ struct App
     GLuint programUniformTexture;
 
     // More Uniforms
-    GLint texturedMeshProgram_uTexture;
+    GLint texturedMeshProgram_uTexture; // Forward rendering
+
+    GLint deferredGeometryProgram_uTexture; // Deferred geometry pass
 
     // VAO object to link our screen filling quad with our textured quad shader
     GLuint vao;
