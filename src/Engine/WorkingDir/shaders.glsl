@@ -157,7 +157,7 @@ vec3 CalculatePointLight(Light light)
 	// Diffuse
     float diffuseIntensity = max(0.0, dot(N,L));
 
-	return vec3(brightness) * (specular + diffuseIntensity) * shadowIntensity;
+	return vec3(brightness) * (specular + diffuseIntensity) * shadowIntensity * light.intensity;
 }
 
 void main()
