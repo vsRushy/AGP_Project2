@@ -774,7 +774,6 @@ void Render(App* app)
         {
             glBindFramebuffer(GL_FRAMEBUFFER, app->gBuffer);
 
-            //GLuint drawBuffers[] = { app->colorAttachmentHandle, app->colorAttachmentHandle1, app->depthAttachmentHandle1 };
             GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
             glDrawBuffers(ARRAY_COUNT(drawBuffers), drawBuffers);
 
@@ -839,18 +838,19 @@ void Render(App* app)
 
             glEnable(GL_DEPTH_TEST);
 
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            //glEnable(GL_BLEND);
+            //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
             Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
             glUseProgram(texturedMeshProgram.handle);
+
+            glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(0), app->cbuffer.handle, app->globalParamsOffset, app->globalParamsSize);
 
             for (const Entity& entity : app->entities)
             {
                 Model& model = app->models[entity.modelIndex];
                 Mesh& mesh = app->meshes[model.mesh_index];
 
-                glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(0), app->cbuffer.handle, app->globalParamsOffset, app->globalParamsSize);
                 glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(1), app->cbuffer.handle, entity.localParamsOffset, entity.localParamsSize);
 
                 for (u32 i = 0; i < mesh.submeshes.size(); ++i)
