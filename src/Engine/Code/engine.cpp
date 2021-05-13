@@ -333,10 +333,10 @@ void Init(App* app)
 
 
     
-    app->lights.push_back({ LightType_Point, vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(5.0f, 3.0f, -25.0f), 12, 1.0f , true});
-    app->lights.push_back({ LightType_Point, vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, -5.0f), 14, 0.6f, true });
-    app->lights.push_back({ LightType_Point, vec3(0.0f, 0.0f, 1.0f), vec3(1.0f, 0.0f, 0.0f), vec3(15.0f, 3.0f, -10.0f), 20, 0.4 , true});
-    app->lights.push_back({ LightType_Directional, vec3(1.0f, 1.0f, 1.0f), vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, 10.0f, -3.0f), 0, 0.7f, true });
+    app->lights.push_back({ LightType_Point, vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(5.0f, 3.0f, -25.0f), 12.0f, 1.0f , true});
+    app->lights.push_back({ LightType_Point, vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, -5.0f), 14.0f, 0.6f, true });
+    app->lights.push_back({ LightType_Point, vec3(0.0f, 0.0f, 1.0f), vec3(1.0f, 0.0f, 0.0f), vec3(15.0f, 3.0f, -10.0f), 20.0f, 0.4 , true});
+    app->lights.push_back({ LightType_Directional, vec3(1.0f, 1.0f, 1.0f), vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, 10.0f, -3.0f), 0.0f, 0.7f, true });
 
     app->texturedMeshProgramIdx = LoadProgram(app, "shaders.glsl", "SHOW_TEXTURED_MESH");
     Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
@@ -577,17 +577,29 @@ void Gui(App* app)
 
                 //Intensity
                 float f1 = app->lights[i].intensity;
-                ImGui::DragFloat("drag small float", &f1, 0.01f, 0.0f, 0.0f, "%.06f ns");
+                ImGui::DragFloat("Intensity", &f1, 0.01f, 0.0f, 0.0f, "%.06f");
                 if (f1 < 0.0f)f1 = 0.0f;
                 app->lights[i].intensity = f1;
 
                 ImGui::Spacing();
 
+                //position
                 ImGui::DragFloat3("Position", (float*)&app->lights[i].position, 0.01f);
 
                 ImGui::Spacing();
 
+                //Direction
                 ImGui::DragFloat3("Direction", (float*)&app->lights[i].direction, 0.01f);
+
+                ImGui::Spacing();
+
+                //Radius
+                if (app->lights[i].type == LightType::LightType_Point) {
+                    float f2 = app->lights[i].radius;
+                    ImGui::DragFloat("Radius", &f2, 0.01f, 0.0f, 0.0f, "%.06f");
+                    if (f2 < 0.0f)f2 = 0.0f;
+                    app->lights[i].radius = f2;
+                }
 
                
 
@@ -712,7 +724,7 @@ void Update(App* app)
         PushVec3(app->cbuffer, light.direction);
         PushFloat(app->cbuffer, light.intensity);
         PushVec3(app->cbuffer, light.position);
-        PushUInt(app->cbuffer, light.radius);
+        PushFloat(app->cbuffer, light.radius);
         
        
         
