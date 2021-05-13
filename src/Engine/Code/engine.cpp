@@ -562,10 +562,11 @@ void Gui(App* app)
             else  type = ("Point Light " + std::to_string(i));
 
             if(ImGui::TreeNode(type.c_str())) {
-
+                //Active
                 ImGui::Checkbox("Active", &app->lights[i].active);
                 ImGui::Spacing();
 
+                //Color
                 float col1[3] = { app->lights[i].color.r, app->lights[i].color.g, app->lights[i].color.b };
                 ImGui::ColorEdit3("Color", col1);
                 app->lights[i].color.r = col1[0];
@@ -573,10 +574,20 @@ void Gui(App* app)
                 app->lights[i].color.b = col1[2];
 
                 ImGui::Spacing();
+
+                //Intensity
                 float f1 = app->lights[i].intensity;
                 ImGui::DragFloat("drag small float", &f1, 0.01f, 0.0f, 0.0f, "%.06f ns");
                 if (f1 < 0.0f)f1 = 0.0f;
                 app->lights[i].intensity = f1;
+
+                ImGui::Spacing();
+
+                ImGui::DragFloat3("Position", (float*)&app->lights[i].position, 0.01f);
+
+                ImGui::Spacing();
+
+                ImGui::DragFloat3("Direction", (float*)&app->lights[i].direction, 0.01f);
 
                
 
