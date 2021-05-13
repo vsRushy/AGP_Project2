@@ -902,16 +902,15 @@ void Render(App* app)
         case Mode_Deferred:
         {
             glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             /* First pass (geometry) */
 
             glBindFramebuffer(GL_FRAMEBUFFER, app->gBuffer);
 
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
             GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
             glDrawBuffers(ARRAY_COUNT(drawBuffers), drawBuffers);
-
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             glViewport(0, 0, app->displaySize.x, app->displaySize.y);
 
@@ -919,6 +918,8 @@ void Render(App* app)
 
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+            glDepthMask(GL_TRUE);
 
             Program& deferredGeometryPassProgram = app->programs[app->deferredGeometryPassProgramIdx];
             glUseProgram(deferredGeometryPassProgram.handle);
@@ -955,12 +956,14 @@ void Render(App* app)
 
             /* Second pass (lighting) */
 
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); ???
 
             glBindFramebuffer(GL_FRAMEBUFFER, app->gBuffer);
 
             glEnable(GL_BLEND);
             glBlendFunc(GL_ONE, GL_ONE);
+
+            //glDepthMask(GL_FALSE);
 
             Program& deferredLightingPassProgram = app->programs[app->deferredLightingPassProgramIdx];
             glUseProgram(deferredLightingPassProgram.handle);
