@@ -333,10 +333,10 @@ void Init(App* app)
 
 
     
-    app->lights.push_back({ LightType_Point, vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(5.0f, 3.0f, -25.0f), 12, 1.0f });
-    //app->lights.push_back({ LightType_Point, vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, -5.0f), 14, 0.6f });
-    //app->lights.push_back({ LightType_Point, vec3(0.0f, 0.0f, 1.0f), vec3(1.0f, 0.0f, 0.0f), vec3(15.0f, 3.0f, -10.0f), 20, 0.4 });
-   // app->lights.push_back({ LightType_Directional, vec3(1.0f, 1.0f, 1.0f), vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, 10.0f, -3.0f), 0, 0.7f });
+    app->lights.push_back({ LightType_Point, vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(5.0f, 3.0f, -25.0f), 12, 1.0f , true});
+    app->lights.push_back({ LightType_Point, vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, -5.0f), 14, 0.6f, true });
+    app->lights.push_back({ LightType_Point, vec3(0.0f, 0.0f, 1.0f), vec3(1.0f, 0.0f, 0.0f), vec3(15.0f, 3.0f, -10.0f), 20, 0.4 , true});
+    app->lights.push_back({ LightType_Directional, vec3(1.0f, 1.0f, 1.0f), vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, 10.0f, -3.0f), 0, 0.7f, true });
 
     app->texturedMeshProgramIdx = LoadProgram(app, "shaders.glsl", "SHOW_TEXTURED_MESH");
     Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
@@ -562,6 +562,10 @@ void Gui(App* app)
             else  type = ("Point Light " + std::to_string(i));
 
             if(ImGui::TreeNode(type.c_str())) {
+
+                ImGui::Checkbox("Active", &app->lights[i].active);
+                ImGui::Spacing();
+
                 float col1[3] = { app->lights[i].color.r, app->lights[i].color.g, app->lights[i].color.b };
                 ImGui::ColorEdit3("Color", col1);
                 app->lights[i].color.r = col1[0];
@@ -574,8 +578,12 @@ void Gui(App* app)
                 if (f1 < 0.0f)f1 = 0.0f;
                 app->lights[i].intensity = f1;
 
+               
+
                 ImGui::TreePop();
             }
+           
+
         }
 
         ImGui::TreePop();
@@ -683,6 +691,7 @@ void Update(App* app)
 
     for (u32 i = 0; i < app->lights.size(); ++i)
     {
+        if (!app->lights[i].active)continue;
         AlignHead(app->cbuffer, sizeof(vec4));
 
         Light& light = app->lights[i];
