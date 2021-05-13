@@ -455,6 +455,16 @@ void Init(App* app)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glBindTexture(GL_TEXTURE_2D, 0);
 
+    glGenTextures(1, &app->finalRenderAttachmentHandle);
+    glBindTexture(GL_TEXTURE_2D, app->finalRenderAttachmentHandle);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, app->displaySize.x, app->displaySize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
     glGenTextures(1, &app->depthAttachmentHandle);
     glBindTexture(GL_TEXTURE_2D, app->depthAttachmentHandle);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, app->displaySize.x, app->displaySize.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
@@ -470,9 +480,10 @@ void Init(App* app)
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, app->positionAttachmentHandle, 0);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, app->normalsAttachmentHandle, 0);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, app->diffuseAttachmentHandle, 0);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, app->finalRenderAttachmentHandle, 0);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, app->depthAttachmentHandle, 0);
 
-    GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+    GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
     glDrawBuffers(ARRAY_COUNT(drawBuffers), drawBuffers);
 
     GLenum frameBufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -598,7 +609,7 @@ void Gui(App* app)
 
     ImGui::Separator();
 
-    const char* items[] = { "Position", "Normals", "Diffuse", "Depth" };
+    const char* items[] = { "Position", "Normals", "Diffuse", "Final Render", "Depth" };
     static const char* current_item = items[0];
     if (ImGui::BeginCombo("##combo", current_item))
     {
@@ -619,6 +630,8 @@ void Gui(App* app)
             if (strcmp(current_item, items[2]) == 0)
                 app->currentFboAttachment = FboAttachmentType::Diffuse;
             if (strcmp(current_item, items[3]) == 0)
+                app->currentFboAttachment = FboAttachmentType::FinalRender;
+            if (strcmp(current_item, items[4]) == 0)
                 app->currentFboAttachment = FboAttachmentType::Depth;
         }
         ImGui::EndCombo();
@@ -648,6 +661,12 @@ void Gui(App* app)
         case FboAttachmentType::Diffuse:
         {
             currentAttachment = app->diffuseAttachmentHandle;
+        }
+        break;
+
+        case FboAttachmentType::FinalRender:
+        {
+            currentAttachment = app->finalRenderAttachmentHandle;
         }
         break;
 
@@ -889,7 +908,7 @@ void Render(App* app)
 
             glBindFramebuffer(GL_FRAMEBUFFER, app->gBuffer);
 
-            GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+            GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
             glDrawBuffers(ARRAY_COUNT(drawBuffers), drawBuffers);
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -898,13 +917,11 @@ void Render(App* app)
 
             glEnable(GL_DEPTH_TEST);
 
-            //glEnable(GL_BLEND);
-            //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
             Program& deferredGeometryPassProgram = app->programs[app->deferredGeometryPassProgramIdx];
             glUseProgram(deferredGeometryPassProgram.handle);
-
-            //glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(0), app->cbuffer.handle, app->globalParamsOffset, app->globalParamsSize);
 
             for (const Entity& entity : app->entities)
             {
@@ -940,6 +957,11 @@ void Render(App* app)
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+            glBindFramebuffer(GL_FRAMEBUFFER, app->gBuffer);
+
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_ONE, GL_ONE);
+
             Program& deferredLightingPassProgram = app->programs[app->deferredLightingPassProgramIdx];
             glUseProgram(deferredLightingPassProgram.handle);
 
@@ -947,8 +969,6 @@ void Render(App* app)
             glUniform1i(app->deferredLightingProgram_uGNormals, 2);
             glUniform1i(app->deferredLightingProgram_uGDiffuse, 3);
 
-            glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(0), app->cbuffer.handle, app->globalParamsOffset, app->globalParamsSize);
-            
             glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, app->positionAttachmentHandle);
 
@@ -958,9 +978,11 @@ void Render(App* app)
             glActiveTexture(GL_TEXTURE3);
             glBindTexture(GL_TEXTURE_2D, app->diffuseAttachmentHandle);
 
-
+            glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(0), app->cbuffer.handle, app->globalParamsOffset, app->globalParamsSize);
             
             app->RenderQuad();
+
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
         break;
 

@@ -282,6 +282,8 @@ enum class FboAttachmentType
     Position,
     Normals,
     Diffuse,
+    FinalRender,
+
     Depth,
 };
 
@@ -358,6 +360,7 @@ struct App
     GLuint positionAttachmentHandle;
     GLuint normalsAttachmentHandle;
     GLuint diffuseAttachmentHandle;
+    GLuint finalRenderAttachmentHandle;
 
     GLuint depthAttachmentHandle;
 

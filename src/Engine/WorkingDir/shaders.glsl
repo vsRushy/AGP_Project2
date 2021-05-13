@@ -319,8 +319,8 @@ uniform sampler2D uGPosition;
 uniform sampler2D uGNormals;
 uniform sampler2D uGDiffuse;
 
-//layout(location = 0) out vec4 oFinalRender;
-out vec4 oFinalRender;
+layout(location = 3) out vec4 oFinalRender;
+//out vec4 oFinalRender;
 
 vec3 CalculateDirectionalLight(Light light)
 {
@@ -402,7 +402,7 @@ void main()
 		}
 	}*/
 
-	vec3 lighting  = Diffuse * 0.1;
+	vec3 lighting = Diffuse * 0.1;
 	vec3 viewPos = uCameraPosition;
     vec3 viewDir  = normalize(viewPos - FragPos);
 
