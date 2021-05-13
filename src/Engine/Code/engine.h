@@ -343,6 +343,10 @@ struct App
 
     GLint deferredGeometryProgram_uTexture; // Deferred geometry pass
 
+    GLint deferredLightingProgram_uGPosition; // Lighting geometry pass
+    GLint deferredLightingProgram_uGNormals; // Lighting geometry pass
+    GLint deferredLightingProgram_uGDiffuse; // Lighting geometry pass
+
     // VAO object to link our screen filling quad with our textured quad shader
     GLuint vao;
 

@@ -315,6 +315,10 @@ layout(binding = 0, std140) uniform GlobalParams
 	Light uLight[16];
 };
 
+uniform sampler2D uGPosition;
+uniform sampler2D uGNormals;
+uniform sampler2D uGDiffuse;
+
 //layout(location = 0) out vec4 oFinalRender;
 out vec4 oFinalRender;
 
@@ -370,7 +374,11 @@ vec3 CalculatePointLight(Light light)
 
 void main()
 {
-	vec3 lightFactor = vec3(0.0);
+	vec3 FragPos = texture(uGPosition, vTexCoord).rgb;
+    vec3 Normal = texture(uGNormals, vTexCoord).rgb;
+    vec3 Diffuse = texture(uGDiffuse, vTexCoord).rgb;
+
+	/*vec3 lightFactor = vec3(0.0);
 	for(int i = 0; i < uLightCount; ++i)
 	{
 		switch(uLight[i].type)
@@ -392,10 +400,50 @@ void main()
 				break;
 			}
 		}
-	}
+	}*/
+
+	vec3 lighting  = Diffuse * 0.1;
+	vec3 viewPos = uCameraPosition;
+    vec3 viewDir  = normalize(viewPos - FragPos);
+
+    for(int i = 0; i < uLightCount; ++i)
+    {
+		switch(uLight[i].type)
+		{
+			case 0: // Directional
+			{
+				
+			}
+			break;
+
+			case 1: // Point
+			{
+				// diffuse
+				vec3 lightDir = normalize(uLight[i].position - FragPos);
+				vec3 diffuse = max(dot(Normal, lightDir), 0.0) * Diffuse * uLight[i].color;
+				// specular
+				vec3 halfwayDir = normalize(lightDir + viewDir);  
+				float spec = pow(max(dot(Normal, halfwayDir), 0.0), 16.0);
+				vec3 specular = uLight[i].color * spec;
+				// attenuation
+				float distance = length(uLight[i].position - FragPos);
+				float attenuation = 1.0 / (1.0 + 0.1 * distance + 0.01 * distance * distance);
+				diffuse *= attenuation;
+				specular *= attenuation;
+				lighting += diffuse + specular;
+			}
+			break;
+
+			default:
+			{
+				
+			}
+			break;
+		}
+    }
 
 	//oFinalRender = vec4(lightFactor, 1.0);
-	oFinalRender = vec4(vec3(1.0), 1.0);
+	oFinalRender = vec4(lighting, 1.0);
 }
 
 

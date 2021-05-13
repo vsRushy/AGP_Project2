@@ -411,7 +411,9 @@ void Init(App* app)
         deferredLightingPassProgram.vertex_input_layout.attributes.push_back({ (u8)attribute_location, GetAttributeComponentCount(attribute_type) });
     }
 
-    // TODO: uniforms (textures from G-buffer)
+    app->deferredLightingProgram_uGPosition = glGetUniformLocation(deferredLightingPassProgram.handle, "uGPosition");
+    app->deferredLightingProgram_uGNormals = glGetUniformLocation(deferredLightingPassProgram.handle, "uGNormals");
+    app->deferredLightingProgram_uGDiffuse = glGetUniformLocation(deferredLightingPassProgram.handle, "uGDiffuse");
 
     /* --------- */
 
@@ -941,20 +943,20 @@ void Render(App* app)
             Program& deferredLightingPassProgram = app->programs[app->deferredLightingPassProgramIdx];
             glUseProgram(deferredLightingPassProgram.handle);
 
-            //glUniform1i(app->deferredGeometryProgram_uTexture, 0);
-            //glUniform1i(app->deferredGeometryProgram_uTexture, 0);
-            //glUniform1i(app->deferredGeometryProgram_uTexture, 0);
+            glUniform1i(app->deferredLightingProgram_uGPosition, 1);
+            glUniform1i(app->deferredLightingProgram_uGNormals, 2);
+            glUniform1i(app->deferredLightingProgram_uGDiffuse, 3);
 
             glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(0), app->cbuffer.handle, app->globalParamsOffset, app->globalParamsSize);
             
-            /*glActiveTexture(GL_TEXTURE0);
+            glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, app->positionAttachmentHandle);
 
-            glActiveTexture(GL_TEXTURE1);
+            glActiveTexture(GL_TEXTURE2);
             glBindTexture(GL_TEXTURE_2D, app->normalsAttachmentHandle);
 
-            glActiveTexture(GL_TEXTURE2);
-            glBindTexture(GL_TEXTURE_2D, app->diffuseAttachmentHandle);*/
+            glActiveTexture(GL_TEXTURE3);
+            glBindTexture(GL_TEXTURE_2D, app->diffuseAttachmentHandle);
 
 
             
