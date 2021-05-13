@@ -604,6 +604,7 @@ void Gui(App* app)
     }
 
     ImGui::Image((ImTextureID)currentAttachment, size, { 0, 1 }, { 1, 0 });
+    app->focused = ImGui::IsWindowFocused();
 
     ImGui::End();
     ImGui::PopStyleVar();
@@ -645,7 +646,8 @@ void Update(App* app)
         float xoffset = app->input.mouseDelta.x;
         float yoffset = -app->input.mouseDelta.y;
 
-        app->camera.Rotate(xoffset, yoffset);
+        if (app->focused)
+            app->camera.Rotate(xoffset, yoffset);
     }
 
     if (app->input.mouseButtons[LEFT] == BUTTON_RELEASE)

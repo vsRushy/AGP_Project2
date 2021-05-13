@@ -359,6 +359,8 @@ struct App
     // Uniform buffer
     GLint max_uniform_buffer_size;
     GLint uniform_block_alignment;
+
+    bool focused = false;
 };
 
 void Init(App* app);
