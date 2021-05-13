@@ -368,6 +368,12 @@ struct App
     // Uniform buffer
     GLint max_uniform_buffer_size;
     GLint uniform_block_alignment;
+
+    // Screen quad
+    GLuint quad_vao = 0;
+    GLuint quad_vbo;
+
+    void RenderQuad();
 };
 
 void Init(App* app);

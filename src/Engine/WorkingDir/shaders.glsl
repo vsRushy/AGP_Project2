@@ -333,13 +333,7 @@ layout(binding = 0, std140) uniform GlobalParams
 	Light uLight[16];
 };
 
-uniform sampler2D uTexture;
-
 layout(location = 0) out vec4 oFinalRender;
-layout(location = 1) out vec4 oNormals;
-layout(location = 2) out vec4 oDiffuse;
-
-out float gl_FragDepth;
 
 vec3 CalculateDirectionalLight(Light light)
 {
@@ -393,9 +387,6 @@ vec3 CalculatePointLight(Light light)
 
 void main()
 {
-	vec4 objectColor = texture(uTexture, vTexCoord);
-	vec4 spec = vec4(0.0);
-
 	vec3 lightFactor = vec3(0.0);
 	for(int i = 0; i < uLightCount; ++i)
 	{
@@ -420,12 +411,7 @@ void main()
 		}
 	}
 
-
-	oFinalRender = vec4(lightFactor, 1.0) * objectColor;
-	oNormals = vec4(normalize(vNormal), 1.0);
-	oDiffuse = objectColor;
-
-	gl_FragDepth = gl_FragCoord.z-0.2;
+	oFinalRender = vec4(/*lightFactor*/vec3(1.0), 1.0);;
 }
 
 

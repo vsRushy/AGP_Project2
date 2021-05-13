@@ -880,12 +880,16 @@ void Render(App* app)
 
         case Mode_Deferred:
         {
+            glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            /* First pass (geometry) */
+
             glBindFramebuffer(GL_FRAMEBUFFER, app->gBuffer);
 
             GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
             glDrawBuffers(ARRAY_COUNT(drawBuffers), drawBuffers);
 
-            glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             glViewport(0, 0, app->displaySize.x, app->displaySize.y);
@@ -898,7 +902,7 @@ void Render(App* app)
             Program& deferredGeometryPassProgram = app->programs[app->deferredGeometryPassProgramIdx];
             glUseProgram(deferredGeometryPassProgram.handle);
 
-            glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(0), app->cbuffer.handle, app->globalParamsOffset, app->globalParamsSize);
+            //glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(0), app->cbuffer.handle, app->globalParamsOffset, app->globalParamsSize);
 
             for (const Entity& entity : app->entities)
             {
@@ -930,7 +934,31 @@ void Render(App* app)
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-            // Unbind uniform buffer
+            /* Second pass (lighting) */
+
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            Program& deferredLightingPassProgram = app->programs[app->deferredLightingPassProgramIdx];
+            glUseProgram(deferredLightingPassProgram.handle);
+
+            //glUniform1i(app->deferredGeometryProgram_uTexture, 0);
+            //glUniform1i(app->deferredGeometryProgram_uTexture, 0);
+            //glUniform1i(app->deferredGeometryProgram_uTexture, 0);
+
+            /*glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(0), app->cbuffer.handle, app->globalParamsOffset, app->globalParamsSize);
+            
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, app->positionAttachmentHandle);
+
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, app->normalsAttachmentHandle);
+
+            glActiveTexture(GL_TEXTURE2);
+            glBindTexture(GL_TEXTURE_2D, app->diffuseAttachmentHandle);*/
+
+
+            
+            app->RenderQuad();
         }
         break;
 
@@ -998,4 +1026,37 @@ GLuint FindVao(Mesh& mesh, u32 submesh_index, const Program& program)
     submesh.vaos.push_back(vao);
 
     return vao_handle;
+}
+
+void App::RenderQuad()
+{
+    if (quad_vao == 0)
+    {
+        float quadVertices[] = {
+            // positions        // texture Coords
+            -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+            -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+             1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+             1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+        };
+        
+        glGenVertexArrays(1, &quad_vao);
+        glGenBuffers(1, &quad_vbo);
+
+        glBindVertexArray(quad_vao);
+        glBindBuffer(GL_ARRAY_BUFFER, quad_vbo);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    }
+
+    glBindVertexArray(quad_vao);
+
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+    glBindVertexArray(0);
 }
