@@ -421,10 +421,10 @@ void Init(App* app)
     app->cbuffer = CreateConstantBuffer(app->max_uniform_buffer_size);
 
     // Framebuffer
-    app->currentFboAttachment = FboAttachmentType::FinalRender;
+    app->currentFboAttachment = FboAttachmentType::Position;
 
-    glGenTextures(1, &app->finalRenderAttachmentHandle);
-    glBindTexture(GL_TEXTURE_2D, app->finalRenderAttachmentHandle);
+    glGenTextures(1, &app->positionAttachmentHandle);
+    glBindTexture(GL_TEXTURE_2D, app->positionAttachmentHandle);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, app->displaySize.x, app->displaySize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -465,7 +465,7 @@ void Init(App* app)
 
     glGenFramebuffers(1, &app->gBuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, app->gBuffer);
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, app->finalRenderAttachmentHandle, 0);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, app->positionAttachmentHandle, 0);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, app->normalsAttachmentHandle, 0);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, app->diffuseAttachmentHandle, 0);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, app->depthAttachmentHandle, 0);
@@ -596,8 +596,8 @@ void Gui(App* app)
 
     ImGui::Separator();
 
-    const char* items[] = { "Final Render", "Normals", "Diffuse", "Depth" };
-    static const char* current_item = "Final Render";
+    const char* items[] = { "Position", "Normals", "Diffuse", "Depth" };
+    static const char* current_item = items[0];
     if (ImGui::BeginCombo("##combo", current_item))
     {
         for (int n = 0; n < IM_ARRAYSIZE(items); n++)
@@ -610,13 +610,13 @@ void Gui(App* app)
                 ImGui::SetItemDefaultFocus();
             }
 
-            if (strcmp(current_item, "Final Render") == 0)
-                app->currentFboAttachment = FboAttachmentType::FinalRender;
-            if (strcmp(current_item, "Normals") == 0)
+            if (strcmp(current_item, items[0]) == 0)
+                app->currentFboAttachment = FboAttachmentType::Position;
+            if (strcmp(current_item, items[1]) == 0)
                 app->currentFboAttachment = FboAttachmentType::Normals;
-            if (strcmp(current_item, "Diffuse") == 0)
+            if (strcmp(current_item, items[2]) == 0)
                 app->currentFboAttachment = FboAttachmentType::Diffuse;
-            if (strcmp(current_item, "Depth") == 0)
+            if (strcmp(current_item, items[3]) == 0)
                 app->currentFboAttachment = FboAttachmentType::Depth;
         }
         ImGui::EndCombo();
@@ -631,9 +631,9 @@ void Gui(App* app)
     GLuint currentAttachment = 0;
     switch (app->currentFboAttachment)
     {
-        case FboAttachmentType::FinalRender:
+        case FboAttachmentType::Position:
         {
-            currentAttachment = app->finalRenderAttachmentHandle;
+            currentAttachment = app->positionAttachmentHandle;
         }
         break;
 
@@ -895,8 +895,8 @@ void Render(App* app)
             //glEnable(GL_BLEND);
             //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-            Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
-            glUseProgram(texturedMeshProgram.handle);
+            Program& deferredGeometryPassProgram = app->programs[app->deferredGeometryPassProgramIdx];
+            glUseProgram(deferredGeometryPassProgram.handle);
 
             glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(0), app->cbuffer.handle, app->globalParamsOffset, app->globalParamsSize);
 
@@ -909,7 +909,7 @@ void Render(App* app)
 
                 for (u32 i = 0; i < mesh.submeshes.size(); ++i)
                 {
-                    GLuint vao = FindVao(mesh, i, texturedMeshProgram);
+                    GLuint vao = FindVao(mesh, i, deferredGeometryPassProgram);
                     glBindVertexArray(vao);
 
                     u32 submesh_material_index = model.material_index[i];
@@ -929,6 +929,8 @@ void Render(App* app)
             glUseProgram(0);
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+            // Unbind uniform buffer
         }
         break;
 

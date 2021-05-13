@@ -279,7 +279,7 @@ enum Mode
 
 enum class FboAttachmentType
 {
-    FinalRender,
+    Position,
     Normals,
     Diffuse,
     Depth,
@@ -351,7 +351,7 @@ struct App
 
     // Framebuffer
     GLuint gBuffer;
-    GLuint finalRenderAttachmentHandle;
+    GLuint positionAttachmentHandle;
     GLuint normalsAttachmentHandle;
     GLuint diffuseAttachmentHandle;
 
