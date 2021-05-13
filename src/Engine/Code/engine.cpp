@@ -336,7 +336,7 @@ void Init(App* app)
     app->lights.push_back({ LightType_Point, vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(5.0f, 3.0f, -25.0f), 12, 1.0f });
     //app->lights.push_back({ LightType_Point, vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, -5.0f), 14, 0.6f });
     //app->lights.push_back({ LightType_Point, vec3(0.0f, 0.0f, 1.0f), vec3(1.0f, 0.0f, 0.0f), vec3(15.0f, 3.0f, -10.0f), 20, 0.4 });
-    //app->lights.push_back({ LightType_Directional, vec3(1.0f, 1.0f, 1.0f), vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, 10.0f, -3.0f), 0, 0.7f });
+   // app->lights.push_back({ LightType_Directional, vec3(1.0f, 1.0f, 1.0f), vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, 10.0f, -3.0f), 0, 0.7f });
 
     app->texturedMeshProgramIdx = LoadProgram(app, "shaders.glsl", "SHOW_TEXTURED_MESH");
     Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
@@ -557,12 +557,23 @@ void Gui(App* app)
     if (ImGui::TreeNode("Lights##2"))
     {
         for (int i = 0; i < app->lights.size(); ++i) {
-            if(ImGui::TreeNode(std::to_string(i).c_str())) {
+            std::string type;
+            if (app->lights[i].type == LightType::LightType_Directional) type = ("Directional Light " + std::to_string(i));
+            else  type = ("Point Light " + std::to_string(i));
+
+            if(ImGui::TreeNode(type.c_str())) {
                 float col1[3] = { app->lights[i].color.r, app->lights[i].color.g, app->lights[i].color.b };
                 ImGui::ColorEdit3("Color", col1);
                 app->lights[i].color.r = col1[0];
                 app->lights[i].color.g = col1[1];
                 app->lights[i].color.b = col1[2];
+
+                ImGui::Spacing();
+                float f1 = app->lights[i].intensity;
+                ImGui::DragFloat("drag small float", &f1, 0.01f, 0.0f, 0.0f, "%.06f ns");
+                if (f1 < 0.0f)f1 = 0.0f;
+                app->lights[i].intensity = f1;
+
                 ImGui::TreePop();
             }
         }

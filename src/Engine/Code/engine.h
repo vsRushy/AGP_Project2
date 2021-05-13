@@ -165,7 +165,7 @@ struct Camera
         near_plane = znear;
         far_plane = zfar;
 
-        speed = 0.25f;
+        speed = 0.05f;
         mouse_sensitivity = 0.25f;
     }
 
