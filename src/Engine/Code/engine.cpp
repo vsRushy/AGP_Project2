@@ -552,9 +552,28 @@ void Gui(App* app)
         }
         ImGui::EndCombo();
     }
+    ImGui::Separator();
+
+    if (ImGui::TreeNode("Lights##2"))
+    {
+        for (int i = 0; i < app->lights.size(); ++i) {
+            if(ImGui::TreeNode(std::to_string(i).c_str())) {
+                float col1[3] = { app->lights[i].color.r, app->lights[i].color.g, app->lights[i].color.b };
+                ImGui::ColorEdit3("Color", col1);
+                app->lights[i].color.r = col1[0];
+                app->lights[i].color.g = col1[1];
+                app->lights[i].color.b = col1[2];
+                ImGui::TreePop();
+            }
+        }
+
+        ImGui::TreePop();
+        ImGui::Separator();
+    }
+    
 
     ImGui::End();
-
+    //------------------------------------------------------------------------------------------
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
     ImGui::Begin("Scene");
     ImVec2 size = ImGui::GetContentRegionAvail();
