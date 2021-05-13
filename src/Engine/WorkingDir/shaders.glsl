@@ -266,10 +266,7 @@ void main()
 #if defined(VERTEX) ///////////////////////////////////////////////////
 
 layout(location = 0) in vec3 aPosition;
-layout(location = 1) in vec3 aNormal;
-layout(location = 2) in vec2 aTexCoord;
-// layout(location = 3) in vec3 aTangent;
-// layout(location = 4) in vec3 aBitangent;
+layout(location = 1) in vec2 aTexCoord;
 
 struct Light
 {
@@ -288,33 +285,18 @@ layout(binding = 0, std140) uniform GlobalParams
 	Light uLight[16];
 };
 
-layout(binding = 1, std140) uniform LocalParams
-{
-	mat4 uWorldMatrix;
-	mat4 uWorldViewProjectionMatrix;
-};
-
 out vec2 vTexCoord;
-out vec3 vPosition; // In worldspace
-out vec3 vNormal; // In worldspace
-out vec3 vViewDir; // In worldspace
 
 void main()
 {
 	vTexCoord = aTexCoord;
-	vPosition = vec3(uWorldMatrix * vec4(aPosition, 1.0));
-	vNormal = vec3(transpose(inverse(uWorldMatrix)) * vec4(aNormal, 1.0));
-	vViewDir = uCameraPosition - vPosition;
 
-	gl_Position = uWorldViewProjectionMatrix * vec4(aPosition, 1.0);
+	gl_Position = vec4(aPosition, 1.0);
 }
 
 #elif defined(FRAGMENT) ///////////////////////////////////////////////
 
 in vec2 vTexCoord;
-in vec3 vPosition;
-in vec3 vNormal;
-in vec3 vViewDir;
 
 struct Light
 {
@@ -333,11 +315,12 @@ layout(binding = 0, std140) uniform GlobalParams
 	Light uLight[16];
 };
 
-layout(location = 0) out vec4 oFinalRender;
+//layout(location = 0) out vec4 oFinalRender;
+out vec4 oFinalRender;
 
 vec3 CalculateDirectionalLight(Light light)
 {
-	vec3 N = normalize(vNormal);
+	/*vec3 N = normalize(vNormal);
     vec3 L = normalize(light.direction);
 
 	// Hardcoded specular parameter
@@ -350,13 +333,13 @@ vec3 CalculateDirectionalLight(Light light)
     float specularIntensity = pow(max(0.0, dot(N, L)), 1.0);
     vec3 specular = light.color * specularMat * specularIntensity;
 
-
-	return (diffuseIntensity + specular) * light.intensity;
+	return (diffuseIntensity + specular) * light.intensity;*/
+	return vec3(1.0);
 }
 
 vec3 CalculatePointLight(Light light)
 {
-	vec3 N = normalize(vNormal);
+	/*vec3 N = normalize(vNormal);
 	vec3 L = normalize(light.position - vPosition);
 
 	float threshold = 1.0;
@@ -367,7 +350,6 @@ vec3 CalculatePointLight(Light light)
 
 	if(dist > light.radius)
 		shadowIntensity = 1.0 - ((dist - light.radius) / threshold);
-
 
 	// Hardcoded specular parameter
     vec3 specularMat = vec3(1.0);
@@ -382,7 +364,8 @@ vec3 CalculatePointLight(Light light)
 	// Diffuse
     float diffuseIntensity = max(0.0, dot(N,L));
 
-	return vec3(brightness) * (specular + diffuseIntensity) * shadowIntensity * light.intensity;
+	return vec3(brightness) * (specular + diffuseIntensity) * shadowIntensity * light.intensity;*/
+	return vec3(1.0);
 }
 
 void main()
@@ -411,7 +394,8 @@ void main()
 		}
 	}
 
-	oFinalRender = vec4(/*lightFactor*/vec3(1.0), 1.0);;
+	//oFinalRender = vec4(lightFactor, 1.0);
+	oFinalRender = vec4(vec3(1.0), 1.0);
 }
 
 

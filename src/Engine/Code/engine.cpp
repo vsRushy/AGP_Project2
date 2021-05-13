@@ -945,9 +945,9 @@ void Render(App* app)
             //glUniform1i(app->deferredGeometryProgram_uTexture, 0);
             //glUniform1i(app->deferredGeometryProgram_uTexture, 0);
 
-            /*glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(0), app->cbuffer.handle, app->globalParamsOffset, app->globalParamsSize);
+            glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(0), app->cbuffer.handle, app->globalParamsOffset, app->globalParamsSize);
             
-            glActiveTexture(GL_TEXTURE0);
+            /*glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, app->positionAttachmentHandle);
 
             glActiveTexture(GL_TEXTURE1);
