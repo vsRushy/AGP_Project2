@@ -378,10 +378,16 @@ struct App
     GLint uniform_block_alignment;
 
     // Screen quad
-    GLuint quad_vao = 0;
+    GLuint quad_vao = 0u;
     GLuint quad_vbo;
 
     void RenderQuad();
+
+    // Sphere
+    GLuint sphere_vao = 0u;
+    u32 index_count;
+
+    void RenderSphere();
 };
 
 void Init(App* app);
