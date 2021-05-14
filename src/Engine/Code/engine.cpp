@@ -1015,6 +1015,13 @@ void Render(App* app)
             
             app->RenderQuad();
 
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, app->gBuffer);
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, app->fBuffer);
+
+            glBlitFramebuffer(0, 0, app->displaySize.x, app->displaySize.x, 0, 0, app->displaySize.x, app->displaySize.x, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+            
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
             glUseProgram(0);
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
