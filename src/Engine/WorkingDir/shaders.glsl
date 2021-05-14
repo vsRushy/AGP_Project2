@@ -412,7 +412,11 @@ void main()
 		{
 			case 0: // Directional
 			{
-				
+				float cosAngle = max(dot(Normal, -uLight[i].direction), 0.0); 
+                vec3 ambient = 0.25 * uLight[i].color;
+                vec3 diffuse = 0.75 * uLight[i].color * cosAngle;
+
+                lighting += (ambient + diffuse) * Diffuse;
 			}
 			break;
 

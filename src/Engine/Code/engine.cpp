@@ -331,8 +331,6 @@ void Init(App* app)
     app->entities.push_back({ TransformPositionRotationScale(vec3(5.0f, 0.0f, -20.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)),
                               app->patrick_index });
 
-
-    
     app->lights.push_back({ LightType_Point, vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(5.0f, 3.0f, -25.0f), 12, 1.0f });
     app->lights.push_back({ LightType_Point, vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, -5.0f), 14, 0.6f });
     app->lights.push_back({ LightType_Point, vec3(0.0f, 0.0f, 1.0f), vec3(1.0f, 0.0f, 0.0f), vec3(15.0f, 3.0f, -10.0f), 20, 0.4 });
@@ -963,7 +961,7 @@ void Render(App* app)
             glEnable(GL_BLEND);
             glBlendFunc(GL_ONE, GL_ONE);
 
-            //glDepthMask(GL_FALSE);
+            //glDepthMask(GL_FALSE); ???
 
             Program& deferredLightingPassProgram = app->programs[app->deferredLightingPassProgramIdx];
             glUseProgram(deferredLightingPassProgram.handle);
@@ -984,6 +982,8 @@ void Render(App* app)
             glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(0), app->cbuffer.handle, app->globalParamsOffset, app->globalParamsSize);
             
             app->RenderQuad();
+
+            glUseProgram(0);
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
