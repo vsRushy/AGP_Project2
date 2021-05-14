@@ -314,7 +314,8 @@ struct App
     u32 texturedMeshProgramIdx;
 
     u32 deferredGeometryPassProgramIdx;
-    u32 deferredLightingPassProgramIdx;;
+    u32 deferredLightingPassProgramIdx;
+    u32 deferredLightProgramIdx;
     
     // texture indices
     u32 diceTexIdx;
@@ -349,6 +350,11 @@ struct App
     GLint deferredLightingProgram_uGNormals; // Lighting geometry pass
     GLint deferredLightingProgram_uGDiffuse; // Lighting geometry pass
 
+    GLint deferredLightProgram_uProjection; // Projection matrix for deferred shading light
+    GLint deferredLightProgram_uView; // View matrix for deferred shading light
+    GLint deferredLightProgram_uModel; // Model matrix for deferred shading light
+    GLint deferredLightProgram_uLightColor; // Light volume for deferred shading
+
     // VAO object to link our screen filling quad with our textured quad shader
     GLuint vao;
 
@@ -373,6 +379,9 @@ struct App
     u32 globalParamsOffset;
     u32 globalParamsSize;
 
+    glm::mat4 view;
+    glm::mat4 projection;
+
     // Uniform buffer
     GLint max_uniform_buffer_size;
     GLint uniform_block_alignment;
@@ -387,7 +396,8 @@ struct App
     GLuint sphere_vao = 0u;
     u32 index_count;
 
-    void RenderSphere();
+    void LoadSphere();
+    void RenderSphere(const GLuint& vao, const u32& index_count);
 };
 
 void Init(App* app);

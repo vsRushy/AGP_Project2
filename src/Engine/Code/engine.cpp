@@ -324,6 +324,8 @@ void Init(App* app)
 
     app->patrick_index = LoadModel(app, "Patrick/Patrick.obj");
 
+    app->LoadSphere();
+
     app->entities.push_back({ TransformPositionRotationScale(vec3(0.0f, 0.0f, -20.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)),
                               app->patrick_index });
     app->entities.push_back({ TransformPositionRotationScale(vec3(-5.0f, 0.0f, -20.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)),
@@ -412,6 +414,32 @@ void Init(App* app)
     app->deferredLightingProgram_uGPosition = glGetUniformLocation(deferredLightingPassProgram.handle, "uGPosition");
     app->deferredLightingProgram_uGNormals = glGetUniformLocation(deferredLightingPassProgram.handle, "uGNormals");
     app->deferredLightingProgram_uGDiffuse = glGetUniformLocation(deferredLightingPassProgram.handle, "uGDiffuse");
+
+    app->deferredLightProgramIdx = LoadProgram(app, "shaders.glsl", "LIGHT_VOLUME");
+    Program& deferredLightProgram = app->programs[app->deferredLightProgramIdx];
+
+    GLint deferred_light_attribute_count;
+    glGetProgramiv(deferredLightProgram.handle, GL_ACTIVE_ATTRIBUTES, &deferred_light_attribute_count);
+
+    for (int i = 0; i < deferred_light_attribute_count; ++i)
+    {
+        GLchar attribute_name[32];
+        GLsizei attribute_length;
+        GLint attribute_size;
+        GLenum attribute_type;
+
+        glGetActiveAttrib(deferredLightProgram.handle, i, ARRAY_COUNT(attribute_name), &attribute_length, &attribute_size, &attribute_type, attribute_name);
+        GLint attribute_location = glGetAttribLocation(deferredLightProgram.handle, attribute_name);
+
+        ELOG("Attribute %s. Location: %d Type: %d", attribute_name, attribute_location, attribute_type);
+
+        deferredLightProgram.vertex_input_layout.attributes.push_back({ (u8)attribute_location, GetAttributeComponentCount(attribute_type) });
+    }
+
+    app->deferredLightProgram_uProjection = glGetUniformLocation(deferredLightProgram.handle, "uProjection");
+    app->deferredLightProgram_uView = glGetUniformLocation(deferredLightProgram.handle, "uView");
+    app->deferredLightProgram_uModel = glGetUniformLocation(deferredLightProgram.handle, "uModel");
+    app->deferredLightProgram_uLightColor = glGetUniformLocation(deferredLightProgram.handle, "uLightColor");
 
     /* --------- */
 
@@ -759,8 +787,8 @@ void Update(App* app)
 
     app->camera.SetAspectRatio((float)app->displaySize.x, (float)app->displaySize.y);
     
-    glm::mat4 view = app->camera.GetViewMatrix();
-    glm::mat4 projection = app->camera.GetProjectionMatrix();
+    app->view = app->camera.GetViewMatrix();
+    app->projection = app->camera.GetProjectionMatrix();
 
     glBindBuffer(GL_UNIFORM_BUFFER, app->cbuffer.handle);
     app->cbuffer.data = (u8*)glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
@@ -796,7 +824,7 @@ void Update(App* app)
         Entity& entity = app->entities[i];
 
         glm::mat4 world = entity.worldMatrix;
-        glm::mat4 worldViewProjectionMatrix = projection * view * world;
+        glm::mat4 worldViewProjectionMatrix = app->projection * app->view * world;
 
         entity.localParamsOffset = app->cbuffer.head;
 
@@ -1022,13 +1050,28 @@ void Render(App* app)
 
             glUseProgram(0);
 
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
             // Render lights
+            Program& deferredLightProgram = app->programs[app->deferredLightProgramIdx];
+            glUseProgram(deferredLightProgram.handle);
+
+            glUniformMatrix4fv(app->deferredLightProgram_uProjection, 1, GL_FALSE, &app->projection[0][0]);
+            glUniformMatrix4fv(app->deferredLightProgram_uView, 1, GL_FALSE, &app->view[0][0]);
+
             for (const Light& light : app->lights)
             {
+                glm::mat4 model = glm::mat4(1.0f);
+                model = glm::translate(model, light.position);
+                model = glm::scale(model, glm::vec3(0.125f));
 
+                glUniformMatrix4fv(app->deferredLightProgram_uModel, 1, GL_FALSE, &model[0][0]);
+                glUniform3f(app->deferredLightProgram_uLightColor, light.color.r, light.color.g, light.color.b);
+
+                app->RenderSphere(app->sphere_vao, app->index_count);
             }
+
+            glUseProgram(0);
+
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
         break;
 
@@ -1131,106 +1174,108 @@ void App::RenderQuad()
     glBindVertexArray(0);
 }
 
-void App::RenderSphere()
+void App::LoadSphere()
 {
-    if (sphere_vao == 0)
+    glGenVertexArrays(1, &sphere_vao);
+
+    unsigned int vbo, ebo;
+    glGenBuffers(1, &vbo);
+    glGenBuffers(1, &ebo);
+
+    std::vector<glm::vec3> positions;
+    std::vector<glm::vec2> uv;
+    std::vector<glm::vec3> normals;
+    std::vector<unsigned int> indices;
+
+    const unsigned int X_SEGMENTS = 64;
+    const unsigned int Y_SEGMENTS = 64;
+    for (unsigned int y = 0; y <= Y_SEGMENTS; ++y)
     {
-        glGenVertexArrays(1, &sphere_vao);
+        for (unsigned int x = 0; x <= X_SEGMENTS; ++x)
+        {
+            float xSegment = (float)x / (float)X_SEGMENTS;
+            float ySegment = (float)y / (float)Y_SEGMENTS;
+            float xPos = std::cos(xSegment * 2.0f * PI) * std::sin(ySegment * PI);
+            float yPos = std::cos(ySegment * PI);
+            float zPos = std::sin(xSegment * 2.0f * PI) * std::sin(ySegment * PI);
 
-        unsigned int vbo, ebo;
-        glGenBuffers(1, &vbo);
-        glGenBuffers(1, &ebo);
+            positions.push_back(glm::vec3(xPos, yPos, zPos));
+            uv.push_back(glm::vec2(xSegment, ySegment));
+            normals.push_back(glm::vec3(xPos, yPos, zPos));
+        }
+    }
 
-        std::vector<glm::vec3> positions;
-        std::vector<glm::vec2> uv;
-        std::vector<glm::vec3> normals;
-        std::vector<unsigned int> indices;
-
-        const unsigned int X_SEGMENTS = 64;
-        const unsigned int Y_SEGMENTS = 64;
-        for (unsigned int y = 0; y <= Y_SEGMENTS; ++y)
+    bool oddRow = false;
+    for (unsigned int y = 0; y < Y_SEGMENTS; ++y)
+    {
+        if (!oddRow)
         {
             for (unsigned int x = 0; x <= X_SEGMENTS; ++x)
             {
-                float xSegment = (float)x / (float)X_SEGMENTS;
-                float ySegment = (float)y / (float)Y_SEGMENTS;
-                float xPos = std::cos(xSegment * 2.0f * PI) * std::sin(ySegment * PI);
-                float yPos = std::cos(ySegment * PI);
-                float zPos = std::sin(xSegment * 2.0f * PI) * std::sin(ySegment * PI);
-
-                positions.push_back(glm::vec3(xPos, yPos, zPos));
-                uv.push_back(glm::vec2(xSegment, ySegment));
-                normals.push_back(glm::vec3(xPos, yPos, zPos));
+                indices.push_back(y * (X_SEGMENTS + 1) + x);
+                indices.push_back((y + 1) * (X_SEGMENTS + 1) + x);
             }
         }
-
-        bool oddRow = false;
-        for (unsigned int y = 0; y < Y_SEGMENTS; ++y)
+        else
         {
-            if (!oddRow)
+            for (int x = X_SEGMENTS; x >= 0; --x)
             {
-                for (unsigned int x = 0; x <= X_SEGMENTS; ++x)
-                {
-                    indices.push_back(y * (X_SEGMENTS + 1) + x);
-                    indices.push_back((y + 1) * (X_SEGMENTS + 1) + x);
-                }
+                indices.push_back((y + 1) * (X_SEGMENTS + 1) + x);
+                indices.push_back(y * (X_SEGMENTS + 1) + x);
             }
-            else
-            {
-                for (int x = X_SEGMENTS; x >= 0; --x)
-                {
-                    indices.push_back((y + 1) * (X_SEGMENTS + 1) + x);
-                    indices.push_back(y * (X_SEGMENTS + 1) + x);
-                }
-            }
-
-            oddRow = !oddRow;
         }
 
-        index_count = indices.size();
+        oddRow = !oddRow;
+    }
 
-        std::vector<float> data;
-        for (std::size_t i = 0; i < positions.size(); ++i)
+    index_count = indices.size();
+
+    std::vector<float> data;
+    for (std::size_t i = 0; i < positions.size(); ++i)
+    {
+        data.push_back(positions[i].x);
+        data.push_back(positions[i].y);
+        data.push_back(positions[i].z);
+
+        if (uv.size() > 0)
         {
-            data.push_back(positions[i].x);
-            data.push_back(positions[i].y);
-            data.push_back(positions[i].z);
-
-            if (uv.size() > 0)
-            {
-                data.push_back(uv[i].x);
-                data.push_back(uv[i].y);
-            }
-
-            if (normals.size() > 0)
-            {
-                data.push_back(normals[i].x);
-                data.push_back(normals[i].y);
-                data.push_back(normals[i].z);
-            }
+            data.push_back(uv[i].x);
+            data.push_back(uv[i].y);
         }
 
-        glBindVertexArray(sphere_vao);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-        glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(float), &data[0], GL_STATIC_DRAW);
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
-        float stride = (3 + 2 + 3) * sizeof(float);
-
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
-
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(float)));
-
-        glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, stride, (void*)(5 * sizeof(float)));
+        if (normals.size() > 0)
+        {
+            data.push_back(normals[i].x);
+            data.push_back(normals[i].y);
+            data.push_back(normals[i].z);
+        }
     }
 
     glBindVertexArray(sphere_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+    glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(float), &data[0], GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+    float stride = (3 + 2 + 3) * sizeof(float);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
+
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(float)));
+
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, stride, (void*)(5 * sizeof(float)));
+}
+
+void App::RenderSphere(const GLuint& vao, const u32& index_count)
+{
+    glBindVertexArray(sphere_vao);
 
     glDrawElements(GL_TRIANGLE_STRIP, index_count, GL_UNSIGNED_INT, 0);
+
+    glBindVertexArray(0);
 }
