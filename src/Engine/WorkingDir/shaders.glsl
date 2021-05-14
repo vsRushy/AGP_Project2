@@ -319,7 +319,7 @@ uniform sampler2D uGPosition;
 uniform sampler2D uGNormals;
 uniform sampler2D uGDiffuse;
 
-layout(location = 3) out vec4 oFinalRender;
+layout(location = 0) out vec4 oFinalRender;
 //out vec4 oFinalRender;
 
 vec3 CalculateDirectionalLight(Light light)

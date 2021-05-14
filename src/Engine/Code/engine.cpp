@@ -423,6 +423,8 @@ void Init(App* app)
     // Framebuffer
     app->currentFboAttachment = FboAttachmentType::Position;
 
+    /* Geometry pass framebuffer */
+
     glGenTextures(1, &app->positionAttachmentHandle);
     glBindTexture(GL_TEXTURE_2D, app->positionAttachmentHandle);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, app->displaySize.x, app->displaySize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
@@ -453,16 +455,6 @@ void Init(App* app)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    glGenTextures(1, &app->finalRenderAttachmentHandle);
-    glBindTexture(GL_TEXTURE_2D, app->finalRenderAttachmentHandle);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, app->displaySize.x, app->displaySize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
     glGenTextures(1, &app->depthAttachmentHandle);
     glBindTexture(GL_TEXTURE_2D, app->depthAttachmentHandle);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, app->displaySize.x, app->displaySize.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
@@ -481,13 +473,13 @@ void Init(App* app)
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, app->finalRenderAttachmentHandle, 0);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, app->depthAttachmentHandle, 0);
 
-    GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
-    glDrawBuffers(ARRAY_COUNT(drawBuffers), drawBuffers);
+    GLenum drawBuffersGBuffer[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+    glDrawBuffers(ARRAY_COUNT(drawBuffersGBuffer), drawBuffersGBuffer);
 
-    GLenum frameBufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (frameBufferStatus != GL_FRAMEBUFFER_COMPLETE)
+    GLenum frameBufferStatusGBuffer = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (frameBufferStatusGBuffer != GL_FRAMEBUFFER_COMPLETE)
     {
-        switch (frameBufferStatus)
+        switch (frameBufferStatusGBuffer)
         {
         case GL_FRAMEBUFFER_UNDEFINED:                          ELOG("Framebuffer status error: GL_FRAMEBUFFER_UNDEFINED"); break;
         case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:              ELOG("Framebuffer status error: GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT"); break;
@@ -503,6 +495,43 @@ void Init(App* app)
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    /* Lighting pass framebuffer */
+
+    glGenTextures(1, &app->finalRenderAttachmentHandle);
+    glBindTexture(GL_TEXTURE_2D, app->finalRenderAttachmentHandle);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, app->displaySize.x, app->displaySize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    glGenFramebuffers(1, &app->fBuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, app->fBuffer);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, app->finalRenderAttachmentHandle, 0);
+
+    GLenum drawBuffersFBuffer[] = { GL_COLOR_ATTACHMENT3 };
+    glDrawBuffers(ARRAY_COUNT(drawBuffersFBuffer), drawBuffersFBuffer);
+
+    GLenum frameBufferStatusFBuffer = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (frameBufferStatusFBuffer != GL_FRAMEBUFFER_COMPLETE)
+    {
+        switch (frameBufferStatusFBuffer)
+        {
+        case GL_FRAMEBUFFER_UNDEFINED:                          ELOG("Framebuffer status error: GL_FRAMEBUFFER_UNDEFINED"); break;
+        case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:              ELOG("Framebuffer status error: GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT"); break;
+        case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:      ELOG("Framebuffer status error: GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT"); break;
+        case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:             ELOG("Framebuffer status error: GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER"); break;
+        case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:             ELOG("Framebuffer status error: GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER"); break;
+        case GL_FRAMEBUFFER_UNSUPPORTED:                        ELOG("Framebuffer status error: GL_FRAMEBUFFER_UNSUPPORTED"); break;
+        case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:             ELOG("Framebuffer status error: GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE"); break;
+        case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:           ELOG("Framebuffer status error: GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS"); break;
+
+        default: ELOG("Unknown framebuffer status error"); break;
+        }
+    }
 
     app->mode = Mode_Deferred;
 }
@@ -607,7 +636,7 @@ void Gui(App* app)
 
     ImGui::Separator();
 
-    const char* items[] = { "Position", "Normals", "Diffuse", "Final Render", "Depth" };
+    const char* items[] = { "Position", "Normals", "Diffuse", "Depth", "Final Render" };
     static const char* current_item = items[0];
     if (ImGui::BeginCombo("##combo", current_item))
     {
@@ -628,9 +657,9 @@ void Gui(App* app)
             if (strcmp(current_item, items[2]) == 0)
                 app->currentFboAttachment = FboAttachmentType::Diffuse;
             if (strcmp(current_item, items[3]) == 0)
-                app->currentFboAttachment = FboAttachmentType::FinalRender;
-            if (strcmp(current_item, items[4]) == 0)
                 app->currentFboAttachment = FboAttachmentType::Depth;
+            if (strcmp(current_item, items[4]) == 0)
+                app->currentFboAttachment = FboAttachmentType::FinalRender;
         }
         ImGui::EndCombo();
     }
@@ -662,15 +691,15 @@ void Gui(App* app)
         }
         break;
 
-        case FboAttachmentType::FinalRender:
-        {
-            currentAttachment = app->finalRenderAttachmentHandle;
-        }
-        break;
-
         case FboAttachmentType::Depth:
         {
             currentAttachment = app->depthAttachmentHandle;
+        }
+        break;
+
+        case FboAttachmentType::FinalRender:
+        {
+            currentAttachment = app->finalRenderAttachmentHandle;
         }
         break;
 
@@ -907,8 +936,8 @@ void Render(App* app)
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
-            glDrawBuffers(ARRAY_COUNT(drawBuffers), drawBuffers);
+            GLenum drawBuffersGBuffer[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+            glDrawBuffers(ARRAY_COUNT(drawBuffersGBuffer), drawBuffersGBuffer);
 
             glViewport(0, 0, app->displaySize.x, app->displaySize.y);
 
@@ -956,7 +985,12 @@ void Render(App* app)
 
             //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); ???
 
-            glBindFramebuffer(GL_FRAMEBUFFER, app->gBuffer);
+            glBindFramebuffer(GL_FRAMEBUFFER, app->fBuffer);
+
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            GLenum drawBuffersFBuffer[] = { GL_COLOR_ATTACHMENT3 };
+            glDrawBuffers(ARRAY_COUNT(drawBuffersFBuffer), drawBuffersFBuffer);
 
             glEnable(GL_BLEND);
             glBlendFunc(GL_ONE, GL_ONE);

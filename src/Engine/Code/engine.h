@@ -282,9 +282,9 @@ enum class FboAttachmentType
     Position,
     Normals,
     Diffuse,
-    FinalRender,
-
     Depth,
+
+    FinalRender, // Used only in the lighting pass FBO
 };
 
 struct App
@@ -356,13 +356,14 @@ struct App
     u32 patrick_index;
 
     // Framebuffer
-    GLuint gBuffer;
+    GLuint gBuffer; // Used at geometry pass
     GLuint positionAttachmentHandle;
     GLuint normalsAttachmentHandle;
     GLuint diffuseAttachmentHandle;
-    GLuint finalRenderAttachmentHandle;
-
     GLuint depthAttachmentHandle;
+
+    GLuint fBuffer; // Used at lighting pass
+    GLuint finalRenderAttachmentHandle;
 
     FboAttachmentType currentFboAttachment;
 
