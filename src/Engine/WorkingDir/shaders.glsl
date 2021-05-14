@@ -475,8 +475,7 @@ void main()
 
 uniform vec3 uLightColor;
 
-//layout(location = 0) out vec4 oFinalRender;
-out vec4 oFinalRender;
+layout(location = 0) out vec4 oFinalRender;
 
 void main()
 {

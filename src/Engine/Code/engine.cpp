@@ -1061,7 +1061,7 @@ void Render(App* app)
             {
                 glm::mat4 model = glm::mat4(1.0f);
                 model = glm::translate(model, light.position);
-                model = glm::scale(model, glm::vec3(0.125f));
+                model = glm::scale(model, glm::vec3(10.0f));
 
                 glUniformMatrix4fv(app->deferredLightProgram_uModel, 1, GL_FALSE, &model[0][0]);
                 glUniform3f(app->deferredLightProgram_uLightColor, light.color.r, light.color.g, light.color.b);
