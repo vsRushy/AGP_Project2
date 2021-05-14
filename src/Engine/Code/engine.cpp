@@ -983,11 +983,9 @@ void Render(App* app)
 
             /* Second pass (lighting) */
 
-            //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); ???
-
             glBindFramebuffer(GL_FRAMEBUFFER, app->fBuffer);
 
-            glClear(GL_COLOR_BUFFER_BIT/* | GL_DEPTH_BUFFER_BIT*/);
+            glClear(GL_COLOR_BUFFER_BIT);
 
             GLenum drawBuffersFBuffer[] = { GL_COLOR_ATTACHMENT3 };
             glDrawBuffers(ARRAY_COUNT(drawBuffersFBuffer), drawBuffersFBuffer);
@@ -995,7 +993,7 @@ void Render(App* app)
             glEnable(GL_BLEND);
             glBlendFunc(GL_ONE, GL_ONE);
 
-            //glDepthMask(GL_FALSE); ???
+            //glDepthMask(GL_FALSE);
 
             Program& deferredLightingPassProgram = app->programs[app->deferredLightingPassProgramIdx];
             glUseProgram(deferredLightingPassProgram.handle);
