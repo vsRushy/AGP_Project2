@@ -366,10 +366,11 @@ struct App
     GLuint positionAttachmentHandle;
     GLuint normalsAttachmentHandle;
     GLuint diffuseAttachmentHandle;
-    GLuint depthAttachmentHandle;
+    GLuint depthGBufferAttachmentHandle;
 
     GLuint fBuffer; // Used at lighting pass
     GLuint finalRenderAttachmentHandle;
+    GLuint depthFBufferAttachmentHandle;
 
     FboAttachmentType currentFboAttachment;
 
