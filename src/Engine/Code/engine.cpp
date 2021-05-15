@@ -986,23 +986,21 @@ void Render(App* app)
         {
             glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
+            glEnable(GL_DEPTH_TEST);
+            glDepthMask(GL_TRUE);
+            
+            glDisable(GL_BLEND);
+
             /* First pass (geometry) */
 
             glBindFramebuffer(GL_FRAMEBUFFER, app->gBuffer);
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            GLenum drawBuffersGBuffer[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
-            glDrawBuffers(ARRAY_COUNT(drawBuffersGBuffer), drawBuffersGBuffer);
-
             glViewport(0, 0, app->displaySize.x, app->displaySize.y);
 
-            glEnable(GL_DEPTH_TEST);
-
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-            glDepthMask(GL_TRUE);
+            GLenum drawBuffersGBuffer[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+            glDrawBuffers(ARRAY_COUNT(drawBuffersGBuffer), drawBuffersGBuffer);
 
             Program& deferredGeometryPassProgram = app->programs[app->deferredGeometryPassProgramIdx];
             glUseProgram(deferredGeometryPassProgram.handle);
@@ -1039,17 +1037,23 @@ void Render(App* app)
 
             /* Second pass (lighting) */
 
+            glDepthMask(GL_FALSE);
+            glDisable(GL_DEPTH_TEST);
+
             glBindFramebuffer(GL_FRAMEBUFFER, app->fBuffer);
 
-            glClear(GL_COLOR_BUFFER_BIT);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            glViewport(0, 0, app->displaySize.x, app->displaySize.y);
 
             GLenum drawBuffersFBuffer[] = { GL_COLOR_ATTACHMENT3 };
             glDrawBuffers(ARRAY_COUNT(drawBuffersFBuffer), drawBuffersFBuffer);
 
             glEnable(GL_BLEND);
+            glBlendEquation(GL_FUNC_ADD);
             glBlendFunc(GL_ONE, GL_ONE);
 
-            //glDepthMask(GL_FALSE);
+            // Point light
 
             Program& deferredLightingPassProgram = app->programs[app->deferredLightingPassProgramIdx];
             glUseProgram(deferredLightingPassProgram.handle);
