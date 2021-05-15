@@ -333,10 +333,9 @@ void Init(App* app)
     app->entities.push_back({ TransformPositionRotationScale(vec3(5.0f, 0.0f, -20.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)),
                               app->patrick_index });
 
-    app->lights.push_back({ LightType_Point, vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(5.0f, 3.0f, -25.0f), 12, 2.0f });
-    app->lights.push_back({ LightType_Point, vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, -5.0f), 14, 3.6f });
-    app->lights.push_back({ LightType_Point, vec3(0.0f, 0.0f, 1.0f), vec3(1.0f, 0.0f, 0.0f), vec3(15.0f, 3.0f, -10.0f), 20, 5.4 });
-    app->lights.push_back({ LightType_Directional, vec3(1.0f, 1.0f, 1.0f), vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, 10.0f, -3.0f), 0, 0.7f });
+    app->lights.push_back({ LightType_Point, vec3(0.0f, 0.0f, 1.0f), vec3(1.0f, 0.0f, 0.0f), vec3(15.0f, 3.0f, -10.0f), 20.0, 1.0, true });
+    app->lights.push_back({ LightType_Point, vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(15.0f, 3.0f, -20.0f), 20.0, 1.0, true });
+    //app->lights.push_back({ LightType_Directional, vec3(1.0f, 1.0f, 1.0f), vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, 10.0f, -3.0f), 0, 0.7f });
 
     /* FORWARD RENDERING SHADER */
 
@@ -692,6 +691,63 @@ void Gui(App* app)
         ImGui::EndCombo();
     }
 
+    ImGui::Separator();
+
+    if (ImGui::TreeNode("Lights##2"))
+    {
+        for (int i = 0; i < app->lights.size(); ++i) {
+            std::string type;
+            if (app->lights[i].type == LightType::LightType_Directional) type = ("Directional Light " + std::to_string(i));
+            else  type = ("Point Light " + std::to_string(i));
+
+            if (ImGui::TreeNode(type.c_str())) {
+                //Active
+                ImGui::Checkbox("Active", &app->lights[i].active);
+                ImGui::Spacing();
+
+                //Color
+                float col1[3] = { app->lights[i].color.r, app->lights[i].color.g, app->lights[i].color.b };
+                ImGui::ColorEdit3("Color", col1);
+                app->lights[i].color.r = col1[0];
+                app->lights[i].color.g = col1[1];
+                app->lights[i].color.b = col1[2];
+
+                ImGui::Spacing();
+
+                //Intensity
+                float f1 = app->lights[i].intensity;
+                ImGui::DragFloat("Intensity", &f1, 0.01f, 0.0f, 0.0f, "%.06f");
+                if (f1 < 0.0f)f1 = 0.0f;
+                app->lights[i].intensity = f1;
+
+                ImGui::Spacing();
+
+                //position
+                ImGui::DragFloat3("Position", (float*)&app->lights[i].position, 0.01f);
+
+                ImGui::Spacing();
+
+                //Direction
+                ImGui::DragFloat3("Direction", (float*)&app->lights[i].direction, 0.01f);
+
+                ImGui::Spacing();
+
+                //Radius
+                if (app->lights[i].type == LightType::LightType_Point) {
+                    float f2 = app->lights[i].radius;
+                    ImGui::DragFloat("Radius", &f2, 0.01f, 0.0f, 0.0f, "%.06f");
+                    if (f2 < 0.0f)f2 = 0.0f;
+                    app->lights[i].radius = f2;
+                }
+
+                ImGui::TreePop();
+            }
+        }
+
+        ImGui::TreePop();
+        ImGui::Separator();
+    }
+
     ImGui::End();
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
@@ -737,6 +793,8 @@ void Gui(App* app)
 
     ImGui::Image((ImTextureID)currentAttachment, size, { 0, 1 }, { 1, 0 });
 
+    app->focused = ImGui::IsWindowFocused();
+
     ImGui::End();
     ImGui::PopStyleVar();
 
@@ -777,7 +835,8 @@ void Update(App* app)
         float xoffset = app->input.mouseDelta.x;
         float yoffset = -app->input.mouseDelta.y;
 
-        app->camera.Rotate(xoffset, yoffset);
+        if(app->focused)
+            app->camera.Rotate(xoffset, yoffset);
     }
 
     if (app->input.mouseButtons[LEFT] == BUTTON_RELEASE)
@@ -802,6 +861,9 @@ void Update(App* app)
 
     for (u32 i = 0; i < app->lights.size(); ++i)
     {
+        if (!app->lights[i].active)
+            continue;
+
         AlignHead(app->cbuffer, sizeof(vec4));
 
         Light& light = app->lights[i];
@@ -811,7 +873,7 @@ void Update(App* app)
         PushVec3(app->cbuffer, light.direction);
         PushFloat(app->cbuffer, light.intensity);
         PushVec3(app->cbuffer, light.position);
-        PushUInt(app->cbuffer, light.radius);
+        PushFloat(app->cbuffer, light.radius);
     }
 
     app->globalParamsSize = app->cbuffer.head - app->globalParamsOffset;

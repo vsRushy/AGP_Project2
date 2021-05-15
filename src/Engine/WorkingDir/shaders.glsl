@@ -275,7 +275,7 @@ struct Light
 	vec3 direction;
 	float intensity;
 	vec3 position;
-	int radius;
+	float radius;
 };
 
 layout(binding = 0, std140) uniform GlobalParams
@@ -305,7 +305,7 @@ struct Light
 	vec3 direction;
 	float intensity;
 	vec3 position;
-	int radius;
+	float radius;
 };
 
 layout(binding = 0, std140) uniform GlobalParams
