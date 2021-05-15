@@ -333,9 +333,9 @@ void Init(App* app)
     app->entities.push_back({ TransformPositionRotationScale(vec3(5.0f, 0.0f, -20.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)),
                               app->patrick_index });
 
-    app->lights.push_back({ LightType_Point, vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(5.0f, 3.0f, -25.0f), 12, 1.0f });
-    app->lights.push_back({ LightType_Point, vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, -5.0f), 14, 0.6f });
-    app->lights.push_back({ LightType_Point, vec3(0.0f, 0.0f, 1.0f), vec3(1.0f, 0.0f, 0.0f), vec3(15.0f, 3.0f, -10.0f), 20, 0.4 });
+    app->lights.push_back({ LightType_Point, vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(5.0f, 3.0f, -25.0f), 12, 2.0f });
+    app->lights.push_back({ LightType_Point, vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, -5.0f), 14, 3.6f });
+    app->lights.push_back({ LightType_Point, vec3(0.0f, 0.0f, 1.0f), vec3(1.0f, 0.0f, 0.0f), vec3(15.0f, 3.0f, -10.0f), 20, 5.4 });
     app->lights.push_back({ LightType_Directional, vec3(1.0f, 1.0f, 1.0f), vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, 10.0f, -3.0f), 0, 0.7f });
 
     /* FORWARD RENDERING SHADER */
@@ -1057,7 +1057,7 @@ void Render(App* app)
             glUniformMatrix4fv(app->deferredLightProgram_uProjection, 1, GL_FALSE, &app->projection[0][0]);
             glUniformMatrix4fv(app->deferredLightProgram_uView, 1, GL_FALSE, &app->view[0][0]);
 
-            for (const Light& light : app->lights)
+            /*for (const Light& light : app->lights)
             {
                 glm::mat4 model = glm::mat4(1.0f);
                 model = glm::translate(model, light.position);
@@ -1067,7 +1067,7 @@ void Render(App* app)
                 glUniform3f(app->deferredLightProgram_uLightColor, light.color.r, light.color.g, light.color.b);
 
                 app->RenderSphere(app->sphere_vao, app->index_count);
-            }
+            }*/
 
             glUseProgram(0);
 

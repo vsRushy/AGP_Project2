@@ -322,85 +322,12 @@ uniform sampler2D uGDiffuse;
 layout(location = 0) out vec4 oFinalRender;
 //out vec4 oFinalRender;
 
-vec3 CalculateDirectionalLight(Light light)
-{
-	/*vec3 N = normalize(vNormal);
-    vec3 L = normalize(light.direction);
-
-	// Hardcoded specular parameter
-    vec3 specularMat = vec3(0.5);
-
-	// Diffuse
-    float diffuseIntensity = max(0.0, dot(N,L));
-
-	// Specular
-    float specularIntensity = pow(max(0.0, dot(N, L)), 1.0);
-    vec3 specular = light.color * specularMat * specularIntensity;
-
-	return (diffuseIntensity + specular) * light.intensity;*/
-	return vec3(1.0);
-}
-
-vec3 CalculatePointLight(Light light)
-{
-	/*vec3 N = normalize(vNormal);
-	vec3 L = normalize(light.position - vPosition);
-
-	float threshold = 1.0;
-
-	float shadowIntensity = 1.0;
-
-	float dist = distance(light.position, vPosition);
-
-	if(dist > light.radius)
-		shadowIntensity = 1.0 - ((dist - light.radius) / threshold);
-
-	// Hardcoded specular parameter
-    vec3 specularMat = vec3(1.0);
-
-	// brightness
-	float brightness = dot(L, vNormal);
-
-	// Specular
-    float specularIntensity = pow(max(0.0, dot(N, L)), 1.0);
-    vec3 specular = light.color * specularMat * specularIntensity;
-
-	// Diffuse
-    float diffuseIntensity = max(0.0, dot(N,L));
-
-	return vec3(brightness) * (specular + diffuseIntensity) * shadowIntensity * light.intensity;*/
-	return vec3(1.0);
-}
-
 void main()
 {
 	vec3 FragPos = texture(uGPosition, vTexCoord).rgb;
     vec3 Normal = texture(uGNormals, vTexCoord).rgb;
     vec3 Diffuse = texture(uGDiffuse, vTexCoord).rgb;
 
-	/*vec3 lightFactor = vec3(0.0);
-	for(int i = 0; i < uLightCount; ++i)
-	{
-		switch(uLight[i].type)
-		{
-			case 0: // Directional
-			{
-				lightFactor += CalculateDirectionalLight(uLight[i]);
-			}
-			break;
-
-			case 1: // Point
-			{
-				lightFactor += CalculatePointLight(uLight[i]);
-			}
-			break;
-
-			default:
-			{
-				break;
-			}
-		}
-	}*/
 
 	vec3 lighting = Diffuse * 0.1;
 	vec3 viewPos = uCameraPosition;
@@ -434,7 +361,7 @@ void main()
 				float attenuation = 1.0 / (1.0 + 0.1 * distance + 0.01 * distance * distance);
 				diffuse *= attenuation;
 				specular *= attenuation;
-				lighting += diffuse + specular;
+				lighting += (diffuse + specular) * uLight[i].intensity;
 			}
 			break;
 
@@ -446,7 +373,6 @@ void main()
 		}
     }
 
-	//oFinalRender = vec4(lightFactor, 1.0);
 	oFinalRender = vec4(lighting, 1.0);
 }
 
