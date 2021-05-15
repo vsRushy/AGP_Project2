@@ -320,7 +320,36 @@ uniform sampler2D uGNormals;
 uniform sampler2D uGDiffuse;
 
 layout(location = 0) out vec4 oFinalRender;
-//out vec4 oFinalRender;
+
+vec3 CalculatePointLight(Light light, vec3 FragPos, vec3 Normal, vec3 Diffuse)
+{
+	vec3 N = normalize(Normal);
+	vec3 L = normalize(light.position - FragPos);
+
+	float threshold = 1.0;
+
+	float shadowIntensity = 1.0;
+
+	float dist = distance(light.position, FragPos);
+
+	if(dist > light.radius)
+		shadowIntensity = 1.0 - ((dist - light.radius) / threshold);
+
+	// Hardcoded specular parameter
+    vec3 specularMat = vec3(1.0);
+
+	// brightness
+	float brightness = dot(L, Normal);
+
+	// Specular
+    float specularIntensity = pow(max(0.0, dot(N, L)), 1.0);
+    vec3 specular = light.color * specularMat * specularIntensity;
+
+	// Diffuse
+    float diffuseIntensity = max(0.0, dot(N, L));
+
+	return vec3(brightness) * (specular + diffuseIntensity) * shadowIntensity * light.intensity * Diffuse;
+}
 
 void main()
 {
@@ -328,10 +357,10 @@ void main()
     vec3 Normal = texture(uGNormals, vTexCoord).rgb;
     vec3 Diffuse = texture(uGDiffuse, vTexCoord).rgb;
 
-
-	vec3 lighting = Diffuse * 0.1;
-	vec3 viewPos = uCameraPosition;
-    vec3 viewDir  = normalize(viewPos - FragPos);
+	//vec3 lighting = Diffuse * 0.1;
+	vec3 lighting = vec3(0.0);
+	/*vec3 viewPos = uCameraPosition;
+    vec3 viewDir  = normalize(viewPos - FragPos);*/
 
     for(int i = 0; i < uLightCount; ++i)
     {
@@ -350,7 +379,7 @@ void main()
 			case 1: // Point
 			{
 				// diffuse
-				vec3 lightDir = normalize(uLight[i].position - FragPos);
+				/*vec3 lightDir = normalize(uLight[i].position - FragPos);
 				vec3 diffuse = max(dot(Normal, lightDir), 0.0) * Diffuse * uLight[i].color;
 				// specular
 				vec3 halfwayDir = normalize(lightDir + viewDir);  
@@ -361,7 +390,9 @@ void main()
 				float attenuation = 1.0 / (1.0 + 0.1 * distance + 0.01 * distance * distance);
 				diffuse *= attenuation;
 				specular *= attenuation;
-				lighting += (diffuse + specular) * uLight[i].intensity;
+				lighting += (diffuse + specular) * uLight[i].intensity;*/
+
+				lighting += CalculatePointLight(uLight[i], FragPos, Normal, Diffuse);
 			}
 			break;
 
