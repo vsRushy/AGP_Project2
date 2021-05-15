@@ -1021,25 +1021,25 @@ void Render(App* app)
 
             /* First pass (geometry) */
 
-            glBindFramebuffer(GL_FRAMEBUFFER, app->gBuffer);
+            glEnable(GL_DEPTH_TEST);
+            glDisable(GL_BLEND);
+            glDepthMask(GL_TRUE);
 
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glBindFramebuffer(GL_FRAMEBUFFER, app->gBuffer);
 
             GLenum drawBuffersGBuffer[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
             glDrawBuffers(ARRAY_COUNT(drawBuffersGBuffer), drawBuffersGBuffer);
 
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
             glViewport(0, 0, app->displaySize.x, app->displaySize.y);
-
-            glEnable(GL_DEPTH_TEST);
-
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-            glDepthMask(GL_TRUE);
 
             Program& deferredGeometryPassProgram = app->programs[app->deferredGeometryPassProgramIdx];
             glUseProgram(deferredGeometryPassProgram.handle);
 
+            // Needed here? TODO
+            glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(0), app->cbuffer.handle, app->globalParamsOffset, app->globalParamsSize);
+            
             for (const Entity& entity : app->entities)
             {
                 Model& model = app->models[entity.modelIndex];
@@ -1072,17 +1072,17 @@ void Render(App* app)
 
             /* Second pass (lighting) */
 
-            glBindFramebuffer(GL_FRAMEBUFFER, app->fBuffer);
+            glDisable(GL_DEPTH_TEST);
+            glDepthMask(GL_FALSE);
 
-            glClear(GL_COLOR_BUFFER_BIT);
+            glBindFramebuffer(GL_FRAMEBUFFER, app->fBuffer);
 
             GLenum drawBuffersFBuffer[] = { GL_COLOR_ATTACHMENT3 };
             glDrawBuffers(ARRAY_COUNT(drawBuffersFBuffer), drawBuffersFBuffer);
 
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_ONE, GL_ONE);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            //glDepthMask(GL_FALSE);
+            glViewport(0, 0, app->displaySize.x, app->displaySize.y);
 
             Program& deferredLightingPassProgram = app->programs[app->deferredLightingPassProgramIdx];
             glUseProgram(deferredLightingPassProgram.handle);
@@ -1118,7 +1118,7 @@ void Render(App* app)
             glUniformMatrix4fv(app->deferredLightProgram_uProjection, 1, GL_FALSE, &app->projection[0][0]);
             glUniformMatrix4fv(app->deferredLightProgram_uView, 1, GL_FALSE, &app->view[0][0]);
 
-            for (const Light& light : app->lights)
+            /*for (const Light& light : app->lights)
             {
                 glm::mat4 model = glm::mat4(1.0f);
                 model = glm::translate(model, light.position);
@@ -1128,7 +1128,7 @@ void Render(App* app)
                 glUniform3f(app->deferredLightProgram_uLightColor, light.color.r, light.color.g, light.color.b);
 
                 app->RenderSphere(app->sphere_vao, app->index_count);
-            }
+            }*/
 
             glUseProgram(0);
 
