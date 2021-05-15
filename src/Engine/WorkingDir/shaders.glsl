@@ -348,7 +348,7 @@ vec3 CalculatePointLight(Light light, vec3 FragPos, vec3 Normal, vec3 Diffuse)
 	// Diffuse
     float diffuseIntensity = max(0.0, dot(N, L));
 
-	return vec3(brightness) * (specular + diffuseIntensity) * shadowIntensity * light.intensity * Diffuse;
+	return vec3(brightness) * (specular + diffuseIntensity) * shadowIntensity * light.intensity;
 }
 
 void main()
@@ -404,7 +404,7 @@ void main()
 		}
     }
 
-	oFinalRender = vec4(lighting, 1.0);
+	oFinalRender = vec4(lighting * Diffuse, 1.0);
 }
 
 
