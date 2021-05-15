@@ -326,17 +326,34 @@ void Init(App* app)
 
     app->LoadSphere();
 
-    app->entities.push_back({ TransformPositionRotationScale(vec3(0.0f, 0.0f, -20.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)),
-                              app->patrick_index });
-    app->entities.push_back({ TransformPositionRotationScale(vec3(-5.0f, 0.0f, -20.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)),
-                              app->patrick_index });
-    app->entities.push_back({ TransformPositionRotationScale(vec3(5.0f, 0.0f, -20.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)),
-                              app->patrick_index });
+    for (int j = 0; j < 16 * 6; j += 16)
+    {
+        int pos_j = j - 8;
 
-    app->lights.push_back({ LightType_Point, vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(5.0f, 3.0f, -25.0f), 12, 1.0f });
-    app->lights.push_back({ LightType_Point, vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, -5.0f), 14, 0.6f });
-    app->lights.push_back({ LightType_Point, vec3(0.0f, 0.0f, 1.0f), vec3(1.0f, 0.0f, 0.0f), vec3(15.0f, 3.0f, -10.0f), 20, 0.4 });
+        for (int i = 0; i < 16 * 6; i += 16)
+        {
+            int pos_i = i - 8;
+
+            app->entities.push_back({ TransformPositionRotationScale(vec3(pos_i, 0.0f, pos_j),
+                60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)), app->patrick_index });
+        }
+    }
+
+    for (int j = 0; j < 16 * 6; j += 16)
+    {
+        int pos_j = j - 8;
+
+        for (int i = 0; i < 16 * 6; i += 16)
+        {
+            int pos_i = i - 8;
+
+            app->lights.push_back({ LightType_Point, vec3(1.0f, 0.0f, 0.0f),
+                vec3(1.0f, 0.0f, 0.0f), vec3(pos_i, 5.0f, pos_j), 12, 1.0f });
+        }
+    }
+
     app->lights.push_back({ LightType_Directional, vec3(1.0f, 1.0f, 1.0f), vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, 10.0f, -3.0f), 0, 0.7f });
+    app->lights.push_back({ LightType_Directional, vec3(1.0f, 1.0f, 1.0f), vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, 5.0f, 7.0f), 0, 0.3f });
 
     /* FORWARD RENDERING SHADER */
 
@@ -1068,7 +1085,7 @@ void Render(App* app)
             glUniformMatrix4fv(app->deferredLightProgram_uProjection, 1, GL_FALSE, &app->projection[0][0]);
             glUniformMatrix4fv(app->deferredLightProgram_uView, 1, GL_FALSE, &app->view[0][0]);
 
-            /*for (const Light& light : app->lights)
+            for (const Light& light : app->lights)
             {
                 glm::mat4 model = glm::mat4(1.0f);
                 model = glm::translate(model, light.position);
@@ -1078,7 +1095,7 @@ void Render(App* app)
                 glUniform3f(app->deferredLightProgram_uLightColor, light.color.r, light.color.g, light.color.b);
 
                 app->RenderSphere(app->sphere_vao, app->index_count);
-            }*/
+            }
 
             glUseProgram(0);
 
