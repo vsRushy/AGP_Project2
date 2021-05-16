@@ -343,12 +343,12 @@ vec3 CalculatePointLight(Light light, vec3 FragPos, vec3 Normal, vec3 Diffuse)
 
 	// Specular
     float specularIntensity = pow(max(0.0, dot(N, L)), 1.0);
-    vec3 specular = light.color * specularMat * specularIntensity;
+    vec3 specular = specularMat * specularIntensity;
 
 	// Diffuse
     float diffuseIntensity = max(0.0, dot(N, L));
 
-	return vec3(brightness) * (specular + diffuseIntensity) * shadowIntensity * light.intensity * Diffuse;
+	return vec3(brightness) * (specular + diffuseIntensity) * shadowIntensity * light.intensity * light.color  * Diffuse;
 }
 
 void main()
