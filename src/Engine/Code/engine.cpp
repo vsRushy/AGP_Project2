@@ -328,13 +328,9 @@ void Init(App* app)
 
     app->entities.push_back({ TransformPositionRotationScale(vec3(0.0f, 0.0f, -20.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)),
                               app->patrick_index });
-    app->entities.push_back({ TransformPositionRotationScale(vec3(-5.0f, 0.0f, -20.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)),
-                              app->patrick_index });
-    app->entities.push_back({ TransformPositionRotationScale(vec3(5.0f, 0.0f, -20.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)),
-                              app->patrick_index });
 
     app->lights.push_back({ LightType_Point, vec3(0.0f, 0.0f, 1.0f), vec3(1.0f, 0.0f, 0.0f), vec3(15.0f, 3.0f, -10.0f), 20.0, 1.0, true });
-    //app->lights.push_back({ LightType_Directional, vec3(1.0f, 1.0f, 1.0f), vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, 10.0f, -3.0f), 0, 0.7f });
+    app->lights.push_back({ LightType_Directional, vec3(1.0f, 1.0f, 1.0f), vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, 10.0f, -3.0f), 0, 0.7f });
 
     /* FORWARD RENDERING SHADER */
 
@@ -1192,8 +1188,6 @@ void Render(App* app)
 
             // Render light volumes
 
-            glDisable(GL_BLEND);
-
             glBindFramebuffer(GL_READ_FRAMEBUFFER, app->gBuffer);
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, app->fBuffer);
             glBlitFramebuffer(0, 0, app->displaySize.x, app->displaySize.x, 0, 0, app->displaySize.x, app->displaySize.x, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
@@ -1206,15 +1200,40 @@ void Render(App* app)
 
             for (const Light& light : app->lights)
             {
+                switch (light.type)
+                {
+                    case LightType_Point:
+                    {
+                        glm::mat4 model = glm::mat4(1.0f);
+                        model = glm::translate(model, light.position);
+                        model = glm::scale(model, glm::vec3(0.5f));
 
-                glm::mat4 model = glm::mat4(1.0f);
-                model = glm::translate(model, light.position);
-                model = glm::scale(model, glm::vec3(0.5f));
+                        glUniformMatrix4fv(app->deferredLightProgram_uModel, 1, GL_FALSE, &model[0][0]);
+                        glUniform3f(app->deferredLightProgram_uLightColor, light.color.r, light.color.g, light.color.b);
 
-                glUniformMatrix4fv(app->deferredLightProgram_uModel, 1, GL_FALSE, &model[0][0]);
-                glUniform3f(app->deferredLightProgram_uLightColor, light.color.r, light.color.g, light.color.b);
+                        app->RenderSphere(app->sphere_vao, app->index_count);
+                    }
+                    break;
 
-                app->RenderSphere(app->sphere_vao, app->index_count);
+                    case LightType_Directional:
+                    {
+                        glm::mat4 model = glm::mat4(1.0f);
+                        model = glm::translate(model, light.position);
+                        model = glm::scale(model, glm::vec3(0.5f));
+
+                        glUniformMatrix4fv(app->deferredLightProgram_uModel, 1, GL_FALSE, &model[0][0]);
+                        glUniform3f(app->deferredLightProgram_uLightColor, light.color.r, light.color.g, light.color.b);
+
+                        app->RenderSphere(app->sphere_vao, app->index_count);
+                    }
+                    break;
+
+                    default:
+                    {
+
+                    }
+                    break;
+                }
             }
 
             glUseProgram(0);

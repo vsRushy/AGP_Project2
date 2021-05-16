@@ -320,7 +320,7 @@ uniform vec2 uGScreenSize;
 
 layout(location = 0) out vec4 oFinalRender;
 
-/*vec3 CalculatePointLight(Light light, vec3 FragPos, vec3 Normal, vec3 Diffuse)
+vec3 CalculatePointLight(Light light, vec3 FragPos, vec3 Normal, vec3 Diffuse)
 {
 	vec3 N = normalize(Normal);
 	vec3 L = normalize(light.position - FragPos);
@@ -347,8 +347,8 @@ layout(location = 0) out vec4 oFinalRender;
 	// Diffuse
     float diffuseIntensity = max(0.0, dot(N, L));
 
-	return vec3(brightness) * (specular + diffuseIntensity) * shadowIntensity * light.intensity;
-}*/
+	return vec3(brightness) * (specular + diffuseIntensity) * shadowIntensity * light.intensity * Diffuse;
+}
 
 void main()
 {
@@ -365,17 +365,7 @@ void main()
 		{
 			case 1: // Point
 			{
-				//colorLit += CalculatePointLight(uLight[i], FragPos, Normal, Diffuse);
-
-				vec3 lightDir = normalize(uLight[i].position - FragPos);
-				vec3 diffuse = max(dot(Normal, lightDir), 0.0) * Diffuse * uLight[i].color;
-          
-				// attenuation
-				float distance = length(uLight[i].position - FragPos);
-				float attenuation = 1.0 / (1.0 + 0.045 * distance + 0.0075 * (distance * distance));
-				diffuse *= attenuation;
-
-				colorLit += diffuse;
+				colorLit += CalculatePointLight(uLight[i], FragPos, Normal, Diffuse);
 			}
 			break;
 
