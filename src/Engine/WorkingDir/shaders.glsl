@@ -56,7 +56,7 @@ layout(binding = 0, std140) uniform GlobalParams
 {
 	vec3 uCameraPosition;
 	unsigned int uLightCount;
-	Light uLight[16];
+	Light uLight[50];
 };
 
 layout(binding = 1, std140) uniform LocalParams
@@ -101,7 +101,7 @@ layout(binding = 0, std140) uniform GlobalParams
 {
 	vec3 uCameraPosition;
 	unsigned int uLightCount;
-	Light uLight[16];
+	Light uLight[50];
 };
 
 uniform sampler2D uTexture;
@@ -282,7 +282,7 @@ layout(binding = 0, std140) uniform GlobalParams
 {
 	vec3 uCameraPosition;
 	unsigned int uLightCount;
-	Light uLight[16];
+	Light uLight[50];
 };
 
 out vec2 vTexCoord;
@@ -312,7 +312,7 @@ layout(binding = 0, std140) uniform GlobalParams
 {
 	vec3 uCameraPosition;
 	unsigned int uLightCount;
-	Light uLight[16];
+	Light uLight[50];
 };
 
 uniform sampler2D uGPosition;

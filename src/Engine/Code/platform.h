@@ -15,6 +15,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <vector>
 #include <string>
+#include <random>
 
 #include "renderdoc_app.h"
 
@@ -113,6 +114,9 @@ LogString(logBuffer);             \
 
 #define PI  3.14159265359f
 #define TAU 6.28318530718f
+
+// Random number generation
+float GenerateRandomFloat(const float& min, const float& max);
 
 // External hooks declarations
 extern RENDERDOC_API_1_4_1* rdoc_api;

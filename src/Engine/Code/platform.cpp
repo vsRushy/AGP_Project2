@@ -445,3 +445,15 @@ void LogString(const char* str)
     fprintf(stderr, "%s\n", str);
 #endif
 }
+
+float GenerateRandomFloat(const float& min, const float& max)
+{
+    std::random_device rd;
+    std::default_random_engine generator(rd());
+    std::uniform_real_distribution<float> distribution(min, max);
+
+    double number = distribution(generator);
+    printf("%f", number);
+
+    return (float)number;
+}
