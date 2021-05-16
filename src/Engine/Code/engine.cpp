@@ -412,6 +412,10 @@ void Init(App* app)
     app->deferredLightingPointProgram_uGPosition = glGetUniformLocation(deferredLightingPointPassProgram.handle, "uGPosition");
     app->deferredLightingPointProgram_uGNormals = glGetUniformLocation(deferredLightingPointPassProgram.handle, "uGNormals");
     app->deferredLightingPointProgram_uGDiffuse = glGetUniformLocation(deferredLightingPointPassProgram.handle, "uGDiffuse");
+    app->deferredLightingPointProgram_uGScreenSize = glGetUniformLocation(deferredLightingPointPassProgram.handle, "uGScreenSize");
+    app->deferredLightingPointProgram_uProjection = glGetUniformLocation(deferredLightingPointPassProgram.handle, "uProjection");
+    app->deferredLightingPointProgram_uView = glGetUniformLocation(deferredLightingPointPassProgram.handle, "uView");
+    app->deferredLightingPointProgram_uModel = glGetUniformLocation(deferredLightingPointPassProgram.handle, "uModel");
 
     app->deferredLightingDirectionalPassProgramIdx = LoadProgram(app, "shaders.glsl", "DEFERRED_LIGHTING_PASS_DIRECTIONAL");
     Program& deferredLightingDirectionalPassProgram = app->programs[app->deferredLightingDirectionalPassProgramIdx];
@@ -1117,9 +1121,57 @@ void Render(App* app)
             Program& deferredLightingPointPassProgram = app->programs[app->deferredLightingPointPassProgramIdx];
             glUseProgram(deferredLightingPointPassProgram.handle);
 
-            glUniform1i(app->deferredLightingPointProgram_uGPosition, 1);
-            glUniform1i(app->deferredLightingPointProgram_uGNormals, 2);
-            glUniform1i(app->deferredLightingPointProgram_uGDiffuse, 3);
+            glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(0), app->cbuffer.handle, app->globalParamsOffset, app->globalParamsSize);
+
+            for (const Light& light : app->lights)
+            {
+                switch (light.type)
+                {
+                    case LightType_Point:
+                    {
+                        glUniformMatrix4fv(app->deferredLightingPointProgram_uProjection, 1, GL_FALSE, &app->projection[0][0]);
+                        glUniformMatrix4fv(app->deferredLightingPointProgram_uView, 1, GL_FALSE, &app->view[0][0]);
+
+                        glm::mat4 model = glm::mat4(1.0f);
+                        model = glm::translate(model, light.position);
+                        model = glm::scale(model, glm::vec3(light.radius));
+
+                        glUniformMatrix4fv(app->deferredLightingPointProgram_uModel, 1, GL_FALSE, &model[0][0]);
+
+                        glUniform2f(app->deferredLightingPointProgram_uGScreenSize, (float)app->displaySize.x, (float)app->displaySize.y);
+
+                        glActiveTexture(GL_TEXTURE1);
+                        glBindTexture(GL_TEXTURE_2D, app->positionAttachmentHandle);
+
+                        glActiveTexture(GL_TEXTURE2);
+                        glBindTexture(GL_TEXTURE_2D, app->normalsAttachmentHandle);
+
+                        glActiveTexture(GL_TEXTURE3);
+                        glBindTexture(GL_TEXTURE_2D, app->diffuseAttachmentHandle);
+
+                        glUniform1i(app->deferredLightingPointProgram_uGPosition, 1);
+                        glUniform1i(app->deferredLightingPointProgram_uGNormals, 2);
+                        glUniform1i(app->deferredLightingPointProgram_uGDiffuse, 3);
+
+                        app->RenderSphere(app->sphere_vao, app->index_count);
+                    }
+
+                    default:
+                    {
+
+                    }
+                    break;
+                }
+            }
+
+            glUseProgram(0);
+
+            // Second, directional lights
+
+            Program& deferredLightingDirectionalPassProgram = app->programs[app->deferredLightingDirectionalPassProgramIdx];
+            glUseProgram(deferredLightingDirectionalPassProgram.handle);
+
+            glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(0), app->cbuffer.handle, app->globalParamsOffset, app->globalParamsSize);
 
             glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, app->positionAttachmentHandle);
@@ -1130,22 +1182,21 @@ void Render(App* app)
             glActiveTexture(GL_TEXTURE3);
             glBindTexture(GL_TEXTURE_2D, app->diffuseAttachmentHandle);
 
-            glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(0), app->cbuffer.handle, app->globalParamsOffset, app->globalParamsSize);
-            
+            glUniform1i(app->deferredLightingDirectionalProgram_uGPosition, 1);
+            glUniform1i(app->deferredLightingDirectionalProgram_uGNormals, 2);
+            glUniform1i(app->deferredLightingDirectionalProgram_uGDiffuse, 3);
+
             app->RenderQuad();
-
-            glBindFramebuffer(GL_READ_FRAMEBUFFER, app->gBuffer);
-            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, app->fBuffer);
-
-            glBlitFramebuffer(0, 0, app->displaySize.x, app->displaySize.x, 0, 0, app->displaySize.x, app->displaySize.x, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
             glUseProgram(0);
 
-            // Second, directional lights
-
-
-
             // Render light volumes
+
+            glDisable(GL_BLEND);
+
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, app->gBuffer);
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, app->fBuffer);
+            glBlitFramebuffer(0, 0, app->displaySize.x, app->displaySize.x, 0, 0, app->displaySize.x, app->displaySize.x, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
             Program& deferredLightProgram = app->programs[app->deferredLightProgramIdx];
             glUseProgram(deferredLightProgram.handle);
@@ -1153,17 +1204,18 @@ void Render(App* app)
             glUniformMatrix4fv(app->deferredLightProgram_uProjection, 1, GL_FALSE, &app->projection[0][0]);
             glUniformMatrix4fv(app->deferredLightProgram_uView, 1, GL_FALSE, &app->view[0][0]);
 
-            /*for (const Light& light : app->lights)
+            for (const Light& light : app->lights)
             {
+
                 glm::mat4 model = glm::mat4(1.0f);
                 model = glm::translate(model, light.position);
-                model = glm::scale(model, glm::vec3(light.radius));
+                model = glm::scale(model, glm::vec3(0.5f));
 
                 glUniformMatrix4fv(app->deferredLightProgram_uModel, 1, GL_FALSE, &model[0][0]);
                 glUniform3f(app->deferredLightProgram_uLightColor, light.color.r, light.color.g, light.color.b);
 
                 app->RenderSphere(app->sphere_vao, app->index_count);
-            }*/
+            }
 
             glUseProgram(0);
 

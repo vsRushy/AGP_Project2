@@ -266,7 +266,6 @@ void main()
 #if defined(VERTEX) ///////////////////////////////////////////////////
 
 layout(location = 0) in vec3 aPosition;
-layout(location = 1) in vec2 aTexCoord;
 
 struct Light
 {
@@ -285,18 +284,16 @@ layout(binding = 0, std140) uniform GlobalParams
 	Light uLight[16];
 };
 
-out vec2 vTexCoord;
+uniform mat4 uProjection;
+uniform mat4 uView;
+uniform mat4 uModel;
 
 void main()
 {
-	vTexCoord = aTexCoord;
-
-	gl_Position = vec4(aPosition, 1.0);
+	gl_Position = uProjection * uView * uModel * vec4(aPosition, 1.0);
 }
 
 #elif defined(FRAGMENT) ///////////////////////////////////////////////
-
-in vec2 vTexCoord;
 
 struct Light
 {
@@ -319,9 +316,11 @@ uniform sampler2D uGPosition;
 uniform sampler2D uGNormals;
 uniform sampler2D uGDiffuse;
 
+uniform vec2 uGScreenSize;
+
 layout(location = 0) out vec4 oFinalRender;
 
-vec3 CalculatePointLight(Light light, vec3 FragPos, vec3 Normal, vec3 Diffuse)
+/*vec3 CalculatePointLight(Light light, vec3 FragPos, vec3 Normal, vec3 Diffuse)
 {
 	vec3 N = normalize(Normal);
 	vec3 L = normalize(light.position - FragPos);
@@ -349,50 +348,34 @@ vec3 CalculatePointLight(Light light, vec3 FragPos, vec3 Normal, vec3 Diffuse)
     float diffuseIntensity = max(0.0, dot(N, L));
 
 	return vec3(brightness) * (specular + diffuseIntensity) * shadowIntensity * light.intensity;
-}
+}*/
 
 void main()
 {
-	vec3 FragPos = texture(uGPosition, vTexCoord).rgb;
-    vec3 Normal = texture(uGNormals, vTexCoord).rgb;
-    vec3 Diffuse = texture(uGDiffuse, vTexCoord).rgb;
+    vec2 texCoord = gl_FragCoord.xy / uGScreenSize;
 
-	//vec3 lighting = Diffuse * 0.1;
-	vec3 lighting = vec3(0.0);
-	/*vec3 viewPos = uCameraPosition;
-    vec3 viewDir  = normalize(viewPos - FragPos);*/
+	vec3 FragPos = texture(uGPosition, texCoord).rgb;
+    vec3 Normal = texture(uGNormals, texCoord).rgb;
+    vec3 Diffuse = texture(uGDiffuse, texCoord).rgb;
 
+	vec3 colorLit = vec3(0.0);
     for(int i = 0; i < uLightCount; ++i)
     {
 		switch(uLight[i].type)
 		{
-			case 0: // Directional
-			{
-				float cosAngle = max(dot(Normal, -uLight[i].direction), 0.0); 
-                vec3 ambient = 0.25 * uLight[i].color;
-                vec3 diffuse = 0.75 * uLight[i].color * cosAngle;
-
-                lighting += (ambient + diffuse) * Diffuse;
-			}
-			break;
-
 			case 1: // Point
 			{
-				// diffuse
-				/*vec3 lightDir = normalize(uLight[i].position - FragPos);
+				//colorLit += CalculatePointLight(uLight[i], FragPos, Normal, Diffuse);
+
+				vec3 lightDir = normalize(uLight[i].position - FragPos);
 				vec3 diffuse = max(dot(Normal, lightDir), 0.0) * Diffuse * uLight[i].color;
-				// specular
-				vec3 halfwayDir = normalize(lightDir + viewDir);  
-				float spec = pow(max(dot(Normal, halfwayDir), 0.0), 16.0);
-				vec3 specular = uLight[i].color * spec;
+          
 				// attenuation
 				float distance = length(uLight[i].position - FragPos);
-				float attenuation = 1.0 / (1.0 + 0.1 * distance + 0.01 * distance * distance);
+				float attenuation = 1.0 / (1.0 + 0.045 * distance + 0.0075 * (distance * distance));
 				diffuse *= attenuation;
-				specular *= attenuation;
-				lighting += (diffuse + specular) * uLight[i].intensity;*/
 
-				lighting += CalculatePointLight(uLight[i], FragPos, Normal, Diffuse);
+				colorLit += diffuse;
 			}
 			break;
 
@@ -404,7 +387,7 @@ void main()
 		}
     }
 
-	oFinalRender = vec4(lighting * Diffuse, 1.0);
+	oFinalRender = vec4(colorLit, 1.0);
 }
 
 
@@ -416,7 +399,8 @@ void main()
 #if defined(VERTEX) ///////////////////////////////////////////////////
 
 layout(location = 0) in vec3 aPosition;
-layout(location = 1) in vec2 aTexCoord;
+layout(location = 1) in vec3 aNormal;
+layout(location = 2) in vec2 aTexCoord;
 
 struct Light
 {
@@ -471,47 +455,13 @@ uniform sampler2D uGDiffuse;
 
 layout(location = 0) out vec4 oFinalRender;
 
-vec3 CalculatePointLight(Light light, vec3 FragPos, vec3 Normal, vec3 Diffuse)
-{
-	vec3 N = normalize(Normal);
-	vec3 L = normalize(light.position - FragPos);
-
-	float threshold = 1.0;
-
-	float shadowIntensity = 1.0;
-
-	float dist = distance(light.position, FragPos);
-
-	if(dist > light.radius)
-		shadowIntensity = 1.0 - ((dist - light.radius) / threshold);
-
-	// Hardcoded specular parameter
-    vec3 specularMat = vec3(1.0);
-
-	// brightness
-	float brightness = dot(L, Normal);
-
-	// Specular
-    float specularIntensity = pow(max(0.0, dot(N, L)), 1.0);
-    vec3 specular = light.color * specularMat * specularIntensity;
-
-	// Diffuse
-    float diffuseIntensity = max(0.0, dot(N, L));
-
-	return vec3(brightness) * (specular + diffuseIntensity) * shadowIntensity * light.intensity;
-}
-
 void main()
 {
 	vec3 FragPos = texture(uGPosition, vTexCoord).rgb;
     vec3 Normal = texture(uGNormals, vTexCoord).rgb;
     vec3 Diffuse = texture(uGDiffuse, vTexCoord).rgb;
 
-	//vec3 lighting = Diffuse * 0.1;
-	vec3 lighting = vec3(0.0);
-	/*vec3 viewPos = uCameraPosition;
-    vec3 viewDir  = normalize(viewPos - FragPos);*/
-
+	vec3 colorLit = vec3(0.0);
     for(int i = 0; i < uLightCount; ++i)
     {
 		switch(uLight[i].type)
@@ -522,27 +472,7 @@ void main()
                 vec3 ambient = 0.25 * uLight[i].color;
                 vec3 diffuse = 0.75 * uLight[i].color * cosAngle;
 
-                lighting += (ambient + diffuse) * Diffuse;
-			}
-			break;
-
-			case 1: // Point
-			{
-				// diffuse
-				/*vec3 lightDir = normalize(uLight[i].position - FragPos);
-				vec3 diffuse = max(dot(Normal, lightDir), 0.0) * Diffuse * uLight[i].color;
-				// specular
-				vec3 halfwayDir = normalize(lightDir + viewDir);  
-				float spec = pow(max(dot(Normal, halfwayDir), 0.0), 16.0);
-				vec3 specular = uLight[i].color * spec;
-				// attenuation
-				float distance = length(uLight[i].position - FragPos);
-				float attenuation = 1.0 / (1.0 + 0.1 * distance + 0.01 * distance * distance);
-				diffuse *= attenuation;
-				specular *= attenuation;
-				lighting += (diffuse + specular) * uLight[i].intensity;*/
-
-				lighting += CalculatePointLight(uLight[i], FragPos, Normal, Diffuse);
+                colorLit += (ambient + diffuse) * Diffuse;
 			}
 			break;
 
@@ -554,7 +484,7 @@ void main()
 		}
     }
 
-	oFinalRender = vec4(lighting * Diffuse, 1.0);
+	oFinalRender = vec4(colorLit, 1.0);
 }
 
 
@@ -566,8 +496,6 @@ void main()
 #if defined(VERTEX) ///////////////////////////////////////////////////
 
 layout (location = 0) in vec3 aPosition;
-layout (location = 1) in vec3 aNormal;
-layout (location = 2) in vec2 aTexCoords;
 
 uniform mat4 uProjection;
 uniform mat4 uView;

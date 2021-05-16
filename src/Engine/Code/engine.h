@@ -353,6 +353,10 @@ struct App
     GLint deferredLightingPointProgram_uGPosition; // Lighting geometry pass 1
     GLint deferredLightingPointProgram_uGNormals; // Lighting geometry pass 1
     GLint deferredLightingPointProgram_uGDiffuse; // Lighting geometry pass 1
+    GLint deferredLightingPointProgram_uGScreenSize;
+    GLint deferredLightingPointProgram_uProjection;
+    GLint deferredLightingPointProgram_uView;
+    GLint deferredLightingPointProgram_uModel;
 
     GLint deferredLightingDirectionalProgram_uGPosition; // Lighting geometry pass 2
     GLint deferredLightingDirectionalProgram_uGNormals; // Lighting geometry pass 2
