@@ -261,7 +261,157 @@ void main()
 #endif
 #endif
 
-#ifdef DEFERRED_LIGHTING_PASS
+#ifdef DEFERRED_LIGHTING_PASS_POINT
+
+#if defined(VERTEX) ///////////////////////////////////////////////////
+
+layout(location = 0) in vec3 aPosition;
+layout(location = 1) in vec2 aTexCoord;
+
+struct Light
+{
+	unsigned int type;
+	vec3 color;
+	vec3 direction;
+	float intensity;
+	vec3 position;
+	float radius;
+};
+
+layout(binding = 0, std140) uniform GlobalParams
+{
+	vec3 uCameraPosition;
+	unsigned int uLightCount;
+	Light uLight[16];
+};
+
+out vec2 vTexCoord;
+
+void main()
+{
+	vTexCoord = aTexCoord;
+
+	gl_Position = vec4(aPosition, 1.0);
+}
+
+#elif defined(FRAGMENT) ///////////////////////////////////////////////
+
+in vec2 vTexCoord;
+
+struct Light
+{
+	unsigned int type;
+	vec3 color;
+	vec3 direction;
+	float intensity;
+	vec3 position;
+	float radius;
+};
+
+layout(binding = 0, std140) uniform GlobalParams
+{
+	vec3 uCameraPosition;
+	unsigned int uLightCount;
+	Light uLight[16];
+};
+
+uniform sampler2D uGPosition;
+uniform sampler2D uGNormals;
+uniform sampler2D uGDiffuse;
+
+layout(location = 0) out vec4 oFinalRender;
+
+vec3 CalculatePointLight(Light light, vec3 FragPos, vec3 Normal, vec3 Diffuse)
+{
+	vec3 N = normalize(Normal);
+	vec3 L = normalize(light.position - FragPos);
+
+	float threshold = 1.0;
+
+	float shadowIntensity = 1.0;
+
+	float dist = distance(light.position, FragPos);
+
+	if(dist > light.radius)
+		shadowIntensity = 1.0 - ((dist - light.radius) / threshold);
+
+	// Hardcoded specular parameter
+    vec3 specularMat = vec3(1.0);
+
+	// brightness
+	float brightness = dot(L, Normal);
+
+	// Specular
+    float specularIntensity = pow(max(0.0, dot(N, L)), 1.0);
+    vec3 specular = light.color * specularMat * specularIntensity;
+
+	// Diffuse
+    float diffuseIntensity = max(0.0, dot(N, L));
+
+	return vec3(brightness) * (specular + diffuseIntensity) * shadowIntensity * light.intensity;
+}
+
+void main()
+{
+	vec3 FragPos = texture(uGPosition, vTexCoord).rgb;
+    vec3 Normal = texture(uGNormals, vTexCoord).rgb;
+    vec3 Diffuse = texture(uGDiffuse, vTexCoord).rgb;
+
+	//vec3 lighting = Diffuse * 0.1;
+	vec3 lighting = vec3(0.0);
+	/*vec3 viewPos = uCameraPosition;
+    vec3 viewDir  = normalize(viewPos - FragPos);*/
+
+    for(int i = 0; i < uLightCount; ++i)
+    {
+		switch(uLight[i].type)
+		{
+			case 0: // Directional
+			{
+				float cosAngle = max(dot(Normal, -uLight[i].direction), 0.0); 
+                vec3 ambient = 0.25 * uLight[i].color;
+                vec3 diffuse = 0.75 * uLight[i].color * cosAngle;
+
+                lighting += (ambient + diffuse) * Diffuse;
+			}
+			break;
+
+			case 1: // Point
+			{
+				// diffuse
+				/*vec3 lightDir = normalize(uLight[i].position - FragPos);
+				vec3 diffuse = max(dot(Normal, lightDir), 0.0) * Diffuse * uLight[i].color;
+				// specular
+				vec3 halfwayDir = normalize(lightDir + viewDir);  
+				float spec = pow(max(dot(Normal, halfwayDir), 0.0), 16.0);
+				vec3 specular = uLight[i].color * spec;
+				// attenuation
+				float distance = length(uLight[i].position - FragPos);
+				float attenuation = 1.0 / (1.0 + 0.1 * distance + 0.01 * distance * distance);
+				diffuse *= attenuation;
+				specular *= attenuation;
+				lighting += (diffuse + specular) * uLight[i].intensity;*/
+
+				lighting += CalculatePointLight(uLight[i], FragPos, Normal, Diffuse);
+			}
+			break;
+
+			default:
+			{
+				
+			}
+			break;
+		}
+    }
+
+	oFinalRender = vec4(lighting * Diffuse, 1.0);
+}
+
+
+#endif
+#endif
+
+#ifdef DEFERRED_LIGHTING_PASS_DIRECTIONAL
 
 #if defined(VERTEX) ///////////////////////////////////////////////////
 

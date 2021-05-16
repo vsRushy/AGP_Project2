@@ -317,7 +317,8 @@ struct App
     u32 texturedMeshProgramIdx;
 
     u32 deferredGeometryPassProgramIdx;
-    u32 deferredLightingPassProgramIdx;
+    u32 deferredLightingPointPassProgramIdx;
+    u32 deferredLightingDirectionalPassProgramIdx;
     u32 deferredLightProgramIdx;
     
     // texture indices
@@ -349,9 +350,13 @@ struct App
 
     GLint deferredGeometryProgram_uTexture; // Deferred geometry pass
 
-    GLint deferredLightingProgram_uGPosition; // Lighting geometry pass
-    GLint deferredLightingProgram_uGNormals; // Lighting geometry pass
-    GLint deferredLightingProgram_uGDiffuse; // Lighting geometry pass
+    GLint deferredLightingPointProgram_uGPosition; // Lighting geometry pass 1
+    GLint deferredLightingPointProgram_uGNormals; // Lighting geometry pass 1
+    GLint deferredLightingPointProgram_uGDiffuse; // Lighting geometry pass 1
+
+    GLint deferredLightingDirectionalProgram_uGPosition; // Lighting geometry pass 2
+    GLint deferredLightingDirectionalProgram_uGNormals; // Lighting geometry pass 2
+    GLint deferredLightingDirectionalProgram_uGDiffuse; // Lighting geometry pass 2
 
     GLint deferredLightProgram_uProjection; // Projection matrix for deferred shading light
     GLint deferredLightProgram_uView; // View matrix for deferred shading light

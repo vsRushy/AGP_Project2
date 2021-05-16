@@ -388,30 +388,55 @@ void Init(App* app)
 
     app->deferredGeometryProgram_uTexture = glGetUniformLocation(deferredGeometryPassProgram.handle, "uTexture");
 
-    app->deferredLightingPassProgramIdx = LoadProgram(app, "shaders.glsl", "DEFERRED_LIGHTING_PASS");
-    Program& deferredLightingPassProgram = app->programs[app->deferredLightingPassProgramIdx];
+    app->deferredLightingPointPassProgramIdx = LoadProgram(app, "shaders.glsl", "DEFERRED_LIGHTING_PASS_POINT");
+    Program& deferredLightingPointPassProgram = app->programs[app->deferredLightingPointPassProgramIdx];
 
-    GLint deferred_lighting_attribute_count;
-    glGetProgramiv(deferredLightingPassProgram.handle, GL_ACTIVE_ATTRIBUTES, &deferred_lighting_attribute_count);
+    GLint deferred_lighting_point_attribute_count;
+    glGetProgramiv(deferredLightingPointPassProgram.handle, GL_ACTIVE_ATTRIBUTES, &deferred_lighting_point_attribute_count);
 
-    for (int i = 0; i < deferred_lighting_attribute_count; ++i)
+    for (int i = 0; i < deferred_lighting_point_attribute_count; ++i)
     {
         GLchar attribute_name[32];
         GLsizei attribute_length;
         GLint attribute_size;
         GLenum attribute_type;
 
-        glGetActiveAttrib(deferredLightingPassProgram.handle, i, ARRAY_COUNT(attribute_name), &attribute_length, &attribute_size, &attribute_type, attribute_name);
-        GLint attribute_location = glGetAttribLocation(deferredLightingPassProgram.handle, attribute_name);
+        glGetActiveAttrib(deferredLightingPointPassProgram.handle, i, ARRAY_COUNT(attribute_name), &attribute_length, &attribute_size, &attribute_type, attribute_name);
+        GLint attribute_location = glGetAttribLocation(deferredLightingPointPassProgram.handle, attribute_name);
 
         ELOG("Attribute %s. Location: %d Type: %d", attribute_name, attribute_location, attribute_type);
 
-        deferredLightingPassProgram.vertex_input_layout.attributes.push_back({ (u8)attribute_location, GetAttributeComponentCount(attribute_type) });
+        deferredLightingPointPassProgram.vertex_input_layout.attributes.push_back({ (u8)attribute_location, GetAttributeComponentCount(attribute_type) });
     }
 
-    app->deferredLightingProgram_uGPosition = glGetUniformLocation(deferredLightingPassProgram.handle, "uGPosition");
-    app->deferredLightingProgram_uGNormals = glGetUniformLocation(deferredLightingPassProgram.handle, "uGNormals");
-    app->deferredLightingProgram_uGDiffuse = glGetUniformLocation(deferredLightingPassProgram.handle, "uGDiffuse");
+    app->deferredLightingPointProgram_uGPosition = glGetUniformLocation(deferredLightingPointPassProgram.handle, "uGPosition");
+    app->deferredLightingPointProgram_uGNormals = glGetUniformLocation(deferredLightingPointPassProgram.handle, "uGNormals");
+    app->deferredLightingPointProgram_uGDiffuse = glGetUniformLocation(deferredLightingPointPassProgram.handle, "uGDiffuse");
+
+    app->deferredLightingDirectionalPassProgramIdx = LoadProgram(app, "shaders.glsl", "DEFERRED_LIGHTING_PASS_DIRECTIONAL");
+    Program& deferredLightingDirectionalPassProgram = app->programs[app->deferredLightingDirectionalPassProgramIdx];
+
+    GLint deferred_lighting_directional_attribute_count;
+    glGetProgramiv(deferredLightingDirectionalPassProgram.handle, GL_ACTIVE_ATTRIBUTES, &deferred_lighting_directional_attribute_count);
+
+    for (int i = 0; i < deferred_lighting_directional_attribute_count; ++i)
+    {
+        GLchar attribute_name[32];
+        GLsizei attribute_length;
+        GLint attribute_size;
+        GLenum attribute_type;
+
+        glGetActiveAttrib(deferredLightingDirectionalPassProgram.handle, i, ARRAY_COUNT(attribute_name), &attribute_length, &attribute_size, &attribute_type, attribute_name);
+        GLint attribute_location = glGetAttribLocation(deferredLightingDirectionalPassProgram.handle, attribute_name);
+
+        ELOG("Attribute %s. Location: %d Type: %d", attribute_name, attribute_location, attribute_type);
+
+        deferredLightingDirectionalPassProgram.vertex_input_layout.attributes.push_back({ (u8)attribute_location, GetAttributeComponentCount(attribute_type) });
+    }
+
+    app->deferredLightingDirectionalProgram_uGPosition = glGetUniformLocation(deferredLightingDirectionalPassProgram.handle, "uGPosition");
+    app->deferredLightingDirectionalProgram_uGNormals = glGetUniformLocation(deferredLightingDirectionalPassProgram.handle, "uGNormals");
+    app->deferredLightingDirectionalProgram_uGDiffuse = glGetUniformLocation(deferredLightingDirectionalPassProgram.handle, "uGDiffuse");
 
     app->deferredLightProgramIdx = LoadProgram(app, "shaders.glsl", "LIGHT_VOLUME");
     Program& deferredLightProgram = app->programs[app->deferredLightProgramIdx];
@@ -803,7 +828,6 @@ void Gui(App* app)
 
 void Update(App* app)
 {
-    // TODO: Handle app->input keyboard/mouse here
     if (app->input.keys[K_W] == BUTTON_PRESSED)
     {
         app->camera.Move(Camera::MOVE::FORWARD);
@@ -880,7 +904,7 @@ void Update(App* app)
     // Local parameters
     for (u32 i = 0; i < app->entities.size(); ++i)
     {
-        AlignHead(app->cbuffer, app->uniform_block_alignment); // TODO correct name?
+        AlignHead(app->cbuffer, app->uniform_block_alignment);
 
         Entity& entity = app->entities[i];
 
@@ -1084,12 +1108,18 @@ void Render(App* app)
 
             glViewport(0, 0, app->displaySize.x, app->displaySize.y);
 
-            Program& deferredLightingPassProgram = app->programs[app->deferredLightingPassProgramIdx];
-            glUseProgram(deferredLightingPassProgram.handle);
+            glEnable(GL_BLEND);
+            glBlendEquation(GL_FUNC_ADD);
+            glBlendFunc(GL_ONE, GL_ONE);
 
-            glUniform1i(app->deferredLightingProgram_uGPosition, 1);
-            glUniform1i(app->deferredLightingProgram_uGNormals, 2);
-            glUniform1i(app->deferredLightingProgram_uGDiffuse, 3);
+            // First, point lights
+
+            Program& deferredLightingPointPassProgram = app->programs[app->deferredLightingPointPassProgramIdx];
+            glUseProgram(deferredLightingPointPassProgram.handle);
+
+            glUniform1i(app->deferredLightingPointProgram_uGPosition, 1);
+            glUniform1i(app->deferredLightingPointProgram_uGNormals, 2);
+            glUniform1i(app->deferredLightingPointProgram_uGDiffuse, 3);
 
             glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, app->positionAttachmentHandle);
@@ -1111,7 +1141,12 @@ void Render(App* app)
 
             glUseProgram(0);
 
-            // Render lights
+            // Second, directional lights
+
+
+
+            // Render light volumes
+
             Program& deferredLightProgram = app->programs[app->deferredLightProgramIdx];
             glUseProgram(deferredLightProgram.handle);
 
