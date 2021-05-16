@@ -326,12 +326,15 @@ void Init(App* app)
 
     app->LoadSphere();
 
-    app->entities.push_back({ TransformPositionRotationScale(vec3(0.0f, 0.0f, -20.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)),
-                              app->patrick_index });
-    app->entities.push_back({ TransformPositionRotationScale(vec3(-5.0f, 0.0f, -20.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)),
-                              app->patrick_index });
-    app->entities.push_back({ TransformPositionRotationScale(vec3(5.0f, 0.0f, -20.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)),
-                              app->patrick_index });
+    int elements_j = 5, elements_i = 5;
+    for (int j = -elements_j / 2; j < elements_j / 2; ++j)
+    {
+        for (int i = -elements_i / 2; i < elements_i / 2; ++i)
+        {
+            app->entities.push_back({ TransformPositionRotationScale(vec3(i * 7, 0.0f, j * 7),
+                60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)), app->patrick_index });
+        }
+    }
 
     app->lights.push_back({ LightType_Point, vec3(0.0f, 0.0f, 1.0f), vec3(1.0f, 0.0f, 0.0f), vec3(15.0f, 3.0f, -10.0f), 20.0, 1.0, true });
     app->lights.push_back({ LightType_Point, vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 10.0f), 10.0, 1.0, true });
