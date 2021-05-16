@@ -1117,17 +1117,17 @@ void Render(App* app)
             glUniformMatrix4fv(app->deferredLightProgram_uProjection, 1, GL_FALSE, &app->projection[0][0]);
             glUniformMatrix4fv(app->deferredLightProgram_uView, 1, GL_FALSE, &app->view[0][0]);
 
-            /*for (const Light& light : app->lights)
+            for (const Light& light : app->lights)
             {
                 glm::mat4 model = glm::mat4(1.0f);
                 model = glm::translate(model, light.position);
-                model = glm::scale(model, glm::vec3(10.0f));
+                model = glm::scale(model, glm::vec3(2.0f));
 
                 glUniformMatrix4fv(app->deferredLightProgram_uModel, 1, GL_FALSE, &model[0][0]);
                 glUniform3f(app->deferredLightProgram_uLightColor, light.color.r, light.color.g, light.color.b);
 
                 app->RenderSphere(app->sphere_vao, app->index_count);
-            }*/
+            }
 
             glUseProgram(0);
 

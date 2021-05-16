@@ -118,7 +118,7 @@ vec3 CalculateDirectionalLight(Light light)
     vec3 L = normalize(light.direction);
 
 	// Hardcoded specular parameter
-    vec3 specularMat = vec3(0.5);
+    vec3 specularMat = vec3(1.0);
 
 	// Diffuse
     float diffuseIntensity = max(0.0, dot(N,L));
@@ -136,7 +136,7 @@ vec3 CalculatePointLight(Light light)
 	vec3 N = normalize(vNormal);
 	vec3 L = normalize(light.position - vPosition);
 
-	float threshold = 1.0;
+	float threshold = 0.3;
 
 	float shadowIntensity = 1.0;
 
