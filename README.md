@@ -10,9 +10,9 @@ GitHub repository: Click [here](https://github.com/vsRushy/AGP_Project2).
 
 ### Camera navigation
 
-- **WASD:** Move camera Forward-Left-Backward-Right.
+- **WASD Keys:** Move camera Forward-Left-Backward-Right.
 
-- **RF:** Move camera Up-Down.
+- **RF Keys:** Move camera Up-Down.
 
 - **Left Click (hold):** Rotate camera.
 
