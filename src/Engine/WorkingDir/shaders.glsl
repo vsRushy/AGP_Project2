@@ -321,9 +321,9 @@ uniform sampler2D uGDiffuse;
 
 layout(location = 0) out vec4 oFinalRender;
 
-vec3 CalculateDirectionalLight(Light light, vec3 Normal)
+vec3 CalculateDirectionalLight(Light light, vec3 Normal, vec3 Diffuse)
 {
-	vec3 N = normalize(Normal);
+	/*vec3 N = normalize(Normal);
     vec3 L = normalize(light.direction);
 
 	// Hardcoded specular parameter
@@ -337,7 +337,12 @@ vec3 CalculateDirectionalLight(Light light, vec3 Normal)
     vec3 specular = specularMat * specularIntensity;
 
 
-	return (diffuseIntensity + specular) * light.intensity * light.color;
+	return (diffuseIntensity + specular) * light.intensity * light.color;*/
+	float cosAngle = max(dot(Normal, -light.direction), 0.0); 
+    vec3 ambient = 0.1 * light.color;
+    vec3 diffuse = 0.9 * light.color * cosAngle;
+
+    return (ambient + diffuse) * Diffuse;
 }
 
 vec3 CalculatePointLight(Light light, vec3 FragPos, vec3 Normal)
@@ -374,21 +379,26 @@ void main()
     vec3 Normal = texture(uGNormals, vTexCoord).rgb;
     vec3 Diffuse = texture(uGDiffuse, vTexCoord).rgb;
 
-	vec3 lighting = vec3(0.0);
+	vec3 viewDir = normalize(uCameraPosition - FragPos);
 
+	vec3 lighting = Diffuse * 0.1;
     for(int i = 0; i < uLightCount; ++i)
     {
 		switch(uLight[i].type)
 		{
 			case 0: // Directional
 			{
-                lighting += CalculateDirectionalLight(uLight[i], Normal);
+                lighting += CalculateDirectionalLight(uLight[i], Normal, Diffuse);
 			}
 			break;
 
 			case 1: // Point
 			{
-				lighting += CalculatePointLight(uLight[i], FragPos, Normal);
+				float distance = length(uLight[i].position - FragPos);
+				if(distance < uLight[i].radius)
+				{
+					lighting += CalculatePointLight(uLight[i], FragPos, Normal);
+				}
 			}
 			break;
 
