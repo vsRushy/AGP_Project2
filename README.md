@@ -2,7 +2,7 @@
 
 ## About
 
-This project consists in creating a deferred renderer.
+This project consists in creating a deferred renderer for the second assignment of the Advanced Graphics Programming subject at UPC.
 
 **GitHub repository:** Click [here](https://github.com/vsRushy/AGP_Project2).
 
