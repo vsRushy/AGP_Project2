@@ -336,12 +336,13 @@ void Init(App* app)
         }
     }
 
+
     app->lights.push_back({ LightType_Point, vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(0.0f, 20.0f, 0.0f), 20.0, 1.0, true });
-    app->lights.push_back({ LightType_Point, vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(-50.0f, 20.0f, 50.0f), 20.0, 1.5, true });
+  /*  app->lights.push_back({ LightType_Point, vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(-50.0f, 20.0f, 50.0f), 20.0, 1.5, true });
     app->lights.push_back({ LightType_Point, vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(50.0f, 20.0f, -50.0f), 20.0, 1.2, true });
     
     app->lights.push_back({ LightType_Directional, vec3(1.0f, 1.0f, 1.0f), vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, 10.0f, -5.0f), 0.0f, 0.5f, true });
-    app->lights.push_back({ LightType_Directional, vec3(0.9f, 0.7f, 0.5f), vec3(0.0f, 1.0f, 0.0f), vec3(5.0f, -10.0f, 0.0f), 0.0f, 0.7f, true });
+    app->lights.push_back({ LightType_Directional, vec3(0.9f, 0.7f, 0.5f), vec3(0.0f, 1.0f, 0.0f), vec3(5.0f, -10.0f, 0.0f), 0.0f, 0.7f, true });*/
 
     /* FORWARD RENDERING SHADER */
 
@@ -460,7 +461,7 @@ void Init(App* app)
 
     glGenTextures(1, &app->positionAttachmentHandle);
     glBindTexture(GL_TEXTURE_2D, app->positionAttachmentHandle);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, app->displaySize.x, app->displaySize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, app->displaySize.x, app->displaySize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
@@ -470,7 +471,7 @@ void Init(App* app)
 
     glGenTextures(1, &app->normalsAttachmentHandle);
     glBindTexture(GL_TEXTURE_2D, app->normalsAttachmentHandle);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, app->displaySize.x, app->displaySize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, app->displaySize.x, app->displaySize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
