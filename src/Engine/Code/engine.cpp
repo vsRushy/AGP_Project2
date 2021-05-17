@@ -343,8 +343,8 @@ void Init(App* app)
     app->lights.push_back({ LightType_Point, vec3(1.0f, 0.0f, 1.0f), vec3(1.0f, 0.0f, 0.0f), vec3(50.0f, 5.0f, 50.0f), 50.0, 0.44, true });
 
     
-    /*app->lights.push_back({ LightType_Directional, vec3(1.0f, 1.0f, 1.0f), vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, 10.0f, -5.0f), 0.0f, 0.5f, true });
-    app->lights.push_back({ LightType_Directional, vec3(0.9f, 0.7f, 0.5f), vec3(0.0f, 1.0f, 0.0f), vec3(5.0f, -10.0f, 0.0f), 0.0f, 0.7f, true });*/
+    app->lights.push_back({ LightType_Directional, vec3(1.0f, 1.0f, 1.0f), vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, 10.0f, -50.0f), 0.0f, 0.2f, true });
+    app->lights.push_back({ LightType_Directional, vec3(0.9f, 0.7f, 0.5f), vec3(0.0f, 1.0f, 0.0f), vec3(50.0f, -10.0f, 20.0f), 0.0f, 0.2f, true });
 
     /* FORWARD RENDERING SHADER */
 
