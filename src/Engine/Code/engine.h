@@ -274,14 +274,18 @@ struct Buffer
 enum Mode
 {
     Mode_TexturedQuad,
-    Mode_Count
+    Mode_Count,
+    Mode_Deferred,
 };
 
 enum class FboAttachmentType
 {
-    FinalRender,
+    Position,
     Normals,
+    Diffuse,
     Depth,
+
+    FinalRender, // Used only in the lighting pass FBO
 };
 
 struct App
@@ -296,6 +300,8 @@ struct App
     // Graphics
     OpenGLInfo opengl_info;
 
+    bool focused = false;
+
     ivec2 displaySize;
 
     std::vector<Texture>    textures;
@@ -309,6 +315,10 @@ struct App
     // program indices
     u32 texturedGeometryProgramIdx;
     u32 texturedMeshProgramIdx;
+
+    u32 deferredGeometryPassProgramIdx;
+    u32 deferredLightingPassProgramIdx;
+    u32 deferredLightProgramIdx;
     
     // texture indices
     u32 diceTexIdx;
@@ -335,7 +345,18 @@ struct App
     GLuint programUniformTexture;
 
     // More Uniforms
-    GLint texturedMeshProgram_uTexture;
+    GLint texturedMeshProgram_uTexture; // Forward rendering
+
+    GLint deferredGeometryProgram_uTexture; // Deferred geometry pass
+
+    GLint deferredLightingProgram_uGPosition; // Lighting geometry pass
+    GLint deferredLightingProgram_uGNormals; // Lighting geometry pass
+    GLint deferredLightingProgram_uGDiffuse; // Lighting geometry pass
+
+    GLint deferredLightProgram_uProjection; // Projection matrix for deferred shading light
+    GLint deferredLightProgram_uView; // View matrix for deferred shading light
+    GLint deferredLightProgram_uModel; // Model matrix for deferred shading light
+    GLint deferredLightProgram_uLightColor; // Light volume for deferred shading
 
     // VAO object to link our screen filling quad with our textured quad shader
     GLuint vao;
@@ -344,10 +365,14 @@ struct App
     u32 patrick_index;
 
     // Framebuffer
-    GLuint frameBufferHandle;
-    GLuint colorAttachmentHandle;
-    GLuint colorAttachmentHandle1;
+    GLuint gBuffer; // Used at geometry pass
+    GLuint positionAttachmentHandle;
+    GLuint normalsAttachmentHandle;
+    GLuint diffuseAttachmentHandle;
     GLuint depthAttachmentHandle;
+
+    GLuint fBuffer; // Used at lighting pass
+    GLuint finalRenderAttachmentHandle;
 
     FboAttachmentType currentFboAttachment;
 
@@ -357,11 +382,25 @@ struct App
     u32 globalParamsOffset;
     u32 globalParamsSize;
 
+    glm::mat4 view;
+    glm::mat4 projection;
+
     // Uniform buffer
     GLint max_uniform_buffer_size;
     GLint uniform_block_alignment;
 
-    bool focused = false;
+    // Screen quad
+    GLuint quad_vao = 0u;
+    GLuint quad_vbo;
+
+    void RenderQuad();
+
+    // Sphere
+    GLuint sphere_vao = 0u;
+    u32 index_count;
+
+    void LoadSphere();
+    void RenderSphere(const GLuint& vao, const u32& index_count);
 };
 
 void Init(App* app);
