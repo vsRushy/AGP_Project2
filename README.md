@@ -4,7 +4,7 @@
 
 This project consists in creating a deferred renderer.
 
-GitHub repository: Click [here](https://github.com/vsRushy/AGP_Project2).
+**GitHub repository:** Click [here](https://github.com/vsRushy/AGP_Project2).
 
 ## Controls
 
