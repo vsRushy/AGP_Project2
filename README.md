@@ -4,20 +4,24 @@
 
 This project consists in creating a deferred renderer.
 
+GitHub repository: Click [here](https://github.com/vsRushy/AGP_Project2).
+
 ## Controls
 
 ### Camera navigation
 
-- WASD: Move camera Forward-Left-Backward-Right
+- **WASD:** Move camera Forward-Left-Backward-Right.
 
-- RF: Move camera Up-Down
+- **RF:** Move camera Up-Down.
 
-- Left Click (hold): Rotate camera
+- **Left Click (hold):** Rotate camera.
 
-- Scrollwheel: Zoom In - Zoom Out
+- **Scroll Wheel:** Zoom In - Zoom Out.
 
 ## Authors
 
-- Marcos Freixas, Gerard
+- Marcos Freixas, Gerard.
+  - **GitHub account:** Click [here](https://github.com/vsRushy).
 
-- Recasens Sarrà, Pol
+- Recasens Sarrà, Pol.
+  - **GitHub account:** Click [here](https://github.com/PolRecasensSarra).
