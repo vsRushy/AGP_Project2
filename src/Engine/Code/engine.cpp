@@ -1092,6 +1092,7 @@ void Render(App* app)
 
             glBindFramebuffer(GL_FRAMEBUFFER, app->fBuffer);
 
+            glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
 
             GLenum drawBuffersFBuffer[] = { GL_COLOR_ATTACHMENT3 };
