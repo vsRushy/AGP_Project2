@@ -448,12 +448,12 @@ void LogString(const char* str)
 
 float GenerateRandomFloat(const float& min, const float& max)
 {
-    std::random_device rd;
-    std::default_random_engine generator(rd());
-    std::uniform_real_distribution<float> distribution(min, max);
+    static std::random_device rd;
+    static std::default_random_engine generator(rd());
+    static std::uniform_real_distribution<float> distribution(min, max);
 
-    double number = distribution(generator);
-    printf("%f", number);
+    float number = distribution(generator);
 
-    return (float)number;
+    return number;
 }
+

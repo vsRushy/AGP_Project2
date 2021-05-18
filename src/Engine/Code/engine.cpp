@@ -326,23 +326,35 @@ void Init(App* app)
 
     app->LoadSphere();
 
-    int elements_j_patricks = 5, elements_i_patricks = 5;
+    int elements_j_patricks = 6, elements_i_patricks = 6;
     for (int j = -elements_j_patricks / 2; j <= elements_j_patricks / 2; ++j)
     {
         for (int i = -elements_i_patricks / 2; i <= elements_i_patricks / 2; ++i)
         {
-            app->entities.push_back({ TransformPositionRotationScale(vec3(i * 35, 0.0f, j * 35),
+            app->entities.push_back({ TransformPositionRotationScale(vec3(i * 30, 0.0f, j * 30),
                 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)), app->patrick_index });
         }
     }
 
+    int elements_j_lights = 6, elements_i_lights = 6;
+    for (int j = -elements_j_lights / 2; j <= elements_j_lights / 2; ++j)
+    {
+        for (int i = -elements_i_lights / 2; i <= elements_i_lights / 2; ++i)
+        {
+            app->lights.push_back({ LightType_Point, vec3(GenerateRandomFloat(0.0f, 1.0f), GenerateRandomFloat(0.0f, 0.75f), GenerateRandomFloat(0.0f, 0.5f)),
+                vec3(1.0f, 0.0f, 0.0f), vec3(i * 30 + 10, 3.0f, j * 30), 50.0, 1.0, true });
+        }
+    }
+
+    /*
     app->lights.push_back({ LightType_Point, vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(0.0f, 20.0f, 0.0f), 50.0, 1.0, true });
     app->lights.push_back({ LightType_Point, vec3(0.0f, 1.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(-50.0f, 5.0f, 50.0f), 70.0, 0.6, true });
     app->lights.push_back({ LightType_Point, vec3(0.0f, 0.0f, 1.0f), vec3(1.0f, 0.0f, 0.0f), vec3(50.0f, 7.0f, -50.0f), 50.0, 0.75, true });
     app->lights.push_back({ LightType_Point, vec3(1.0f, 0.0f, 1.0f), vec3(1.0f, 0.0f, 0.0f), vec3(50.0f, 5.0f, 50.0f), 50.0, 0.44, true });
-    
-    app->lights.push_back({ LightType_Directional, vec3(1.0f, 1.0f, 1.0f), vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, 10.0f, -50.0f), 0.0f, 0.2f, true });
-    app->lights.push_back({ LightType_Directional, vec3(0.9f, 0.7f, 0.5f), vec3(0.0f, 1.0f, 0.0f), vec3(50.0f, -10.0f, 20.0f), 0.0f, 0.2f, true });
+    */
+
+    app->lights.push_back({ LightType_Directional, vec3(1.0f, 1.0f, 1.0f), vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, 45.0f, -50.0f), 0.0f, 0.2f, true });
+    app->lights.push_back({ LightType_Directional, vec3(0.9f, 0.7f, 0.5f), vec3(0.0f, 1.0f, 0.0f), vec3(50.0f, 40.0f, 20.0f), 0.0f, 0.2f, true });
 
     /* FORWARD RENDERING SHADER */
 
