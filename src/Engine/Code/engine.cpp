@@ -1146,7 +1146,13 @@ void Render(App* app)
                 glUniformMatrix4fv(app->deferredLightProgram_uModel, 1, GL_FALSE, &model[0][0]);
                 glUniform3f(app->deferredLightProgram_uLightColor, light.color.r, light.color.g, light.color.b);
 
-                app->RenderSphere(app->sphere_vao, app->index_count);
+                switch (light.type)
+                {
+                case LightType_Point: app->RenderSphere(app->sphere_vao, app->index_count); break;
+                case LightType_Directional: app->RenderQuad(); break;
+
+                default: break;
+                }
             }
 
             glUseProgram(0);
