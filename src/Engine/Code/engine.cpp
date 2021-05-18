@@ -718,11 +718,8 @@ void Gui(App* app)
             if (app->lights[i].type == LightType::LightType_Directional) type = ("Directional Light " + std::to_string(i));
             else  type = ("Point Light " + std::to_string(i));
 
-            if (ImGui::TreeNode(type.c_str())) {
-                //Active
-                ImGui::Checkbox("Active", &app->lights[i].active);
-                ImGui::Spacing();
-
+            if (ImGui::TreeNode(type.c_str()))
+            {
                 //Color
                 float col1[3] = { app->lights[i].color.r, app->lights[i].color.g, app->lights[i].color.b };
                 ImGui::ColorEdit3("Color", col1);
