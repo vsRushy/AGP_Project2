@@ -467,7 +467,7 @@ void Init(App* app)
     app->cbuffer = CreateConstantBuffer(app->max_uniform_buffer_size);
 
     // Framebuffer
-    app->currentFboAttachment = FboAttachmentType::Position;
+    app->currentFboAttachment = FboAttachmentType::FinalRender;
 
     /* Geometry pass framebuffer */
 
@@ -683,7 +683,7 @@ void Gui(App* app)
     ImGui::Separator();
 
     const char* items[] = { "Position", "Normals", "Diffuse", "Depth", "Final Render" };
-    static const char* current_item = items[0];
+    static const char* current_item = items[4];
     if (ImGui::BeginCombo("##combo", current_item))
     {
         for (int n = 0; n < IM_ARRAYSIZE(items); n++)
