@@ -449,6 +449,41 @@ void main()
 #endif
 #endif
 
+#ifdef SKYBOX
+
+#if defined(VERTEX) ///////////////////////////////////////////////////
+
+layout (location = 0) in vec3 aPosition;
+
+uniform mat4 uProjection;
+uniform mat4 uView;
+//uniform mat4 uModel;
+
+out vec3 vTexCoord;
+
+void main()
+{
+	vTexCoord = aPosition;
+	gl_Position = uProjection * uView /** uModel*/ * vec4(aPosition, 1.0);
+}
+
+#elif defined(FRAGMENT) ///////////////////////////////////////////////
+
+uniform samplerCube uSkybox;
+
+in vec3 vTexCoord;
+
+layout(location = 0) out vec4 oFragColor;
+
+void main()
+{
+	oFragColor = texture(uSkybox, vTexCoord);
+}
+
+
+#endif
+#endif
+
 
 // NOTE: You can write several shaders in the same file if you want as
 // long as you embrace them within an #ifdef block (as you can see above).

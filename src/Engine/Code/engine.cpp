@@ -459,6 +459,29 @@ void Init(App* app)
     app->deferredLightProgram_uModel = glGetUniformLocation(deferredLightProgram.handle, "uModel");
     app->deferredLightProgram_uLightColor = glGetUniformLocation(deferredLightProgram.handle, "uLightColor");
 
+    app->skyboxProgramIdx = LoadProgram(app, "shaders.glsl", "SKYBOX");
+    Program& skyboxProgram = app->programs[app->skyboxProgramIdx];
+
+    GLint skybox_attribute_count;
+    glGetProgramiv(skyboxProgram.handle, GL_ACTIVE_ATTRIBUTES, &skybox_attribute_count);
+
+    for (int i = 0; i < skybox_attribute_count; ++i)
+    {
+        GLchar attribute_name[32];
+        GLsizei attribute_length;
+        GLint attribute_size;
+        GLenum attribute_type;
+
+        glGetActiveAttrib(skyboxProgram.handle, i, ARRAY_COUNT(attribute_name), &attribute_length, &attribute_size, &attribute_type, attribute_name);
+        GLint attribute_location = glGetAttribLocation(skyboxProgram.handle, attribute_name);
+
+        ELOG("Attribute %s. Location: %d Type: %d", attribute_name, attribute_location, attribute_type);
+
+        skyboxProgram.vertex_input_layout.attributes.push_back({ (u8)attribute_location, GetAttributeComponentCount(attribute_type) });
+    }
+
+    app->skyboxProgram_uSkybox = glGetUniformLocation(skyboxProgram.handle, "uSkybox");
+
     /* --------- */
 
     glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &app->max_uniform_buffer_size);
@@ -582,6 +605,7 @@ void Init(App* app)
     app->mode = Mode_Deferred;
 
     /* Cubemap */
+
     std::vector<std::string> faces = {
         "Cubemap/right.jpg",
         "Cubemap/left.jpg",
@@ -592,6 +616,58 @@ void Init(App* app)
     };
 
     app->cubemap = app->LoadCubemap(faces);
+
+    float skybox_vertices[] = {
+        -1.0f,  1.0f, -1.0f,
+        -1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+         1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+
+        -1.0f, -1.0f,  1.0f,
+        -1.0f, -1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f,  1.0f,
+        -1.0f, -1.0f,  1.0f,
+
+         1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+
+        -1.0f, -1.0f,  1.0f,
+        -1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f, -1.0f,  1.0f,
+        -1.0f, -1.0f,  1.0f,
+
+        -1.0f,  1.0f, -1.0f,
+         1.0f,  1.0f, -1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+        -1.0f,  1.0f,  1.0f,
+        -1.0f,  1.0f, -1.0f,
+
+        -1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f,  1.0f,
+         1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f,  1.0f,
+         1.0f, -1.0f,  1.0f
+    };
+
+    glGenVertexArrays(1, &app->skybox_vao);
+    glGenBuffers(1, &app->skybox_vbo);
+    glBindVertexArray(app->skybox_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, app->skybox_vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(skybox_vertices), &skybox_vertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 }
 
 void Gui(App* app)

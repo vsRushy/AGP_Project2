@@ -319,6 +319,8 @@ struct App
     u32 deferredGeometryPassProgramIdx;
     u32 deferredLightingPassProgramIdx;
     u32 deferredLightProgramIdx;
+
+    u32 skyboxProgramIdx;
     
     // texture indices
     u32 diceTexIdx;
@@ -357,6 +359,8 @@ struct App
     GLint deferredLightProgram_uView; // View matrix for deferred shading light
     GLint deferredLightProgram_uModel; // Model matrix for deferred shading light
     GLint deferredLightProgram_uLightColor; // Light volume for deferred shading
+
+    GLint skyboxProgram_uSkybox;
 
     // VAO object to link our screen filling quad with our textured quad shader
     GLuint vao;
@@ -405,6 +409,7 @@ struct App
     // Cubemap
     GLuint cubemap;
     GLuint LoadCubemap(const std::vector<std::string>& faces);
+    GLuint skybox_vao, skybox_vbo;
 };
 
 void Init(App* app);
