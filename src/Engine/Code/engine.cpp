@@ -580,6 +580,18 @@ void Init(App* app)
     }
 
     app->mode = Mode_Deferred;
+
+    /* Cubemap */
+    std::vector<std::string> faces = {
+        "Cubemap/right.jpg",
+        "Cubemap/left.jpg",
+        "Cubemap/top.jpg",
+        "Cubemap/bottom.jpg",
+        "Cubemap/front.jpg",
+        "Cubemap/back.jpg",
+    };
+
+    app->cubemap = app->LoadCubemap(faces);
 }
 
 void Gui(App* app)
@@ -1361,4 +1373,37 @@ void App::RenderSphere(const GLuint& vao, const u32& index_count)
     glDrawElements(GL_TRIANGLE_STRIP, index_count, GL_UNSIGNED_INT, 0);
 
     glBindVertexArray(0);
+}
+
+GLuint App::LoadCubemap(const std::vector<std::string>& faces)
+{
+    GLuint textureID;
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+
+    int width, height, nrChannels;
+    for (unsigned int i = 0; i < faces.size(); i++)
+    {
+        unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
+        if (data)
+        {
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+                0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
+            );
+
+            stbi_image_free(data);
+        }
+        else
+        {
+            stbi_image_free(data);
+        }
+    }
+
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    return textureID;
 }

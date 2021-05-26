@@ -401,6 +401,10 @@ struct App
 
     void LoadSphere();
     void RenderSphere(const GLuint& vao, const u32& index_count);
+
+    // Cubemap
+    GLuint cubemap;
+    GLuint LoadCubemap(const std::vector<std::string>& faces);
 };
 
 void Init(App* app);
