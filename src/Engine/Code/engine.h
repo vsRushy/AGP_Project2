@@ -360,6 +360,8 @@ struct App
     GLint deferredLightProgram_uModel; // Model matrix for deferred shading light
     GLint deferredLightProgram_uLightColor; // Light volume for deferred shading
 
+    GLint skyboxProgram_uProjection;
+    GLint skyboxProgram_uView;
     GLint skyboxProgram_uSkybox;
 
     // VAO object to link our screen filling quad with our textured quad shader

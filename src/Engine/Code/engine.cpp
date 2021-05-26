@@ -480,6 +480,8 @@ void Init(App* app)
         skyboxProgram.vertex_input_layout.attributes.push_back({ (u8)attribute_location, GetAttributeComponentCount(attribute_type) });
     }
 
+    app->skyboxProgram_uProjection = glGetUniformLocation(skyboxProgram.handle, "uProjection");
+    app->skyboxProgram_uView = glGetUniformLocation(skyboxProgram.handle, "uView");
     app->skyboxProgram_uSkybox = glGetUniformLocation(skyboxProgram.handle, "uSkybox");
 
     /* --------- */
@@ -983,7 +985,7 @@ void Update(App* app)
     // Local parameters
     for (u32 i = 0; i < app->entities.size(); ++i)
     {
-        AlignHead(app->cbuffer, app->uniform_block_alignment); // TODO correct name?
+        AlignHead(app->cbuffer, app->uniform_block_alignment);
 
         Entity& entity = app->entities[i];
 
@@ -1241,6 +1243,34 @@ void Render(App* app)
             }
 
             glUseProgram(0);
+
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+            glBindFramebuffer(GL_FRAMEBUFFER, app->fBuffer);
+
+            // Skybox
+
+            Program& skyboxProgram = app->programs[app->skyboxProgramIdx];
+            glUseProgram(skyboxProgram.handle);
+
+            glDepthFunc(GL_LEQUAL);
+
+            glUniformMatrix4fv(app->skyboxProgram_uProjection, 1, GL_FALSE, &app->projection[0][0]);
+            glm::mat4 view_no_translation = glm::mat4(glm::mat3(app->view)); // No translation
+            glUniformMatrix4fv(app->skyboxProgram_uView, 1, GL_FALSE, &view_no_translation[0][0]);
+
+            glUniform1i(app->skyboxProgram_uSkybox, 4);
+
+            glBindVertexArray(app->skybox_vao);
+
+            glActiveTexture(GL_TEXTURE4);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, app->cubemap);
+
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+
+            glBindVertexArray(0);
+
+            glDepthFunc(GL_LESS);
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
