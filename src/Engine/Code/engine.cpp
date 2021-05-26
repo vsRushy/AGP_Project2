@@ -670,6 +670,8 @@ void Init(App* app)
     glBufferData(GL_ARRAY_BUFFER, sizeof(skybox_vertices), &skybox_vertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+    glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 }
 
 void Gui(App* app)
@@ -1246,14 +1248,20 @@ void Render(App* app)
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+            // Skybox
+
             glBindFramebuffer(GL_FRAMEBUFFER, app->fBuffer);
 
-            // Skybox
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             Program& skyboxProgram = app->programs[app->skyboxProgramIdx];
             glUseProgram(skyboxProgram.handle);
 
+            glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_LEQUAL);
+            glDepthMask(GL_FALSE);
+
+            glDisable(GL_BLEND);
 
             glUniformMatrix4fv(app->skyboxProgram_uProjection, 1, GL_FALSE, &app->projection[0][0]);
             glm::mat4 view_no_translation = glm::mat4(glm::mat3(app->view)); // No translation
@@ -1270,7 +1278,10 @@ void Render(App* app)
 
             glBindVertexArray(0);
 
+            glDepthMask(GL_TRUE);
             glDepthFunc(GL_LESS);
+
+            glUseProgram(0);
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }

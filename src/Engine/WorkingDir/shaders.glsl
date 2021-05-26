@@ -457,14 +457,15 @@ layout (location = 0) in vec3 aPosition;
 
 uniform mat4 uProjection;
 uniform mat4 uView;
-//uniform mat4 uModel;
 
 out vec3 vTexCoord;
 
 void main()
 {
 	vTexCoord = aPosition;
-	gl_Position = uProjection * uView /** uModel*/ * vec4(aPosition, 1.0);
+	vec4 pos = uProjection * uView * vec4(aPosition, 1.0);
+	//gl_Position = vec4(vec3(pos.x, pos.y , pos.z) / pos.w, pos.w);
+	gl_Position = pos.xyww;
 }
 
 #elif defined(FRAGMENT) ///////////////////////////////////////////////
