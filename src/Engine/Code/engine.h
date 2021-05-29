@@ -371,6 +371,9 @@ struct App
     u32 patrick_index;
 
     // Framebuffer
+    GLuint forwardFrameBuffer;
+    GLuint renderAttachmentHandle;
+
     GLuint gBuffer; // Used at geometry pass
     GLuint positionAttachmentHandle;
     GLuint normalsAttachmentHandle;

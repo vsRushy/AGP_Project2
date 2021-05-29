@@ -492,6 +492,45 @@ void Init(App* app)
     app->cbuffer = CreateConstantBuffer(app->max_uniform_buffer_size);
 
     // Framebuffer
+    /* Forward */
+    glGenTextures(1, &app->renderAttachmentHandle);
+    glBindTexture(GL_TEXTURE_2D, app->renderAttachmentHandle);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, app->displaySize.x, app->displaySize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    glGenFramebuffers(1, &app->forwardFrameBuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, app->forwardFrameBuffer);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, app->renderAttachmentHandle, 0);
+
+    GLenum drawForwardBuffer[] = { GL_COLOR_ATTACHMENT0 };
+    glDrawBuffers(ARRAY_COUNT(drawForwardBuffer), drawForwardBuffer);
+
+    GLenum forwardFrameBufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (forwardFrameBufferStatus != GL_FRAMEBUFFER_COMPLETE)
+    {
+        switch (forwardFrameBufferStatus)
+        {
+        case GL_FRAMEBUFFER_UNDEFINED:                          ELOG("Framebuffer status error: GL_FRAMEBUFFER_UNDEFINED"); break;
+        case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:              ELOG("Framebuffer status error: GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT"); break;
+        case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:      ELOG("Framebuffer status error: GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT"); break;
+        case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:             ELOG("Framebuffer status error: GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER"); break;
+        case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:             ELOG("Framebuffer status error: GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER"); break;
+        case GL_FRAMEBUFFER_UNSUPPORTED:                        ELOG("Framebuffer status error: GL_FRAMEBUFFER_UNSUPPORTED"); break;
+        case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:             ELOG("Framebuffer status error: GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE"); break;
+        case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:           ELOG("Framebuffer status error: GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS"); break;
+
+        default: ELOG("Unknown framebuffer status error"); break;
+        }
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    /* Deferred */
     app->currentFboAttachment = FboAttachmentType::FinalRender;
 
     /* Geometry pass framebuffer */
@@ -604,7 +643,7 @@ void Init(App* app)
         }
     }
 
-    app->mode = Mode_Deferred;
+    app->mode = Mode_Count;
 
     /* Cubemap */
 
@@ -774,129 +813,156 @@ void Gui(App* app)
 
     ImGui::Separator();
 
-    const char* items[] = { "Position", "Normals", "Diffuse", "Depth", "Final Render" };
-    static const char* current_item = items[4];
-    if (ImGui::BeginCombo("##combo", current_item))
+    static bool is_deferred;
+    if (ImGui::Checkbox("Deferred", &is_deferred))
     {
-        for (int n = 0; n < IM_ARRAYSIZE(items); n++)
-        {
-            bool is_selected = (current_item == items[n]);
-            if (ImGui::Selectable(items[n], is_selected))
-                current_item = items[n];
-            if (is_selected)
-            {
-                ImGui::SetItemDefaultFocus();
-            }
-
-            if (strcmp(current_item, items[0]) == 0)
-                app->currentFboAttachment = FboAttachmentType::Position;
-            if (strcmp(current_item, items[1]) == 0)
-                app->currentFboAttachment = FboAttachmentType::Normals;
-            if (strcmp(current_item, items[2]) == 0)
-                app->currentFboAttachment = FboAttachmentType::Diffuse;
-            if (strcmp(current_item, items[3]) == 0)
-                app->currentFboAttachment = FboAttachmentType::Depth;
-            if (strcmp(current_item, items[4]) == 0)
-                app->currentFboAttachment = FboAttachmentType::FinalRender;
-        }
-        ImGui::EndCombo();
+        is_deferred ? app->mode = Mode_Deferred : app->mode = Mode_Count;
     }
+
     ImGui::Separator();
 
-    if (ImGui::TreeNode("Lights##2"))
+    if (app->mode == Mode_Deferred)
     {
-        for (int i = 0; i < app->lights.size(); ++i) {
-            std::string type;
-            if (app->lights[i].type == LightType::LightType_Directional) type = ("Directional Light " + std::to_string(i));
-            else  type = ("Point Light " + std::to_string(i));
-
-            if (ImGui::TreeNode(type.c_str()))
+        const char* items[] = { "Position", "Normals", "Diffuse", "Depth", "Final Render" };
+        static const char* current_item = items[4];
+        if (ImGui::BeginCombo("##combo", current_item))
+        {
+            for (int n = 0; n < IM_ARRAYSIZE(items); n++)
             {
-                //Color
-                float col1[3] = { app->lights[i].color.r, app->lights[i].color.g, app->lights[i].color.b };
-                ImGui::ColorEdit3("Color", col1);
-                app->lights[i].color.r = col1[0];
-                app->lights[i].color.g = col1[1];
-                app->lights[i].color.b = col1[2];
-
-                ImGui::Spacing();
-
-                //Intensity
-                float f1 = app->lights[i].intensity;
-                ImGui::DragFloat("Intensity", &f1, 0.01f, 0.0f, 0.0f, "%.06f");
-                if (f1 < 0.0f)f1 = 0.0f;
-                app->lights[i].intensity = f1;
-
-                ImGui::Spacing();
-
-                //position
-                ImGui::DragFloat3("Position", (float*)&app->lights[i].position, 0.01f);
-
-                ImGui::Spacing();
-
-                //Direction
-                ImGui::DragFloat3("Direction", (float*)&app->lights[i].direction, 0.01f);
-
-                ImGui::Spacing();
-
-                //Radius
-                if (app->lights[i].type == LightType::LightType_Point) {
-                    float f2 = app->lights[i].radius;
-                    ImGui::DragFloat("Radius", &f2, 0.01f, 0.0f, 0.0f, "%.06f");
-                    if (f2 < 0.0f)f2 = 0.0f;
-                    app->lights[i].radius = f2;
+                bool is_selected = (current_item == items[n]);
+                if (ImGui::Selectable(items[n], is_selected))
+                    current_item = items[n];
+                if (is_selected)
+                {
+                    ImGui::SetItemDefaultFocus();
                 }
 
-                ImGui::TreePop();
+                if (strcmp(current_item, items[0]) == 0)
+                    app->currentFboAttachment = FboAttachmentType::Position;
+                if (strcmp(current_item, items[1]) == 0)
+                    app->currentFboAttachment = FboAttachmentType::Normals;
+                if (strcmp(current_item, items[2]) == 0)
+                    app->currentFboAttachment = FboAttachmentType::Diffuse;
+                if (strcmp(current_item, items[3]) == 0)
+                    app->currentFboAttachment = FboAttachmentType::Depth;
+                if (strcmp(current_item, items[4]) == 0)
+                    app->currentFboAttachment = FboAttachmentType::FinalRender;
             }
+            ImGui::EndCombo();
         }
-
-        ImGui::TreePop();
         ImGui::Separator();
+
+        if (ImGui::TreeNode("Lights##2"))
+        {
+            for (int i = 0; i < app->lights.size(); ++i) {
+                std::string type;
+                if (app->lights[i].type == LightType::LightType_Directional) type = ("Directional Light " + std::to_string(i));
+                else  type = ("Point Light " + std::to_string(i));
+
+                if (ImGui::TreeNode(type.c_str()))
+                {
+                    //Color
+                    float col1[3] = { app->lights[i].color.r, app->lights[i].color.g, app->lights[i].color.b };
+                    ImGui::ColorEdit3("Color", col1);
+                    app->lights[i].color.r = col1[0];
+                    app->lights[i].color.g = col1[1];
+                    app->lights[i].color.b = col1[2];
+
+                    ImGui::Spacing();
+
+                    //Intensity
+                    float f1 = app->lights[i].intensity;
+                    ImGui::DragFloat("Intensity", &f1, 0.01f, 0.0f, 0.0f, "%.06f");
+                    if (f1 < 0.0f)f1 = 0.0f;
+                    app->lights[i].intensity = f1;
+
+                    ImGui::Spacing();
+
+                    //position
+                    ImGui::DragFloat3("Position", (float*)&app->lights[i].position, 0.01f);
+
+                    ImGui::Spacing();
+
+                    //Direction
+                    ImGui::DragFloat3("Direction", (float*)&app->lights[i].direction, 0.01f);
+
+                    ImGui::Spacing();
+
+                    //Radius
+                    if (app->lights[i].type == LightType::LightType_Point) {
+                        float f2 = app->lights[i].radius;
+                        ImGui::DragFloat("Radius", &f2, 0.01f, 0.0f, 0.0f, "%.06f");
+                        if (f2 < 0.0f)f2 = 0.0f;
+                        app->lights[i].radius = f2;
+                    }
+
+                    ImGui::TreePop();
+                }
+            }
+
+            ImGui::TreePop();
+            ImGui::Separator();
+        }
     }
-    
 
     ImGui::End();
     //------------------------------------------------------------------------------------------
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
     ImGui::Begin("Scene");
     ImVec2 size = ImGui::GetContentRegionAvail();
-
+    
     GLuint currentAttachment = 0;
-    switch (app->currentFboAttachment)
+    switch (app->mode)
     {
-        case FboAttachmentType::Position:
+    case Mode_Deferred:
+    {
+        switch (app->currentFboAttachment)
         {
-            currentAttachment = app->positionAttachmentHandle;
-        }
-        break;
+            case FboAttachmentType::Position:
+            {
+                currentAttachment = app->positionAttachmentHandle;
+            }
+            break;
 
-        case FboAttachmentType::Normals:
-        {
-            currentAttachment = app->normalsAttachmentHandle;
-        }
-        break;
+            case FboAttachmentType::Normals:
+            {
+                currentAttachment = app->normalsAttachmentHandle;
+            }
+            break;
 
-        case FboAttachmentType::Diffuse:
-        {
-            currentAttachment = app->diffuseAttachmentHandle;
-        }
-        break;
+            case FboAttachmentType::Diffuse:
+            {
+                currentAttachment = app->diffuseAttachmentHandle;
+            }
+            break;
 
-        case FboAttachmentType::Depth:
-        {
-            currentAttachment = app->depthAttachmentHandle;
-        }
-        break;
+            case FboAttachmentType::Depth:
+            {
+                currentAttachment = app->depthAttachmentHandle;
+            }
+            break;
 
-        case FboAttachmentType::FinalRender:
-        {
-            currentAttachment = app->finalRenderAttachmentHandle;
-        }
-        break;
+            case FboAttachmentType::FinalRender:
+            {
+                currentAttachment = app->finalRenderAttachmentHandle;
+            }
+            break;
 
-        default:
-        {} break;
+            default:
+            {} break;
+        }
+    }
+    break;
+
+    case Mode_Count:
+    {
+        currentAttachment = app->renderAttachmentHandle;
+    }
+    break;
+
+    default:
+    {} break;
+
     }
 
     ImGui::Image((ImTextureID)currentAttachment, size, { 0, 1 }, { 1, 0 });
@@ -1070,9 +1136,9 @@ void Render(App* app)
 
         case Mode_Count:
         {
-            glBindFramebuffer(GL_FRAMEBUFFER, app->gBuffer);
+            glBindFramebuffer(GL_FRAMEBUFFER, app->forwardFrameBuffer);
 
-            GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+            GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
             glDrawBuffers(ARRAY_COUNT(drawBuffers), drawBuffers);
 
             glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -1119,6 +1185,42 @@ void Render(App* app)
             glUseProgram(0);
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+            /* Skybox */
+            /*glBindFramebuffer(GL_FRAMEBUFFER, app->fBuffer);
+
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            Program& skyboxProgram = app->programs[app->skyboxProgramIdx];
+            glUseProgram(skyboxProgram.handle);
+
+            glEnable(GL_DEPTH_TEST);
+            glDepthFunc(GL_LEQUAL);
+            glDepthMask(GL_FALSE);
+
+            glDisable(GL_BLEND);
+
+            glUniformMatrix4fv(app->skyboxProgram_uProjection, 1, GL_FALSE, &app->projection[0][0]);
+            glm::mat4 view_no_translation = glm::mat4(glm::mat3(app->view)); // No translation
+            glUniformMatrix4fv(app->skyboxProgram_uView, 1, GL_FALSE, &view_no_translation[0][0]);
+
+            glUniform1i(app->skyboxProgram_uSkybox, 4);
+
+            glBindVertexArray(app->skybox_vao);
+
+            glActiveTexture(GL_TEXTURE4);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, app->cubemap);
+
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+
+            glBindVertexArray(0);
+
+            glDepthMask(GL_TRUE);
+            glDepthFunc(GL_LESS);
+
+            glUseProgram(0);
+
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);*/
         }
         break;
 
@@ -1243,43 +1345,6 @@ void Render(App* app)
                 default: break;
                 }
             }
-
-            glUseProgram(0);
-
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-            // Skybox
-
-            glBindFramebuffer(GL_FRAMEBUFFER, app->fBuffer);
-
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-            Program& skyboxProgram = app->programs[app->skyboxProgramIdx];
-            glUseProgram(skyboxProgram.handle);
-
-            glEnable(GL_DEPTH_TEST);
-            glDepthFunc(GL_LEQUAL);
-            glDepthMask(GL_FALSE);
-
-            glDisable(GL_BLEND);
-
-            glUniformMatrix4fv(app->skyboxProgram_uProjection, 1, GL_FALSE, &app->projection[0][0]);
-            glm::mat4 view_no_translation = glm::mat4(glm::mat3(app->view)); // No translation
-            glUniformMatrix4fv(app->skyboxProgram_uView, 1, GL_FALSE, &view_no_translation[0][0]);
-
-            glUniform1i(app->skyboxProgram_uSkybox, 4);
-
-            glBindVertexArray(app->skybox_vao);
-
-            glActiveTexture(GL_TEXTURE4);
-            glBindTexture(GL_TEXTURE_CUBE_MAP, app->cubemap);
-
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-
-            glBindVertexArray(0);
-
-            glDepthMask(GL_TRUE);
-            glDepthFunc(GL_LESS);
 
             glUseProgram(0);
 
