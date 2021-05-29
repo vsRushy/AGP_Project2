@@ -1330,8 +1330,14 @@ void Render(App* app)
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+            glEnable(GL_CLIP_DISTANCE0);
+
             Program& texturedMeshWithClippingProgram = app->programs[app->texturedMeshWithClippingProgramIdx];
             glUseProgram(texturedMeshWithClippingProgram.handle);
+
+            Camera reflectionCamera = app->camera;
+            reflectionCamera.position.y = -reflectionCamera.position.y;
+            reflectionCamera.pitch = -reflectionCamera.pitch;
 
             glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(0), app->cbuffer.handle, app->globalParamsOffset, app->globalParamsSize);
 
@@ -1366,6 +1372,8 @@ void Render(App* app)
             }
 
             glUseProgram(0);
+
+            glDisable(GL_CLIP_DISTANCE0);
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
