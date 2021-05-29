@@ -381,6 +381,14 @@ struct App
     GLuint renderAttachmentHandle;
     GLuint forwardDepthAttachmentHandle;
 
+    GLuint waterReflectionFrameBuffer;
+    GLuint waterReflectionColorAttachment;
+    GLuint waterReflectionDepthAttachment;
+
+    GLuint waterRefractionFrameBuffer;
+    GLuint waterRefractionColorAttachment;
+    GLuint waterRefractionDepthAttachment;
+
     GLuint gBuffer; // Used at geometry pass
     GLuint positionAttachmentHandle;
     GLuint normalsAttachmentHandle;
