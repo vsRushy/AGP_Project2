@@ -416,8 +416,8 @@ void Init(App* app)
         texturedMeshWithClippingProgram.vertex_input_layout.attributes.push_back({ (u8)attribute_location, GetAttributeComponentCount(attribute_type) });
     }
 
-    app->texturedMeshProgram_uTexture = glGetUniformLocation(texturedMeshWithClippingProgram.handle, "uTexture");
-    app->texturedMeshProgram_uSkybox = glGetUniformLocation(texturedMeshWithClippingProgram.handle, "uSkybox");
+    app->texturedMeshWithClippingProgram_uTexture = glGetUniformLocation(texturedMeshWithClippingProgram.handle, "uTexture");
+    app->texturedMeshWithClippingProgram_uSkybox = glGetUniformLocation(texturedMeshWithClippingProgram.handle, "uSkybox");
 
     app->waterMeshProgramIdx = LoadProgram(app, "shaders.glsl", "WATER_MESH");
     Program& waterMeshProgram = app->programs[app->waterMeshProgramIdx];
@@ -1330,8 +1330,8 @@ void Render(App* app)
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-            Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
-            glUseProgram(texturedMeshProgram.handle);
+            Program& texturedMeshWithClippingProgram = app->programs[app->texturedMeshWithClippingProgramIdx];
+            glUseProgram(texturedMeshWithClippingProgram.handle);
 
             glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(0), app->cbuffer.handle, app->globalParamsOffset, app->globalParamsSize);
 
@@ -1344,7 +1344,7 @@ void Render(App* app)
 
                 for (u32 i = 0; i < mesh.submeshes.size(); ++i)
                 {
-                    GLuint vao = FindVao(mesh, i, texturedMeshProgram);
+                    GLuint vao = FindVao(mesh, i, texturedMeshWithClippingProgram);
                     glBindVertexArray(vao);
 
                     u32 submesh_material_index = model.material_index[i];
@@ -1352,11 +1352,11 @@ void Render(App* app)
 
                     glActiveTexture(GL_TEXTURE0);
                     glBindTexture(GL_TEXTURE_2D, app->textures[submesh_material.albedo_texture_index].handle);
-                    glUniform1i(app->texturedMeshProgram_uTexture, 0);
+                    glUniform1i(app->texturedMeshWithClippingProgram_uTexture, 0);
 
                     glActiveTexture(GL_TEXTURE1);
                     glBindTexture(GL_TEXTURE_CUBE_MAP, app->cubemap);
-                    glUniform1i(app->texturedMeshProgram_uSkybox, 1);
+                    glUniform1i(app->texturedMeshWithClippingProgram_uSkybox, 1);
 
                     Submesh& submesh = mesh.submeshes[i];
                     glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.index_offset);
@@ -1419,7 +1419,7 @@ void Render(App* app)
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-            //Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
+            Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
             glUseProgram(texturedMeshProgram.handle);
             
             glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(0), app->cbuffer.handle, app->globalParamsOffset, app->globalParamsSize);

@@ -352,6 +352,9 @@ struct App
     GLint texturedMeshProgram_uTexture; // Forward rendering mesh texture
     GLint texturedMeshProgram_uSkybox; // Forward rendering skybox
 
+    GLint texturedMeshWithClippingProgram_uTexture;
+    GLint texturedMeshWithClippingProgram_uSkybox;
+
     GLint waterMeshProgram_uProjection;
     GLint waterMeshProgram_uView;
     GLint waterMeshProgram_uModel;
