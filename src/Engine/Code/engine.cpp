@@ -394,6 +394,31 @@ void Init(App* app)
 
     app->texturedMeshProgram_uTexture = glGetUniformLocation(texturedMeshProgram.handle, "uTexture");
     app->texturedMeshProgram_uSkybox = glGetUniformLocation(texturedMeshProgram.handle, "uSkybox");
+
+    app->waterMeshProgramIdx = LoadProgram(app, "shaders.glsl", "WATER_MESH");
+    Program& waterMeshProgram = app->programs[app->waterMeshProgramIdx];
+
+    GLint attribute_water_count;
+    glGetProgramiv(waterMeshProgram.handle, GL_ACTIVE_ATTRIBUTES, &attribute_water_count);
+
+    for (int i = 0; i < attribute_water_count; ++i)
+    {
+        GLchar attribute_name[32];
+        GLsizei attribute_length;
+        GLint attribute_size;
+        GLenum attribute_type;
+
+        glGetActiveAttrib(waterMeshProgram.handle, i, ARRAY_COUNT(attribute_name), &attribute_length, &attribute_size, &attribute_type, attribute_name);
+        GLint attribute_location = glGetAttribLocation(waterMeshProgram.handle, attribute_name);
+
+        ELOG("Attribute %s. Location: %d Type: %d", attribute_name, attribute_location, attribute_type);
+
+        waterMeshProgram.vertex_input_layout.attributes.push_back({ (u8)attribute_location, GetAttributeComponentCount(attribute_type) });
+    }
+
+    app->waterMeshProgram_uProjection = glGetUniformLocation(waterMeshProgram.handle, "uProjection");
+    app->waterMeshProgram_uView = glGetUniformLocation(waterMeshProgram.handle, "uView");
+    app->waterMeshProgram_uModel = glGetUniformLocation(waterMeshProgram.handle, "uModel");
     
     /* --------- */
 
@@ -1246,6 +1271,14 @@ void Render(App* app)
             glDepthFunc(GL_LESS);
 
             glUseProgram(0);
+
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+            // Water
+
+            glBindFramebuffer(GL_FRAMEBUFFER, app->forwardFrameBuffer);
+
+            
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }

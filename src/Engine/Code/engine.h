@@ -313,7 +313,9 @@ struct App
 
     // program indices
     u32 texturedGeometryProgramIdx;
+
     u32 texturedMeshProgramIdx;
+    u32 waterMeshProgramIdx;
 
     u32 deferredGeometryPassProgramIdx;
     u32 deferredLightingPassProgramIdx;
@@ -348,6 +350,10 @@ struct App
     // More Uniforms
     GLint texturedMeshProgram_uTexture; // Forward rendering mesh texture
     GLint texturedMeshProgram_uSkybox; // Forward rendering skybox
+
+    GLint waterMeshProgram_uProjection;
+    GLint waterMeshProgram_uView;
+    GLint waterMeshProgram_uModel;
 
     GLint deferredGeometryProgram_uTexture; // Deferred geometry pass
 
