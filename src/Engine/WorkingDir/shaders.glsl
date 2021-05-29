@@ -112,50 +112,15 @@ out float gl_FragDepth;
 
 vec3 CalculateDirectionalLight(Light light)
 {
-	vec3 N = normalize(vNormal);
-    vec3 L = normalize(light.direction);
-
-	// Hardcoded specular parameter
-    vec3 specularMat = vec3(1.0);
-
-	// Diffuse
-    float diffuseIntensity = max(0.0, dot(N,L));
-
-	// Specular
-    float specularIntensity = pow(max(0.0, dot(N, L)), 1.0);
-    vec3 specular = light.color * specularMat * specularIntensity;
-
-	return (diffuseIntensity + specular) * light.intensity;
+	return vec3(1.0);
 }
 
 vec3 CalculatePointLight(Light light)
 {
-	vec3 N = normalize(vNormal);
-	vec3 L = normalize(light.position - vPosition);
+	vec3 lightVector = normalize(light.position - vPosition);
+	float brightness = dot(lightVector, vNormal);
 
-	float threshold = 0.3;
-
-	float shadowIntensity = 1.0;
-
-	float dist = distance(light.position, vPosition);
-
-	if(dist > light.radius)
-		shadowIntensity = 1.0 - ((dist - light.radius) / threshold);
-
-	// Hardcoded specular parameter
-    vec3 specularMat = vec3(1.0);
-
-	// brightness
-	float brightness = dot(L, vNormal);
-
-	// Specular
-    float specularIntensity = pow(max(0.0, dot(N, L)), 1.0);
-    vec3 specular = light.color * specularMat * specularIntensity;
-
-	// Diffuse
-    float diffuseIntensity = max(0.0, dot(N,L));
-
-	return vec3(brightness) * (specular + diffuseIntensity) * shadowIntensity * light.intensity;
+	return vec3(brightness) * light.color;
 }
 
 void main()
