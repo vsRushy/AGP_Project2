@@ -1276,9 +1276,24 @@ void Render(App* app)
 
             // Water
 
+            Program& waterMeshProgram = app->programs[app->waterMeshProgramIdx];
+            glUseProgram(waterMeshProgram.handle);
+
             glBindFramebuffer(GL_FRAMEBUFFER, app->forwardFrameBuffer);
 
-            
+            glUniformMatrix4fv(app->waterMeshProgram_uProjection, 1, GL_FALSE, &app->projection[0][0]);
+            glUniformMatrix4fv(app->waterMeshProgram_uView, 1, GL_FALSE, &app->view[0][0]);
+
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, vec3(0.0f));
+            model = glm::rotate(model, glm::radians(90.0f), vec3(1.0f, 0.0f, 0.0f));
+            model = glm::scale(model, glm::vec3(100.0f));
+
+            glUniformMatrix4fv(app->waterMeshProgram_uModel, 1, GL_FALSE, &model[0][0]);
+
+            app->RenderQuad();
+
+            glUseProgram(0);
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
