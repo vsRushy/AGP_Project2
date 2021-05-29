@@ -166,6 +166,141 @@ void main()
 #endif
 #endif
 
+#ifdef SHOW_TEXTURED_MESH_WITH_CLIPPING
+
+#if defined(VERTEX) ///////////////////////////////////////////////////
+
+layout(location = 0) in vec3 aPosition;
+layout(location = 1) in vec3 aNormal;
+layout(location = 2) in vec2 aTexCoord;
+// layout(location = 3) in vec3 aTangent;
+// layout(location = 4) in vec3 aBitangent;
+
+struct Light
+{
+	unsigned int type;
+	vec3 color;
+	vec3 direction;
+	float intensity;
+	vec3 position;
+	float radius;
+};
+
+layout(binding = 0, std140) uniform GlobalParams
+{
+	vec3 uCameraPosition;
+	unsigned int uLightCount;
+	Light uLight[50];
+};
+
+layout(binding = 1, std140) uniform LocalParams
+{
+	mat4 uWorldMatrix;
+	mat4 uWorldViewProjectionMatrix;
+};
+
+out vec2 vTexCoord;
+out vec3 vPosition; // In worldspace
+out vec3 vNormal; // In worldspace
+out vec3 vViewDir; // In worldspace
+
+void main()
+{
+	vTexCoord = aTexCoord;
+	vPosition = vec3(uWorldMatrix * vec4(aPosition, 1.0));
+	vNormal = vec3(transpose(inverse(uWorldMatrix)) * vec4(aNormal, 1.0));
+	vViewDir = uCameraPosition - vPosition;
+
+	//gl_Position = uWorldViewProjectionMatrix * vec4(aPosition, 1.0);
+	gl_Position = uWorldViewProjectionMatrix * vec4(aPosition, 1.0);
+}
+
+#elif defined(FRAGMENT) ///////////////////////////////////////////////
+
+in vec2 vTexCoord;
+in vec3 vPosition;
+in vec3 vNormal;
+in vec3 vViewDir;
+
+struct Light
+{
+	unsigned int type;
+	vec3 color;
+	vec3 direction;
+	float intensity;
+	vec3 position;
+	float radius;
+};
+
+layout(binding = 0, std140) uniform GlobalParams
+{
+	vec3 uCameraPosition;
+	unsigned int uLightCount;
+	Light uLight[50];
+};
+
+uniform sampler2D uTexture;
+uniform samplerCube uSkybox;
+
+layout(location = 0) out vec4 oFinalRender;
+
+out float gl_FragDepth;
+
+vec3 CalculateDirectionalLight(Light light)
+{
+	return vec3(1.0);
+}
+
+vec3 CalculatePointLight(Light light)
+{
+	vec3 lightVector = normalize(light.position - vPosition);
+	float brightness = dot(lightVector, vNormal);
+
+	return vec3(brightness) * light.color;
+}
+
+void main()
+{
+	vec4 objectColor = texture(uTexture, vTexCoord);
+	vec4 spec = vec4(0.0);
+
+	vec3 lightFactor = vec3(0.0);
+	for(int i = 0; i < uLightCount; ++i)
+	{
+		switch(uLight[i].type)
+		{
+			case 0: // Directional
+			{
+				lightFactor += CalculateDirectionalLight(uLight[i]);
+			}
+			break;
+
+			case 1: // Point
+			{
+				lightFactor += CalculatePointLight(uLight[i]);
+			}
+			break;
+
+			default:
+			{
+				break;
+			}
+		}
+	}
+
+	vec3 I = normalize(vPosition - uCameraPosition);
+	vec3 R = reflect(I, normalize(vNormal));
+
+	vec4 reflections = vec4(texture(uSkybox, R).rgb, 1.0);
+	oFinalRender = mix(vec4(lightFactor, 1.0) * objectColor, reflections, 0.5);
+
+	gl_FragDepth = gl_FragCoord.z - 0.2;
+}
+
+
+#endif
+#endif
+
 #ifdef WATER_MESH
 
 #if defined(VERTEX) ///////////////////////////////////////////////////

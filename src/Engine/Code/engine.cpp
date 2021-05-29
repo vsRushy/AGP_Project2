@@ -395,6 +395,30 @@ void Init(App* app)
     app->texturedMeshProgram_uTexture = glGetUniformLocation(texturedMeshProgram.handle, "uTexture");
     app->texturedMeshProgram_uSkybox = glGetUniformLocation(texturedMeshProgram.handle, "uSkybox");
 
+    app->texturedMeshWithClippingProgramIdx = LoadProgram(app, "shaders.glsl", "SHOW_TEXTURED_MESH_WITH_CLIPPING");
+    Program& texturedMeshWithClippingProgram = app->programs[app->texturedMeshWithClippingProgramIdx];
+
+    GLint attribute_clipping_count;
+    glGetProgramiv(texturedMeshWithClippingProgram.handle, GL_ACTIVE_ATTRIBUTES, &attribute_clipping_count);
+
+    for (int i = 0; i < attribute_clipping_count; ++i)
+    {
+        GLchar attribute_name[32];
+        GLsizei attribute_length;
+        GLint attribute_size;
+        GLenum attribute_type;
+
+        glGetActiveAttrib(texturedMeshWithClippingProgram.handle, i, ARRAY_COUNT(attribute_name), &attribute_length, &attribute_size, &attribute_type, attribute_name);
+        GLint attribute_location = glGetAttribLocation(texturedMeshWithClippingProgram.handle, attribute_name);
+
+        ELOG("Attribute %s. Location: %d Type: %d", attribute_name, attribute_location, attribute_type);
+
+        texturedMeshWithClippingProgram.vertex_input_layout.attributes.push_back({ (u8)attribute_location, GetAttributeComponentCount(attribute_type) });
+    }
+
+    app->texturedMeshProgram_uTexture = glGetUniformLocation(texturedMeshWithClippingProgram.handle, "uTexture");
+    app->texturedMeshProgram_uSkybox = glGetUniformLocation(texturedMeshWithClippingProgram.handle, "uSkybox");
+
     app->waterMeshProgramIdx = LoadProgram(app, "shaders.glsl", "WATER_MESH");
     Program& waterMeshProgram = app->programs[app->waterMeshProgramIdx];
 

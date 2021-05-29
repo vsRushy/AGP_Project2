@@ -315,6 +315,7 @@ struct App
     u32 texturedGeometryProgramIdx;
 
     u32 texturedMeshProgramIdx;
+    u32 texturedMeshWithClippingProgramIdx;
     u32 waterMeshProgramIdx;
 
     u32 deferredGeometryPassProgramIdx;
