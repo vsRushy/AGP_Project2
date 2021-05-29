@@ -503,9 +503,20 @@ void Init(App* app)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glBindTexture(GL_TEXTURE_2D, 0);
 
+    glGenTextures(1, &app->forwardDepthAttachmentHandle);
+    glBindTexture(GL_TEXTURE_2D, app->forwardDepthAttachmentHandle);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, app->displaySize.x, app->displaySize.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
     glGenFramebuffers(1, &app->forwardFrameBuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, app->forwardFrameBuffer);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, app->renderAttachmentHandle, 0);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, app->forwardDepthAttachmentHandle, 0);
 
     GLenum drawForwardBuffer[] = { GL_COLOR_ATTACHMENT0 };
     glDrawBuffers(ARRAY_COUNT(drawForwardBuffer), drawForwardBuffer);
@@ -1187,7 +1198,7 @@ void Render(App* app)
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
             /* Skybox */
-            /*glBindFramebuffer(GL_FRAMEBUFFER, app->fBuffer);
+            glBindFramebuffer(GL_FRAMEBUFFER, app->forwardFrameBuffer);
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -1220,7 +1231,7 @@ void Render(App* app)
 
             glUseProgram(0);
 
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);*/
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
         break;
 

@@ -373,6 +373,7 @@ struct App
     // Framebuffer
     GLuint forwardFrameBuffer;
     GLuint renderAttachmentHandle;
+    GLuint forwardDepthAttachmentHandle;
 
     GLuint gBuffer; // Used at geometry pass
     GLuint positionAttachmentHandle;
