@@ -153,13 +153,11 @@ void main()
 		}
 	}
 
-	//oFinalRender = vec4(lightFactor, 1.0) * objectColor;
-
 	vec3 I = normalize(vPosition - uCameraPosition);
 	vec3 R = reflect(I, normalize(vNormal));
 
-	oFinalRender = vec4(texture(uSkybox, R).rgb, 1.0);
-	//oFinalRender = vec4(lightFactor, 1.0) * objectColor;
+	vec4 reflections = vec4(texture(uSkybox, R).rgb, 1.0);
+	oFinalRender = mix(vec4(lightFactor, 1.0) * objectColor, reflections, 0.5);
 
 	gl_FragDepth = gl_FragCoord.z - 0.2;
 }
