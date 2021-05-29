@@ -333,9 +333,9 @@ void Init(App* app)
     app->entities.push_back({ TransformPositionRotationScale(vec3(5.0f, 0.0f, -20.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)),
                               app->patrick_index });
 
-    app->lights.push_back({ LightType_Point, vec3(1.0f, 1.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(0.0f, 5.0f, 0.0f) });
-    app->lights.push_back({ LightType_Point, vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(5.0f, 7.0f, 0.0f) });
-    app->lights.push_back({ LightType_Directional, vec3(1.0f, 1.0f, 1.0f), vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, 10.0f, -3.0f) });
+    app->lights.push_back({ LightType_Point, vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(0.0f, 5.0f, -20.0f), 20.0f, 1.0f });
+    app->lights.push_back({ LightType_Point, vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(5.0f, 7.0f, 0.0f), 14.0f, 0.7f });
+    app->lights.push_back({ LightType_Directional, vec3(1.0f, 1.0f, 1.0f), vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, 10.0f, -3.0f), 0.0f, 1.0f });
 
     /*int elements_j_patricks = 6, elements_i_patricks = 6;
     for (int j = -elements_j_patricks / 2; j <= elements_j_patricks / 2; ++j)
@@ -876,57 +876,58 @@ void Gui(App* app)
         }
         ImGui::Separator();
 
-        if (ImGui::TreeNode("Lights##2"))
-        {
-            for (int i = 0; i < app->lights.size(); ++i) {
-                std::string type;
-                if (app->lights[i].type == LightType::LightType_Directional) type = ("Directional Light " + std::to_string(i));
-                else  type = ("Point Light " + std::to_string(i));
+        
+    }
+    if (ImGui::TreeNode("Lights##2"))
+    {
+        for (int i = 0; i < app->lights.size(); ++i) {
+            std::string type;
+            if (app->lights[i].type == LightType::LightType_Directional) type = ("Directional Light " + std::to_string(i));
+            else  type = ("Point Light " + std::to_string(i));
 
-                if (ImGui::TreeNode(type.c_str()))
-                {
-                    //Color
-                    float col1[3] = { app->lights[i].color.r, app->lights[i].color.g, app->lights[i].color.b };
-                    ImGui::ColorEdit3("Color", col1);
-                    app->lights[i].color.r = col1[0];
-                    app->lights[i].color.g = col1[1];
-                    app->lights[i].color.b = col1[2];
+            if (ImGui::TreeNode(type.c_str()))
+            {
+                //Color
+                float col1[3] = { app->lights[i].color.r, app->lights[i].color.g, app->lights[i].color.b };
+                ImGui::ColorEdit3("Color", col1);
+                app->lights[i].color.r = col1[0];
+                app->lights[i].color.g = col1[1];
+                app->lights[i].color.b = col1[2];
 
-                    ImGui::Spacing();
+                ImGui::Spacing();
 
-                    //Intensity
-                    float f1 = app->lights[i].intensity;
-                    ImGui::DragFloat("Intensity", &f1, 0.01f, 0.0f, 0.0f, "%.06f");
-                    if (f1 < 0.0f)f1 = 0.0f;
-                    app->lights[i].intensity = f1;
+                //Intensity
+                float f1 = app->lights[i].intensity;
+                ImGui::DragFloat("Intensity", &f1, 0.01f, 0.0f, 0.0f, "%.06f");
+                if (f1 < 0.0f)f1 = 0.0f;
+                app->lights[i].intensity = f1;
 
-                    ImGui::Spacing();
+                ImGui::Spacing();
 
-                    //position
-                    ImGui::DragFloat3("Position", (float*)&app->lights[i].position, 0.01f);
+                //position
+                ImGui::DragFloat3("Position", (float*)&app->lights[i].position, 0.01f);
 
-                    ImGui::Spacing();
+                ImGui::Spacing();
 
-                    //Direction
-                    ImGui::DragFloat3("Direction", (float*)&app->lights[i].direction, 0.01f);
+                //Direction
+                ImGui::DragFloat3("Direction", (float*)&app->lights[i].direction, 0.01f);
 
-                    ImGui::Spacing();
+                ImGui::Spacing();
 
-                    //Radius
-                    if (app->lights[i].type == LightType::LightType_Point) {
-                        float f2 = app->lights[i].radius;
-                        ImGui::DragFloat("Radius", &f2, 0.01f, 0.0f, 0.0f, "%.06f");
-                        if (f2 < 0.0f)f2 = 0.0f;
-                        app->lights[i].radius = f2;
-                    }
-
-                    ImGui::TreePop();
+                //Radius
+                if (app->lights[i].type == LightType::LightType_Point) {
+                    float f2 = app->lights[i].radius;
+                    ImGui::DragFloat("Radius", &f2, 0.01f, 0.0f, 0.0f, "%.06f");
+                    if (f2 < 0.0f)f2 = 0.0f;
+                    app->lights[i].radius = f2;
                 }
-            }
 
-            ImGui::TreePop();
-            ImGui::Separator();
+                ImGui::TreePop();
+            }
         }
+
+        ImGui::TreePop();
+        ImGui::Separator();
     }
 
     ImGui::End();
