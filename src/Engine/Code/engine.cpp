@@ -1345,6 +1345,40 @@ void Render(App* app)
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+            /* Skybox */
+            glBindFramebuffer(GL_FRAMEBUFFER, app->waterReflectionFrameBuffer);
+
+            Program& skyboxProgram = app->programs[app->skyboxProgramIdx];
+            glUseProgram(skyboxProgram.handle);
+
+            glEnable(GL_DEPTH_TEST);
+            glDepthFunc(GL_LEQUAL);
+            glDepthMask(GL_FALSE);
+
+            glDisable(GL_BLEND);
+
+            glUniformMatrix4fv(app->skyboxProgram_uProjection, 1, GL_FALSE, &app->projection[0][0]);
+            glm::mat4 view_no_translation = glm::mat4(glm::mat3(app->view)); // No translation
+            glUniformMatrix4fv(app->skyboxProgram_uView, 1, GL_FALSE, &view_no_translation[0][0]);
+
+            glUniform1i(app->skyboxProgram_uSkybox, 4);
+
+            glBindVertexArray(app->skybox_vao);
+
+            glActiveTexture(GL_TEXTURE4);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, app->cubemap);
+
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+
+            glBindVertexArray(0);
+
+            glDepthMask(GL_TRUE);
+            glDepthFunc(GL_LESS);
+
+            glUseProgram(0);
+
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
             /* Dafault */
             glBindFramebuffer(GL_FRAMEBUFFER, app->forwardFrameBuffer);
 
@@ -1403,7 +1437,7 @@ void Render(App* app)
             /* Skybox */
             glBindFramebuffer(GL_FRAMEBUFFER, app->forwardFrameBuffer);
 
-            Program& skyboxProgram = app->programs[app->skyboxProgramIdx];
+            //Program& skyboxProgram = app->programs[app->skyboxProgramIdx];
             glUseProgram(skyboxProgram.handle);
 
             glEnable(GL_DEPTH_TEST);
@@ -1413,7 +1447,7 @@ void Render(App* app)
             glDisable(GL_BLEND);
 
             glUniformMatrix4fv(app->skyboxProgram_uProjection, 1, GL_FALSE, &app->projection[0][0]);
-            glm::mat4 view_no_translation = glm::mat4(glm::mat3(app->view)); // No translation
+            /*glm::mat4 */view_no_translation = glm::mat4(glm::mat3(app->view)); // No translation
             glUniformMatrix4fv(app->skyboxProgram_uView, 1, GL_FALSE, &view_no_translation[0][0]);
 
             glUniform1i(app->skyboxProgram_uSkybox, 4);
