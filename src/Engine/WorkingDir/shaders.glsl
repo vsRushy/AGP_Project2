@@ -107,8 +107,6 @@ layout(binding = 0, std140) uniform GlobalParams
 uniform sampler2D uTexture;
 
 layout(location = 0) out vec4 oFinalRender;
-layout(location = 1) out vec4 oNormals;
-layout(location = 2) out vec4 oDiffuse;
 
 out float gl_FragDepth;
 
@@ -127,7 +125,6 @@ vec3 CalculateDirectionalLight(Light light)
     float specularIntensity = pow(max(0.0, dot(N, L)), 1.0);
     vec3 specular = light.color * specularMat * specularIntensity;
 
-
 	return (diffuseIntensity + specular) * light.intensity;
 }
 
@@ -144,7 +141,6 @@ vec3 CalculatePointLight(Light light)
 
 	if(dist > light.radius)
 		shadowIntensity = 1.0 - ((dist - light.radius) / threshold);
-
 
 	// Hardcoded specular parameter
     vec3 specularMat = vec3(1.0);
@@ -191,12 +187,9 @@ void main()
 		}
 	}
 
-
 	oFinalRender = vec4(lightFactor, 1.0) * objectColor;
-	oNormals = vec4(normalize(vNormal), 1.0);
-	oDiffuse = objectColor;
 
-	gl_FragDepth = gl_FragCoord.z-0.2;
+	gl_FragDepth = gl_FragCoord.z - 0.2;
 }
 
 
