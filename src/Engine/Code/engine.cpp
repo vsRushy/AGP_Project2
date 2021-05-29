@@ -1200,8 +1200,6 @@ void Render(App* app)
             /* Skybox */
             glBindFramebuffer(GL_FRAMEBUFFER, app->forwardFrameBuffer);
 
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
             Program& skyboxProgram = app->programs[app->skyboxProgramIdx];
             glUseProgram(skyboxProgram.handle);
 
