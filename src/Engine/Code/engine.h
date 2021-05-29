@@ -346,7 +346,8 @@ struct App
     GLuint programUniformTexture;
 
     // More Uniforms
-    GLint texturedMeshProgram_uTexture; // Forward rendering
+    GLint texturedMeshProgram_uTexture; // Forward rendering mesh texture
+    GLint texturedMeshProgram_uSkybox; // Forward rendering skybox
 
     GLint deferredGeometryProgram_uTexture; // Deferred geometry pass
 

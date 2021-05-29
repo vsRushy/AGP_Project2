@@ -393,6 +393,7 @@ void Init(App* app)
     }
 
     app->texturedMeshProgram_uTexture = glGetUniformLocation(texturedMeshProgram.handle, "uTexture");
+    app->texturedMeshProgram_uSkybox = glGetUniformLocation(texturedMeshProgram.handle, "uSkybox");
     
     /* --------- */
 
@@ -1198,6 +1199,10 @@ void Render(App* app)
                     glActiveTexture(GL_TEXTURE0);
                     glBindTexture(GL_TEXTURE_2D, app->textures[submesh_material.albedo_texture_index].handle);
                     glUniform1i(app->texturedMeshProgram_uTexture, 0);
+
+                    glActiveTexture(GL_TEXTURE1);
+                    glBindTexture(GL_TEXTURE_CUBE_MAP, app->cubemap);
+                    glUniform1i(app->texturedMeshProgram_uSkybox, 1);
 
                     Submesh& submesh = mesh.submeshes[i];
                     glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.index_offset);

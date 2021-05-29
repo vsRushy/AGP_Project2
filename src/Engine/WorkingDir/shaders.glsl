@@ -105,6 +105,7 @@ layout(binding = 0, std140) uniform GlobalParams
 };
 
 uniform sampler2D uTexture;
+uniform samplerCube uSkybox;
 
 layout(location = 0) out vec4 oFinalRender;
 
@@ -152,7 +153,13 @@ void main()
 		}
 	}
 
-	oFinalRender = vec4(lightFactor, 1.0) * objectColor;
+	//oFinalRender = vec4(lightFactor, 1.0) * objectColor;
+
+	vec3 I = normalize(vPosition - uCameraPosition);
+	vec3 R = reflect(I, normalize(vNormal));
+
+	oFinalRender = vec4(texture(uSkybox, R).rgb, 1.0);
+	//oFinalRender = vec4(lightFactor, 1.0) * objectColor;
 
 	gl_FragDepth = gl_FragCoord.z - 0.2;
 }
