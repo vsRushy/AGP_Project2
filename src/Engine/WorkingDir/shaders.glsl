@@ -340,7 +340,7 @@ in vec4 vClipSpace;
 
 void main()
 {
-	vec2 ndc = (vClipSpace.xy / vClipSpace.w) * 0.5 + 0.5;
+	vec2 ndc = (vClipSpace.xy / vClipSpace.w) / 2.0 + 0.5;
 	
 	vec2 reflectTexCoords = vec2(ndc.x, -ndc.y);
 	vec2 refractTexCoords = vec2(ndc.x, ndc.y);

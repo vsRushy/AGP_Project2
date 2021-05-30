@@ -426,13 +426,14 @@ struct App
 
     // Screen quad
     GLuint quad_vao = 0u;
-    GLuint quad_vbo;
+    u32 quad_index_count;
 
-    void RenderQuad();
+    void LoadQuad();
+    void RenderQuad(const GLuint& vao, const u32& index_count);
 
     // Sphere
     GLuint sphere_vao = 0u;
-    u32 index_count;
+    u32 sphere_index_count;
 
     void LoadSphere();
     void RenderSphere(const GLuint& vao, const u32& index_count);

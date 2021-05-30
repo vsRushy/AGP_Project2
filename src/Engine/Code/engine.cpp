@@ -324,6 +324,7 @@ void Init(App* app)
 
     app->patrick_index = LoadModel(app, "Patrick/Patrick.obj");
 
+    app->LoadQuad();
     app->LoadSphere();
 
     app->entities.push_back({ TransformPositionRotationScale(vec3(0.0f, 0.0f, -20.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)),
@@ -1606,7 +1607,8 @@ void Render(App* app)
 
             glUniformMatrix4fv(app->waterMeshProgram_uModel, 1, GL_FALSE, &model[0][0]);
 
-            app->RenderQuad();
+            app->RenderQuad(app->quad_vao, 4);
+            //app->RenderSphere(app->sphere_vao, app->sphere_index_count);
 
             glUseProgram(0);
 
@@ -1702,7 +1704,7 @@ void Render(App* app)
 
             glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(0), app->cbuffer.handle, app->globalParamsOffset, app->globalParamsSize);
             
-            app->RenderQuad();
+            app->RenderQuad(app->quad_vao, 4);
 
             glBindFramebuffer(GL_READ_FRAMEBUFFER, app->gBuffer);
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, app->fBuffer);
@@ -1729,8 +1731,8 @@ void Render(App* app)
 
                 switch (light.type)
                 {
-                case LightType_Point: app->RenderSphere(app->sphere_vao, app->index_count); break;
-                case LightType_Directional: app->RenderQuad(); break;
+                case LightType_Point: app->RenderSphere(app->sphere_vao, app->sphere_index_count); break;
+                case LightType_Directional: app->RenderQuad(app->quad_vao, 4); break;
 
                 default: break;
                 }
@@ -1808,35 +1810,37 @@ GLuint FindVao(Mesh& mesh, u32 submesh_index, const Program& program)
     return vao_handle;
 }
 
-void App::RenderQuad()
+void App::LoadQuad()
 {
-    if (quad_vao == 0)
-    {
-        float quadVertices[] = {
-            // positions        // texture Coords
-            -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
-            -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-             1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
-             1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-        };
-        
-        glGenVertexArrays(1, &quad_vao);
-        glGenBuffers(1, &quad_vbo);
+    float quadVertices[] = {
+        // positions        // texture Coords
+        -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+            1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+            1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+    };
 
-        glBindVertexArray(quad_vao);
-        glBindBuffer(GL_ARRAY_BUFFER, quad_vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+    unsigned int vbo;
 
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    }
+    glGenVertexArrays(1, &quad_vao);
+    glGenBuffers(1, &vbo);
 
     glBindVertexArray(quad_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
 
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+}
+
+void App::RenderQuad(const GLuint& vao, const u32& index_count)
+{
+    glBindVertexArray(vao);
+
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, index_count);
 
     glBindVertexArray(0);
 }
@@ -1895,7 +1899,7 @@ void App::LoadSphere()
         oddRow = !oddRow;
     }
 
-    index_count = indices.size();
+    sphere_index_count = indices.size();
 
     std::vector<float> data;
     for (std::size_t i = 0; i < positions.size(); ++i)
