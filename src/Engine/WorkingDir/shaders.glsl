@@ -112,23 +112,23 @@ layout(location = 0) out vec4 oFinalRender;
 
 out float gl_FragDepth;
 
-vec3 CalculateDirectionalLight(Light light, vec3 normal)
+vec3 CalculateDirectionalLight(Light light, vec3 normal, vec3 viewDir)
 {
-	vec3 N = normalize(normal);
-    vec3 L = normalize(light.direction);
+	vec3 ambient = light.color;
+    // Diffuse
+    //vec3 fake_lightDir = normalize(light.lightPos - frag_pos);
+    vec3 lightDir = normalize(light.direction);
+    float diff = max(dot(lightDir, normal), 0.0);
+    vec3 diffuse = ambient *  diff;
+    
+    // Specular
+    vec3 halfwayDir = normalize(lightDir + viewDir); 
+    float spec = pow(max(dot(normal, halfwayDir), 0.0), 0.0) * 0.01;
 
-	// Hardcoded specular parameter
-    vec3 specularMat = vec3(0.5);
-
-	// Diffuse
-    float diffuseIntensity = max(0.0, dot(N,L));
-
-	// Specular
-    float specularIntensity = pow(max(0.0, dot(N, L)), 1.0);
-    vec3 specular = specularMat * specularIntensity;
-
-
-	return (diffuseIntensity + specular) * light.intensity * light.color;
+    vec3 specular = vec3(0);
+    specular = diffuse * spec;
+    // Final Calculation     
+    return (diffuse + specular) * light.intensity;
 }
 
 vec3 CalculatePointLight(Light light)
@@ -153,7 +153,7 @@ void main()
 		{
 			case 0: // Directional
 			{
-				lightFactor += CalculateDirectionalLight(uLight[i], normals);
+				lightFactor += CalculateDirectionalLight(uLight[i], normals, normalize(vViewDir));
 			}
 			break;
 
@@ -274,21 +274,7 @@ out float gl_FragDepth;
 
 vec3 CalculateDirectionalLight(Light light, vec3 normal)
 {
-	vec3 N = normalize(normal);
-    vec3 L = normalize(light.direction);
-
-	// Hardcoded specular parameter
-    vec3 specularMat = vec3(0.5);
-
-	// Diffuse
-    float diffuseIntensity = max(0.0, dot(N,L));
-
-	// Specular
-    float specularIntensity = pow(max(0.0, dot(N, L)), 1.0);
-    vec3 specular = specularMat * specularIntensity;
-
-
-	return (diffuseIntensity + specular) * light.intensity * light.color;
+	return light.color * light.intensity;
 }
 
 vec3 CalculatePointLight(Light light)

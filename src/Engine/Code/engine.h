@@ -387,6 +387,7 @@ struct App
 
     // Model indices
     u32 patrick_index;
+    u32 cliff_index;
     u32 cube_index;
 
     // Framebuffer

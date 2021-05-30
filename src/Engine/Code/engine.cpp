@@ -323,17 +323,20 @@ void Init(App* app)
     // --------------------------------
 
     app->patrick_index = LoadModel(app, "Patrick/Patrick.obj");
+    app->cliff_index = LoadModel(app, "Cliff/rocks.obj");
     app->cube_index = LoadModel(app, "Cube/Cube.obj");
 
     app->LoadQuad();
     app->LoadSphere();
 
-    app->entities.push_back({ TransformPositionRotationScale(vec3(0.0f, 0.0f, -20.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)),
+   /* app->entities.push_back({ TransformPositionRotationScale(vec3(0.0f, 0.0f, -20.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)),
                               app->patrick_index });
     app->entities.push_back({ TransformPositionRotationScale(vec3(-5.0f, 0.0f, -20.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)),
                               app->patrick_index });
     app->entities.push_back({ TransformPositionRotationScale(vec3(5.0f, 0.0f, -20.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)),
-                              app->patrick_index });
+                              app->patrick_index });*/
+    app->entities.push_back({ TransformPositionRotationScale(vec3(0.0f, 0.0f, 0.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)),
+                              app->cliff_index });
 
    //app->lights.push_back({ LightType_Point, vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(0.0f, 5.0f, -20.0f), 20.0f, 1.0f });
     //app->lights.push_back({ LightType_Point, vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(5.0f, 7.0f, 0.0f), 14.0f, 0.7f });
