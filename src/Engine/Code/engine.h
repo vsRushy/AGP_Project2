@@ -331,6 +331,8 @@ struct App
     u32 normalTexIdx;
     u32 magentaTexIdx;
 
+    u32 dudvMapIdx;
+
     // Camera
     Camera camera;
 
@@ -365,6 +367,8 @@ struct App
 
     GLint waterMeshProgram_uReflectionTexture;
     GLint waterMeshProgram_uRefractionTexture;
+
+    GLint waterMeshProgram_uDudvMap;
 
     GLint deferredGeometryProgram_uTexture; // Deferred geometry pass
 

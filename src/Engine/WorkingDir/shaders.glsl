@@ -336,6 +336,8 @@ layout(location = 0) out vec4 oFinalRender;
 uniform sampler2D uReflectionTexture;
 uniform sampler2D uRefractionTexture;
 
+uniform sampler2D uDudvMap;
+
 in vec4 vClipSpace;
 
 void main()

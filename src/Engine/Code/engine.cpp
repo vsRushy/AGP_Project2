@@ -319,6 +319,8 @@ void Init(App* app)
     app->blackTexIdx = LoadTexture2D(app, "color_black.png");
     app->normalTexIdx = LoadTexture2D(app, "color_normal.png");
     app->magentaTexIdx = LoadTexture2D(app, "color_magenta.png");
+    
+    app->dudvMapIdx = LoadTexture2D(app, "Textures/dudv_map.png");
 
     // --------------------------------
 
@@ -451,6 +453,7 @@ void Init(App* app)
     app->waterMeshProgram_uModel = glGetUniformLocation(waterMeshProgram.handle, "uModel");
     app->waterMeshProgram_uReflectionTexture = glGetUniformLocation(waterMeshProgram.handle, "uReflectionTexture");
     app->waterMeshProgram_uRefractionTexture = glGetUniformLocation(waterMeshProgram.handle, "uRefractionTexture");
+    app->waterMeshProgram_uDudvMap = glGetUniformLocation(waterMeshProgram.handle, "uDudvMap");
     
     /* --------- */
 
@@ -1600,6 +1603,11 @@ void Render(App* app)
             glActiveTexture(GL_TEXTURE11);
             glBindTexture(GL_TEXTURE_2D, app->waterRefractionColorAttachment);
             glUniform1i(app->waterMeshProgram_uRefractionTexture, 11);
+
+            glActiveTexture(GL_TEXTURE12);
+            GLuint dudvMapTexHandle = app->textures[app->dudvMapIdx].handle;
+            glBindTexture(GL_TEXTURE_2D, dudvMapTexHandle);
+            glUniform1i(app->waterMeshProgram_uDudvMap, 12);
 
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, vec3(0.0f));
