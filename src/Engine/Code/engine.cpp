@@ -1346,7 +1346,7 @@ void Render(App* app)
             glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(0), app->cbuffer.handle, app->globalParamsOffset, app->globalParamsSize);
 
             glUniform4i(app->texturedMeshWithClippingProgram_uClippingPlane, 0, 1, 0, 0);
-
+            
             for (const Entity& entity : app->entities)
             {
                 Model& model = app->models[entity.modelIndex];
