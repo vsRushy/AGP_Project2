@@ -105,15 +105,30 @@ layout(binding = 0, std140) uniform GlobalParams
 };
 
 uniform sampler2D uTexture;
+uniform sampler2D uNormal;
 uniform samplerCube uSkybox;
 
 layout(location = 0) out vec4 oFinalRender;
 
 out float gl_FragDepth;
 
-vec3 CalculateDirectionalLight(Light light)
+vec3 CalculateDirectionalLight(Light light, vec3 normal)
 {
-	return vec3(1.0);
+	vec3 N = normalize(normal);
+    vec3 L = normalize(light.direction);
+
+	// Hardcoded specular parameter
+    vec3 specularMat = vec3(0.5);
+
+	// Diffuse
+    float diffuseIntensity = max(0.0, dot(N,L));
+
+	// Specular
+    float specularIntensity = pow(max(0.0, dot(N, L)), 1.0);
+    vec3 specular = specularMat * specularIntensity;
+
+
+	return (diffuseIntensity + specular) * light.intensity * light.color;
 }
 
 vec3 CalculatePointLight(Light light)
@@ -127,6 +142,8 @@ vec3 CalculatePointLight(Light light)
 void main()
 {
 	vec4 objectColor = texture(uTexture, vTexCoord);
+	vec3 normals = texture(uNormal, vTexCoord).rgb;
+	normals = normalize(normals * 2.0 - 1.0);
 	vec4 spec = vec4(0.0);
 
 	vec3 lightFactor = vec3(0.0);
@@ -136,7 +153,7 @@ void main()
 		{
 			case 0: // Directional
 			{
-				lightFactor += CalculateDirectionalLight(uLight[i]);
+				lightFactor += CalculateDirectionalLight(uLight[i], normals);
 			}
 			break;
 
@@ -248,15 +265,30 @@ layout(binding = 0, std140) uniform GlobalParams
 };
 
 uniform sampler2D uTexture;
+uniform sampler2D uNormal;
 uniform samplerCube uSkybox;
 
 layout(location = 0) out vec4 oFinalRender;
 
 out float gl_FragDepth;
 
-vec3 CalculateDirectionalLight(Light light)
+vec3 CalculateDirectionalLight(Light light, vec3 normal)
 {
-	return vec3(1.0);
+	vec3 N = normalize(normal);
+    vec3 L = normalize(light.direction);
+
+	// Hardcoded specular parameter
+    vec3 specularMat = vec3(0.5);
+
+	// Diffuse
+    float diffuseIntensity = max(0.0, dot(N,L));
+
+	// Specular
+    float specularIntensity = pow(max(0.0, dot(N, L)), 1.0);
+    vec3 specular = specularMat * specularIntensity;
+
+
+	return (diffuseIntensity + specular) * light.intensity * light.color;
 }
 
 vec3 CalculatePointLight(Light light)
@@ -271,6 +303,8 @@ void main()
 {
 	vec4 objectColor = texture(uTexture, vTexCoord);
 	vec4 spec = vec4(0.0);
+	vec3 normals = texture(uNormal, vTexCoord).rgb;
+	normals = normalize(normals * 2.0 - 1.0);
 
 	vec3 lightFactor = vec3(0.0);
 	for(int i = 0; i < uLightCount; ++i)
@@ -279,7 +313,7 @@ void main()
 		{
 			case 0: // Directional
 			{
-				lightFactor += CalculateDirectionalLight(uLight[i]);
+				lightFactor += CalculateDirectionalLight(uLight[i], normals);
 			}
 			break;
 

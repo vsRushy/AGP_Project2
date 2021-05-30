@@ -353,6 +353,7 @@ struct App
     GLint texturedMeshProgram_uSkybox; // Forward rendering skybox
 
     GLint texturedMeshWithClippingProgram_uTexture;
+    GLint texturedMeshWithClippingProgram_uNormal;
     GLint texturedMeshWithClippingProgram_uSkybox;
     GLint texturedMeshWithClippingProgram_uProjection;
     GLint texturedMeshWithClippingProgram_uView;
