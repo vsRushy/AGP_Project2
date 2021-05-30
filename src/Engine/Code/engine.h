@@ -88,6 +88,8 @@ struct Material
     u32 specular_texture_index;
     u32 normals_texture_index;
     u32 bump_texture_index;
+    bool hasNormalTex;
+    bool hasBumbTex;
 };
 
 struct Model

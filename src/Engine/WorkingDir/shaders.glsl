@@ -105,8 +105,8 @@ layout(binding = 0, std140) uniform GlobalParams
 };
 
 uniform sampler2D uTexture;
-uniform sampler2D uNormal;
 uniform samplerCube uSkybox;
+uniform sampler2D uNormal;
 
 layout(location = 0) out vec4 oFinalRender;
 
@@ -143,8 +143,7 @@ void main()
 {
 	vec4 objectColor = texture(uTexture, vTexCoord);
 	vec3 normals = texture(uNormal, vTexCoord).rgb;
-	normals = normalize(normals * 2.0 - 1.0);
-	vec4 spec = vec4(0.0);
+	//normals = normalize(normals);
 
 	vec3 lightFactor = vec3(0.0);
 	for(int i = 0; i < uLightCount; ++i)
@@ -173,8 +172,10 @@ void main()
 	vec3 I = normalize(vPosition - uCameraPosition);
 	vec3 R = reflect(I, normalize(vNormal));
 
-	vec4 reflections = vec4(texture(uSkybox, R).rgb, 1.0);
-	oFinalRender = mix(vec4(lightFactor, 1.0) * objectColor, reflections, 0.5);
+	/*vec4 reflections = vec4(texture(uSkybox, R).rgb, 1.0);
+	oFinalRender = mix(vec4(lightFactor, 1.0) * objectColor, reflections, 0.5);*/
+	//oFinalRender = vec4(lightFactor, 1.0) * objectColor;
+	oFinalRender = vec4(normals, 1.0);
 
 	gl_FragDepth = gl_FragCoord.z - 0.2;
 }
