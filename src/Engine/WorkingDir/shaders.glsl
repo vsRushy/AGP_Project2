@@ -217,7 +217,9 @@ void main()
 	vNormal = vec3(transpose(inverse(uWorldMatrix)) * vec4(aNormal, 1.0));
 	vViewDir = uCameraPosition - vPosition;
 
-	//glClipDistance[0] = dot(vec4(positionWorldSpace.xyz, 1.0), uClippingPlane);
+	vec3 positionWorldSpace = vPosition;
+	gl_ClipDistance[0] = dot(vec4(positionWorldSpace, 1.0), uClippingPlane);
+
 	gl_Position = uProjection * uView * uModel * vec4(aPosition, 1.0);
 }
 

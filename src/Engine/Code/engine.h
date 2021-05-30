@@ -357,6 +357,7 @@ struct App
     GLint texturedMeshWithClippingProgram_uProjection;
     GLint texturedMeshWithClippingProgram_uView;
     GLint texturedMeshWithClippingProgram_uModel;
+    GLint texturedMeshWithClippingProgram_uClippingPlane;
 
     GLint waterMeshProgram_uProjection;
     GLint waterMeshProgram_uView;

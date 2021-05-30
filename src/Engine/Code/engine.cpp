@@ -421,6 +421,7 @@ void Init(App* app)
     app->texturedMeshWithClippingProgram_uProjection = glGetUniformLocation(texturedMeshWithClippingProgram.handle, "uProjection");
     app->texturedMeshWithClippingProgram_uView = glGetUniformLocation(texturedMeshWithClippingProgram.handle, "uView");
     app->texturedMeshWithClippingProgram_uModel = glGetUniformLocation(texturedMeshWithClippingProgram.handle, "uModel");
+    app->texturedMeshWithClippingProgram_uClippingPlane = glGetUniformLocation(texturedMeshWithClippingProgram.handle, "uClippingPlane");
 
     app->waterMeshProgramIdx = LoadProgram(app, "shaders.glsl", "WATER_MESH");
     Program& waterMeshProgram = app->programs[app->waterMeshProgramIdx];
@@ -1343,6 +1344,8 @@ void Render(App* app)
             reflectionCamera.pitch = -reflectionCamera.pitch;
 
             glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(0), app->cbuffer.handle, app->globalParamsOffset, app->globalParamsSize);
+
+            glUniform4i(app->texturedMeshWithClippingProgram_uClippingPlane, 0, 1, 0, 0);
 
             for (const Entity& entity : app->entities)
             {
