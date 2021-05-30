@@ -376,7 +376,7 @@ void main()
 
 	vec3 viewVector = normalize(vToCameraVector);
 	float refractiveFactor = dot(viewVector, vec3(0.0, 1.0, 0.0));
-	refractiveFactor = pow(refractiveFactor, 0.5);
+	refractiveFactor = pow(refractiveFactor, 5.0);
 
 	oFinalRender = mix(reflectColor, refractColor, refractiveFactor);
 	oFinalRender = mix(oFinalRender, vec4(0.0, 0.3, 0.5, 1.0), 0.25);
