@@ -322,10 +322,14 @@ uniform mat4 uView;
 uniform mat4 uModel;
 
 out vec4 vClipSpace;
+out vec2 vTexCoords;
+
+const float tiling = 1.0;
 
 void main()
 {
 	vClipSpace = uProjection * uView * uModel * vec4(aPosition, 1.0);
+	vTexCoords = vec2(aPosition.x / 2.0 + 0.5, aPosition.y / 2.0 + 0.5) * tiling;
 	gl_Position = vClipSpace;
 }
 
@@ -339,6 +343,9 @@ uniform sampler2D uRefractionTexture;
 uniform sampler2D uDudvMap;
 
 in vec4 vClipSpace;
+in vec2 vTexCoords;
+
+const float waveStrength = 0.02;
 
 void main()
 {
@@ -346,6 +353,15 @@ void main()
 	
 	vec2 reflectTexCoords = vec2(ndc.x, -ndc.y);
 	vec2 refractTexCoords = vec2(ndc.x, ndc.y);
+
+	vec2 distortion01 = (texture(uDudvMap, vec2(vTexCoords.x, vTexCoords.y)).rg * 2.0 - 1.0) * waveStrength;
+
+	reflectTexCoords += distortion01;
+	reflectTexCoords.x = clamp(reflectTexCoords.x, 0.001, 0.999);
+	reflectTexCoords.y = clamp(reflectTexCoords.y, -0.999, 0.001);
+
+	refractTexCoords += distortion01;
+	refractTexCoords = clamp(refractTexCoords, 0.001, 0.999);
 
 	vec4 reflectColor = texture(uReflectionTexture, reflectTexCoords);
 	vec4 refractColor = texture(uRefractionTexture, refractTexCoords);
