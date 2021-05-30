@@ -1352,9 +1352,6 @@ void Render(App* app)
                     glBindTexture(GL_TEXTURE_CUBE_MAP, app->cubemap);
                     glUniform1i(app->texturedMeshWithClippingProgram_uSkybox, 1);
 
-                    glActiveTexture(GL_TEXTURE2);
-                    glBindTexture(GL_TEXTURE_2D, app->textures[submesh_material.bump_texture_index].handle);
-                    glUniform1i(app->texturedMeshWithClippingProgram_uNormal, 2);
 
                     Submesh& submesh = mesh.submeshes[i];
                     glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.index_offset);
@@ -1457,10 +1454,6 @@ void Render(App* app)
                     glActiveTexture(GL_TEXTURE1);
                     glBindTexture(GL_TEXTURE_CUBE_MAP, app->cubemap);
                     glUniform1i(app->texturedMeshWithClippingProgram_uSkybox, 1);
-
-                    glActiveTexture(GL_TEXTURE2);
-                    glBindTexture(GL_TEXTURE_2D, app->textures[submesh_material.bump_texture_index].handle);
-                    glUniform1i(app->texturedMeshWithClippingProgram_uNormal, 2);
 
                     Submesh& submesh = mesh.submeshes[i];
                     glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.index_offset);
