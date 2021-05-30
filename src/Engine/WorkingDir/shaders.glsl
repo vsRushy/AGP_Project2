@@ -39,8 +39,8 @@ void main()
 layout(location = 0) in vec3 aPosition;
 layout(location = 1) in vec3 aNormal;
 layout(location = 2) in vec2 aTexCoord;
-// layout(location = 3) in vec3 aTangent;
-// layout(location = 4) in vec3 aBitangent;
+layout(location = 3) in vec3 aTangent;
+layout(location = 4) in vec3 aBitangent;
 
 struct Light
 {
@@ -69,6 +69,7 @@ out vec2 vTexCoord;
 out vec3 vPosition; // In worldspace
 out vec3 vNormal; // In worldspace
 out vec3 vViewDir; // In worldspace
+out mat3 TBN;
 
 void main()
 {
@@ -76,6 +77,12 @@ void main()
 	vPosition = vec3(uWorldMatrix * vec4(aPosition, 1.0));
 	vNormal = vec3(transpose(inverse(uWorldMatrix)) * vec4(aNormal, 1.0));
 	vViewDir = uCameraPosition - vPosition;
+
+	vec3 T = normalize(vec3(uWorldMatrix * vec4(aTangent,   0.0)));
+    vec3 B = normalize(vec3(uWorldMatrix * vec4(aBitangent, 0.0)));
+    vec3 N = normalize(vec3(uWorldMatrix * vec4(vNormal,    0.0)));
+
+	 TBN = mat3(T,B,N);
 
 	gl_Position = uWorldViewProjectionMatrix * vec4(aPosition, 1.0);
 }
@@ -86,6 +93,7 @@ in vec2 vTexCoord;
 in vec3 vPosition;
 in vec3 vNormal;
 in vec3 vViewDir;
+in mat3 TBN;
 
 struct Light
 {
@@ -143,7 +151,8 @@ void main()
 {
 	vec4 objectColor = texture(uTexture, vTexCoord);
 	vec3 normals = texture(uNormal, vTexCoord).rgb;
-	//normals = normalize(normals);
+	normals = normals * 2.0 - 1.0;
+	normals = normalize(inverse(transpose(TBN)) * normals);
 
 	vec3 lightFactor = vec3(0.0);
 	for(int i = 0; i < uLightCount; ++i)
@@ -174,8 +183,8 @@ void main()
 
 	/*vec4 reflections = vec4(texture(uSkybox, R).rgb, 1.0);
 	oFinalRender = mix(vec4(lightFactor, 1.0) * objectColor, reflections, 0.5);*/
-	//oFinalRender = vec4(lightFactor, 1.0) * objectColor;
-	oFinalRender = vec4(normals, 1.0);
+	oFinalRender = vec4(lightFactor, 1.0) * objectColor;
+	//oFinalRender = vec4(normals, 1.0);
 
 	gl_FragDepth = gl_FragCoord.z - 0.2;
 }
