@@ -455,6 +455,7 @@ void Init(App* app)
     app->waterMeshProgram_uRefractionTexture = glGetUniformLocation(waterMeshProgram.handle, "uRefractionTexture");
     app->waterMeshProgram_uDudvMap = glGetUniformLocation(waterMeshProgram.handle, "uDudvMap");
     app->waterMeshProgram_uMoveFactor = glGetUniformLocation(waterMeshProgram.handle, "uMoveFactor");
+    app->waterMeshProgram_uCameraPosition = glGetUniformLocation(waterMeshProgram.handle, "uCameraPosition");
     
     /* --------- */
 
@@ -1501,7 +1502,6 @@ void Render(App* app)
             /* Dafault ------------------------------- */
             glBindFramebuffer(GL_FRAMEBUFFER, app->forwardFrameBuffer);
 
-            //GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
             glDrawBuffers(ARRAY_COUNT(drawBuffers), drawBuffers);
 
             glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -1616,6 +1616,8 @@ void Render(App* app)
             moveFactor = fmod(moveFactor, 1);
 
             glUniform1f(app->waterMeshProgram_uMoveFactor, moveFactor);
+
+            glUniform3f(app->waterMeshProgram_uCameraPosition, app->camera.position.x, app->camera.position.y, app->camera.position.z);
 
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, vec3(0.0f));

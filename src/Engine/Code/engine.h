@@ -373,6 +373,8 @@ struct App
 
     GLint waterMeshProgram_uMoveFactor;
 
+    GLint waterMeshProgram_uCameraPosition;
+
     GLint deferredGeometryProgram_uTexture; // Deferred geometry pass
 
     GLint deferredLightingProgram_uGPosition; // Lighting geometry pass

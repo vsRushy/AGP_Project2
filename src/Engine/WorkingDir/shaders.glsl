@@ -321,15 +321,22 @@ uniform mat4 uProjection;
 uniform mat4 uView;
 uniform mat4 uModel;
 
+uniform vec3 uCameraPosition;
+
 out vec4 vClipSpace;
 out vec2 vTexCoords;
+out vec3 vToCameraVector;
 
 const float tiling = 1.0;
 
 void main()
 {
-	vClipSpace = uProjection * uView * uModel * vec4(aPosition, 1.0);
+	vec4 worldPosition =  uModel * vec4(aPosition, 1.0);
+
+	vClipSpace = uProjection * uView * worldPosition;
 	vTexCoords = vec2(aPosition.x / 2.0 + 0.5, aPosition.y / 2.0 + 0.5) * tiling;
+	vToCameraVector = uCameraPosition - worldPosition.xyz;
+
 	gl_Position = vClipSpace;
 }
 
@@ -346,6 +353,7 @@ uniform float uMoveFactor;
 
 in vec4 vClipSpace;
 in vec2 vTexCoords;
+in vec3 vToCameraVector;
 
 const float waveStrength = 0.02;
 
@@ -366,7 +374,11 @@ void main()
 	vec4 reflectColor = texture(uReflectionTexture, reflectTexCoords);
 	vec4 refractColor = texture(uRefractionTexture, refractTexCoords);
 
-	oFinalRender = mix(reflectColor, refractColor, 0.5);
+	vec3 viewVector = normalize(vToCameraVector);
+	float refractiveFactor = dot(viewVector, vec3(0.0, 1.0, 0.0));
+	refractiveFactor = pow(refractiveFactor, 0.5);
+
+	oFinalRender = mix(reflectColor, refractColor, refractiveFactor);
 	oFinalRender = mix(oFinalRender, vec4(0.0, 0.3, 0.5, 1.0), 0.25);
 }
 
