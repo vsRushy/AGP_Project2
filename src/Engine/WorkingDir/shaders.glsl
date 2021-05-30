@@ -314,19 +314,19 @@ void main()
 #if defined(VERTEX) ///////////////////////////////////////////////////
 
 layout (location = 0) in vec3 aPosition;
-layout (location = 1) in vec3 aNormal;
-layout (location = 2) in vec2 aTexCoords;
+//layout (location = 1) in vec3 aNormal;
+//layout (location = 2) in vec2 aTexCoords;
 
 uniform mat4 uProjection;
 uniform mat4 uView;
 uniform mat4 uModel;
 
-out vec2 vTexCoord;
+out vec4 vClipSpace;
 
 void main()
 {
-	vTexCoord = aTexCoords;
-	gl_Position = uProjection * uView * uModel * vec4(aPosition, 1.0);
+	vClipSpace = uProjection * uView * uModel * vec4(aPosition, 1.0);
+	gl_Position = vClipSpace;
 }
 
 #elif defined(FRAGMENT) ///////////////////////////////////////////////
@@ -336,12 +336,17 @@ layout(location = 0) out vec4 oFinalRender;
 uniform sampler2D uReflectionTexture;
 uniform sampler2D uRefractionTexture;
 
-in vec2 vTexCoord;
+in vec4 vClipSpace;
 
 void main()
 {
-	vec4 reflectColor = texture(uReflectionTexture, vTexCoord);
-	vec4 refractColor = texture(uRefractionTexture, vTexCoord);
+	vec2 ndc = (vClipSpace.xy / vClipSpace.w) * 0.5 + 0.5;
+	
+	vec2 reflectTexCoords = vec2(ndc.x, -ndc.y);
+	vec2 refractTexCoords = vec2(ndc.x, ndc.y);
+
+	vec4 reflectColor = texture(uReflectionTexture, reflectTexCoords);
+	vec4 refractColor = texture(uRefractionTexture, refractTexCoords);
 
 	oFinalRender = mix(reflectColor, refractColor, 0.5);
 }
