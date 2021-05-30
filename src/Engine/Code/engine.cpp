@@ -1457,8 +1457,8 @@ void Render(App* app)
 
                 glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(1), app->cbuffer.handle, entity.localParamsOffset, entity.localParamsSize);
 
-                glUniformMatrix4fv(app->texturedMeshWithClippingProgram_uProjection, 1, GL_FALSE, &reflectionCamera.GetProjectionMatrix()[0][0]);
-                glUniformMatrix4fv(app->texturedMeshWithClippingProgram_uView, 1, GL_FALSE, &reflectionCamera.GetViewMatrix()[0][0]);
+                glUniformMatrix4fv(app->texturedMeshWithClippingProgram_uProjection, 1, GL_FALSE, &refractionCamera.GetProjectionMatrix()[0][0]);
+                glUniformMatrix4fv(app->texturedMeshWithClippingProgram_uView, 1, GL_FALSE, &refractionCamera.GetViewMatrix()[0][0]);
                 glUniformMatrix4fv(app->texturedMeshWithClippingProgram_uModel, 1, GL_FALSE, &entity.worldMatrix[0][0]);
 
                 for (u32 i = 0; i < mesh.submeshes.size(); ++i)
