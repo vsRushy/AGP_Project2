@@ -359,11 +359,7 @@ void main()
 	vec2 distortion01 = (texture(uDudvMap, vec2(vTexCoords.x + uMoveFactor, vTexCoords.y)).rg * 2.0 - 1.0) * waveStrength;
 
 	reflectTexCoords += distortion01;
-	reflectTexCoords.x = clamp(reflectTexCoords.x, 0.001, 0.999);
-	reflectTexCoords.y = clamp(reflectTexCoords.y, -0.999, 0.001);
-
 	refractTexCoords += distortion01;
-	refractTexCoords = clamp(refractTexCoords, 0.001, 0.999);
 
 	vec4 reflectColor = texture(uReflectionTexture, reflectTexCoords);
 	vec4 refractColor = texture(uRefractionTexture, refractTexCoords);
