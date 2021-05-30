@@ -291,6 +291,7 @@ struct App
 {
     // Loop
     f32  deltaTime;
+    f32  timeSinceStartup;
     bool isRunning;
 
     // Input
@@ -369,6 +370,8 @@ struct App
     GLint waterMeshProgram_uRefractionTexture;
 
     GLint waterMeshProgram_uDudvMap;
+
+    GLint waterMeshProgram_uMoveFactor;
 
     GLint deferredGeometryProgram_uTexture; // Deferred geometry pass
 

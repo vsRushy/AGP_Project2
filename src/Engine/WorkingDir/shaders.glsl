@@ -342,6 +342,8 @@ uniform sampler2D uRefractionTexture;
 
 uniform sampler2D uDudvMap;
 
+uniform float uMoveFactor;
+
 in vec4 vClipSpace;
 in vec2 vTexCoords;
 
@@ -354,7 +356,7 @@ void main()
 	vec2 reflectTexCoords = vec2(ndc.x, -ndc.y);
 	vec2 refractTexCoords = vec2(ndc.x, ndc.y);
 
-	vec2 distortion01 = (texture(uDudvMap, vec2(vTexCoords.x, vTexCoords.y)).rg * 2.0 - 1.0) * waveStrength;
+	vec2 distortion01 = (texture(uDudvMap, vec2(vTexCoords.x + uMoveFactor, vTexCoords.y)).rg * 2.0 - 1.0) * waveStrength;
 
 	reflectTexCoords += distortion01;
 	reflectTexCoords.x = clamp(reflectTexCoords.x, 0.001, 0.999);

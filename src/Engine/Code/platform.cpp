@@ -140,6 +140,7 @@ int main()
 
     App app         = {};
     app.deltaTime   = 1.0f/60.0f;
+    app.timeSinceStartup = 0.0f;
     app.displaySize = ivec2(WINDOW_WIDTH, WINDOW_HEIGHT);
     app.isRunning   = true;
 
@@ -292,6 +293,7 @@ int main()
         // Frame time
         f64 currentFrameTime = glfwGetTime();
         app.deltaTime = (f32)(currentFrameTime - lastFrameTime);
+        app.timeSinceStartup += currentFrameTime;
         lastFrameTime = currentFrameTime;
 
         // Reset frame allocator
