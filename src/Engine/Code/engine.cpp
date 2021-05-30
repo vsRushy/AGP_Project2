@@ -418,6 +418,9 @@ void Init(App* app)
 
     app->texturedMeshWithClippingProgram_uTexture = glGetUniformLocation(texturedMeshWithClippingProgram.handle, "uTexture");
     app->texturedMeshWithClippingProgram_uSkybox = glGetUniformLocation(texturedMeshWithClippingProgram.handle, "uSkybox");
+    app->texturedMeshWithClippingProgram_uProjection = glGetUniformLocation(texturedMeshWithClippingProgram.handle, "uProjection");
+    app->texturedMeshWithClippingProgram_uView = glGetUniformLocation(texturedMeshWithClippingProgram.handle, "uView");
+    app->texturedMeshWithClippingProgram_uModel = glGetUniformLocation(texturedMeshWithClippingProgram.handle, "uModel");
 
     app->waterMeshProgramIdx = LoadProgram(app, "shaders.glsl", "WATER_MESH");
     Program& waterMeshProgram = app->programs[app->waterMeshProgramIdx];
@@ -1347,6 +1350,10 @@ void Render(App* app)
                 Mesh& mesh = app->meshes[model.mesh_index];
 
                 glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(1), app->cbuffer.handle, entity.localParamsOffset, entity.localParamsSize);
+
+                glUniformMatrix4fv(app->texturedMeshWithClippingProgram_uProjection, 1, GL_FALSE, &reflectionCamera.GetProjectionMatrix()[0][0]);
+                glUniformMatrix4fv(app->texturedMeshWithClippingProgram_uView, 1, GL_FALSE, &reflectionCamera.GetViewMatrix()[0][0]);
+                glUniformMatrix4fv(app->texturedMeshWithClippingProgram_uModel, 1, GL_FALSE, &entity.worldMatrix[0][0]);
 
                 for (u32 i = 0; i < mesh.submeshes.size(); ++i)
                 {

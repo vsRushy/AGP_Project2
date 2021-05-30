@@ -199,6 +199,12 @@ layout(binding = 1, std140) uniform LocalParams
 	mat4 uWorldViewProjectionMatrix;
 };
 
+uniform mat4 uProjection;
+uniform mat4 uView;
+uniform mat4 uModel;
+
+uniform vec4 uClippingPlane;
+
 out vec2 vTexCoord;
 out vec3 vPosition; // In worldspace
 out vec3 vNormal; // In worldspace
@@ -211,8 +217,8 @@ void main()
 	vNormal = vec3(transpose(inverse(uWorldMatrix)) * vec4(aNormal, 1.0));
 	vViewDir = uCameraPosition - vPosition;
 
-	//gl_Position = uWorldViewProjectionMatrix * vec4(aPosition, 1.0);
-	gl_Position = uWorldViewProjectionMatrix * vec4(aPosition, 1.0);
+	//glClipDistance[0] = dot(vec4(positionWorldSpace.xyz, 1.0), uClippingPlane);
+	gl_Position = uProjection * uView * uModel * vec4(aPosition, 1.0);
 }
 
 #elif defined(FRAGMENT) ///////////////////////////////////////////////
