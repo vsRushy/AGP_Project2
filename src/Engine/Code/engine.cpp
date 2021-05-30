@@ -447,6 +447,8 @@ void Init(App* app)
     app->waterMeshProgram_uProjection = glGetUniformLocation(waterMeshProgram.handle, "uProjection");
     app->waterMeshProgram_uView = glGetUniformLocation(waterMeshProgram.handle, "uView");
     app->waterMeshProgram_uModel = glGetUniformLocation(waterMeshProgram.handle, "uModel");
+    app->waterMeshProgram_uReflectionTexture = glGetUniformLocation(waterMeshProgram.handle, "uReflectionTexture");
+    app->waterMeshProgram_uRefractionTexture = glGetUniformLocation(waterMeshProgram.handle, "uRefractionTexture");
     
     /* --------- */
 
@@ -1588,6 +1590,14 @@ void Render(App* app)
 
             glUniformMatrix4fv(app->waterMeshProgram_uProjection, 1, GL_FALSE, &app->projection[0][0]);
             glUniformMatrix4fv(app->waterMeshProgram_uView, 1, GL_FALSE, &app->view[0][0]);
+
+            glActiveTexture(GL_TEXTURE6);
+            glBindTexture(GL_TEXTURE_2D, app->waterReflectionColorAttachment);
+            glUniform1i(app->waterMeshProgram_uReflectionTexture, 6);
+
+            glActiveTexture(GL_TEXTURE7);
+            glBindTexture(GL_TEXTURE_2D, app->waterRefractionColorAttachment);
+            glUniform1i(app->waterMeshProgram_uRefractionTexture, 7);
 
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, vec3(0.0f));

@@ -363,6 +363,9 @@ struct App
     GLint waterMeshProgram_uView;
     GLint waterMeshProgram_uModel;
 
+    GLint waterMeshProgram_uReflectionTexture;
+    GLint waterMeshProgram_uRefractionTexture;
+
     GLint deferredGeometryProgram_uTexture; // Deferred geometry pass
 
     GLint deferredLightingProgram_uGPosition; // Lighting geometry pass

@@ -321,8 +321,11 @@ uniform mat4 uProjection;
 uniform mat4 uView;
 uniform mat4 uModel;
 
+out vec2 vTexCoord;
+
 void main()
 {
+	vTexCoord = aTexCoords;
 	gl_Position = uProjection * uView * uModel * vec4(aPosition, 1.0);
 }
 
@@ -330,9 +333,17 @@ void main()
 
 layout(location = 0) out vec4 oFinalRender;
 
+uniform sampler2D uReflectionTexture;
+uniform sampler2D uRefractionTexture;
+
+in vec2 vTexCoord;
+
 void main()
 {
-	oFinalRender = vec4(0.0, 0.0, 1.0, 1.0);
+	vec4 reflectColor = texture(uReflectionTexture, vTexCoord);
+	vec4 refractColor = texture(uRefractionTexture, vTexCoord);
+
+	oFinalRender = mix(reflectColor, refractColor, 0.5);
 }
 
 
