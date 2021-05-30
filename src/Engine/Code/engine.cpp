@@ -1000,6 +1000,7 @@ void Gui(App* app)
     ImGui::Separator();
 
     ImGui::Image((ImTextureID)app->waterReflectionColorAttachment, ImVec2(100.0f, 100.0f), { 0, 1 }, { 1, 0 });
+    ImGui::Image((ImTextureID)app->waterRefractionColorAttachment, ImVec2(100.0f, 100.0f), { 0, 1 }, { 1, 0 });
 
     ImGui::Separator();
 
@@ -1318,7 +1319,7 @@ void Render(App* app)
 
         case Mode_Count:
         {
-            /* Water reflection */
+            /* Water reflection ------------------------------- */
             glBindFramebuffer(GL_FRAMEBUFFER, app->waterReflectionFrameBuffer);
 
             GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
@@ -1421,7 +1422,75 @@ void Render(App* app)
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-            /* Dafault */
+            /* Water refraction ------------------------------- */
+
+            glBindFramebuffer(GL_FRAMEBUFFER, app->waterRefractionFrameBuffer);
+
+            glDrawBuffers(ARRAY_COUNT(drawBuffers), drawBuffers);
+
+            glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            glViewport(0, 0, app->displaySize.x, app->displaySize.y);
+
+            glEnable(GL_DEPTH_TEST);
+
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+            glEnable(GL_CLIP_DISTANCE0);
+
+            glUseProgram(texturedMeshWithClippingProgram.handle);
+
+            Camera refractionCamera = app->camera;
+            refractionCamera.position.y = -refractionCamera.position.y;
+            refractionCamera.pitch = -refractionCamera.pitch;
+
+            glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(0), app->cbuffer.handle, app->globalParamsOffset, app->globalParamsSize);
+
+            glUniform4i(app->texturedMeshWithClippingProgram_uClippingPlane, 0, -1, 0, 0);
+
+            for (const Entity& entity : app->entities)
+            {
+                Model& model = app->models[entity.modelIndex];
+                Mesh& mesh = app->meshes[model.mesh_index];
+
+                glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(1), app->cbuffer.handle, entity.localParamsOffset, entity.localParamsSize);
+
+                glUniformMatrix4fv(app->texturedMeshWithClippingProgram_uProjection, 1, GL_FALSE, &reflectionCamera.GetProjectionMatrix()[0][0]);
+                glUniformMatrix4fv(app->texturedMeshWithClippingProgram_uView, 1, GL_FALSE, &reflectionCamera.GetViewMatrix()[0][0]);
+                glUniformMatrix4fv(app->texturedMeshWithClippingProgram_uModel, 1, GL_FALSE, &entity.worldMatrix[0][0]);
+
+                for (u32 i = 0; i < mesh.submeshes.size(); ++i)
+                {
+                    GLuint vao = FindVao(mesh, i, texturedMeshWithClippingProgram);
+                    glBindVertexArray(vao);
+
+                    u32 submesh_material_index = model.material_index[i];
+                    Material& submesh_material = app->materials[submesh_material_index];
+
+                    glActiveTexture(GL_TEXTURE0);
+                    glBindTexture(GL_TEXTURE_2D, app->textures[submesh_material.albedo_texture_index].handle);
+                    glUniform1i(app->texturedMeshWithClippingProgram_uTexture, 0);
+
+                    glActiveTexture(GL_TEXTURE1);
+                    glBindTexture(GL_TEXTURE_CUBE_MAP, app->cubemap);
+                    glUniform1i(app->texturedMeshWithClippingProgram_uSkybox, 1);
+
+                    Submesh& submesh = mesh.submeshes[i];
+                    glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.index_offset);
+
+                    glBindVertexArray(0);
+                }
+            }
+
+            glUseProgram(0);
+
+            glDisable(GL_CLIP_DISTANCE0);
+
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+            /* Dafault ------------------------------- */
             glBindFramebuffer(GL_FRAMEBUFFER, app->forwardFrameBuffer);
 
             //GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
