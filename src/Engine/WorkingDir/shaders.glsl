@@ -161,7 +161,7 @@ void main()
 		{
 			case 0: // Directional
 			{
-				lightFactor += CalculateDirectionalLight(uLight[i], vNormal, normalize(vViewDir));
+				lightFactor += CalculateDirectionalLight(uLight[i], normals, normalize(vViewDir));
 			}
 			break;
 
