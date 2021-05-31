@@ -1627,7 +1627,6 @@ void Render(App* app)
             glUniformMatrix4fv(app->waterMeshProgram_uModel, 1, GL_FALSE, &model[0][0]);
 
             app->RenderQuad(app->quad_vao, 4);
-            //app->RenderSphere(app->sphere_vao, app->sphere_index_count);
 
             glUseProgram(0);
 
