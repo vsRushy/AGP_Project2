@@ -323,7 +323,7 @@ void Init(App* app)
     // --------------------------------
 
     app->patrick_index = LoadModel(app, "Patrick/Patrick.obj");
-    app->cliff_index = LoadModel(app, "Cliff/rocks.obj");
+    app->cliff_index = LoadModel(app, "AK47/AK47.obj");
     app->cube_index = LoadModel(app, "Cube/Cube.obj");
 
     app->LoadQuad();
@@ -335,7 +335,7 @@ void Init(App* app)
                               app->patrick_index });
     app->entities.push_back({ TransformPositionRotationScale(vec3(5.0f, 0.0f, -20.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)),
                               app->patrick_index });*/
-    app->entities.push_back({ TransformPositionRotationScale(vec3(0.0f, 0.0f, 0.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)),
+    app->entities.push_back({ TransformPositionRotationScale(vec3(0.0f, 0.0f, 0.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(1.0f)),
                               app->cliff_index });
 
    //app->lights.push_back({ LightType_Point, vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(0.0f, 5.0f, -20.0f), 20.0f, 1.0f });
@@ -368,6 +368,7 @@ void Init(App* app)
 
     app->texturedMeshProgram_uTexture = glGetUniformLocation(texturedMeshProgram.handle, "uTexture");
     app->texturedMeshProgram_uSkybox = glGetUniformLocation(texturedMeshProgram.handle, "uSkybox");
+    app->texturedMeshProgram_uNormal = glGetUniformLocation(texturedMeshProgram.handle, "uNormal");
 
     app->texturedMeshWithClippingProgramIdx = LoadProgram(app, "shaders.glsl", "SHOW_TEXTURED_MESH_WITH_CLIPPING");
     Program& texturedMeshWithClippingProgram = app->programs[app->texturedMeshWithClippingProgramIdx];
@@ -391,7 +392,6 @@ void Init(App* app)
     }
 
     app->texturedMeshWithClippingProgram_uTexture = glGetUniformLocation(texturedMeshWithClippingProgram.handle, "uTexture");
-    app->texturedMeshWithClippingProgram_uNormal = glGetUniformLocation(texturedMeshWithClippingProgram.handle, "uNormal");
     app->texturedMeshWithClippingProgram_uSkybox = glGetUniformLocation(texturedMeshWithClippingProgram.handle, "uSkybox");
     app->texturedMeshWithClippingProgram_uProjection = glGetUniformLocation(texturedMeshWithClippingProgram.handle, "uProjection");
     app->texturedMeshWithClippingProgram_uView = glGetUniformLocation(texturedMeshWithClippingProgram.handle, "uView");
@@ -1514,7 +1514,7 @@ void Render(App* app)
 
                     glActiveTexture(GL_TEXTURE2);
                     glBindTexture(GL_TEXTURE_2D, app->textures[submesh_material.bump_texture_index].handle);
-                    glUniform1i(app->texturedMeshWithClippingProgram_uNormal, 2);
+                    glUniform1i(app->texturedMeshProgram_uNormal, 2);
 
                     Submesh& submesh = mesh.submeshes[i];
                     glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.index_offset);

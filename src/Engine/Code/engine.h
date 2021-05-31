@@ -351,9 +351,9 @@ struct App
     // More Uniforms
     GLint texturedMeshProgram_uTexture; // Forward rendering mesh texture
     GLint texturedMeshProgram_uSkybox; // Forward rendering skybox
+    GLint texturedMeshProgram_uNormal;
 
     GLint texturedMeshWithClippingProgram_uTexture;
-    GLint texturedMeshWithClippingProgram_uNormal;
     GLint texturedMeshWithClippingProgram_uSkybox;
     GLint texturedMeshWithClippingProgram_uProjection;
     GLint texturedMeshWithClippingProgram_uView;

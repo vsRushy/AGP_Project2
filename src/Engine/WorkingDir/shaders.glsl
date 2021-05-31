@@ -76,7 +76,7 @@ void main()
 	vTexCoord = aTexCoord;
 	vPosition = vec3(uWorldMatrix * vec4(aPosition, 1.0));
 	vNormal = vec3(transpose(inverse(uWorldMatrix)) * vec4(aNormal, 1.0));
-	vViewDir = uCameraPosition - vPosition;
+	vViewDir = uCameraPosition - aPosition;
 
 	vec3 T = normalize(vec3(uWorldMatrix * vec4(aTangent,   0.0)));
     vec3 B = normalize(vec3(uWorldMatrix * vec4(aBitangent, 0.0)));
@@ -161,7 +161,7 @@ void main()
 		{
 			case 0: // Directional
 			{
-				lightFactor += CalculateDirectionalLight(uLight[i], normals, normalize(vViewDir));
+				lightFactor += CalculateDirectionalLight(uLight[i], vNormal, normalize(vViewDir));
 			}
 			break;
 
@@ -185,6 +185,7 @@ void main()
 	oFinalRender = mix(vec4(lightFactor, 1.0) * objectColor, reflections, 0.5);*/
 	oFinalRender = vec4(lightFactor, 1.0) * objectColor;
 	//oFinalRender = vec4(normals, 1.0);
+	//oFinalRender = objectColor;
 
 	gl_FragDepth = gl_FragCoord.z - 0.2;
 }
