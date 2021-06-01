@@ -330,6 +330,7 @@ struct App
     u32 blackTexIdx;
     u32 normalTexIdx;
     u32 magentaTexIdx;
+    u32 heightMapTexIdx;
 
     // Camera
     Camera camera;
@@ -352,6 +353,7 @@ struct App
     GLint texturedMeshProgram_uTexture; // Forward rendering mesh texture
     GLint texturedMeshProgram_uSkybox; // Forward rendering skybox
     GLint texturedMeshProgram_uNormal;
+    GLint texturedMeshProgram_uHeight;
 
     GLint texturedMeshWithClippingProgram_uTexture;
     GLint texturedMeshWithClippingProgram_uSkybox;
@@ -387,7 +389,7 @@ struct App
 
     // Model indices
     u32 patrick_index;
-    u32 cliff_index;
+    u32 cubeHeight_index;
     u32 cube_index;
 
     // Framebuffer

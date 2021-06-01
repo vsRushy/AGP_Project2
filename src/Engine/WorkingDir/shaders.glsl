@@ -70,13 +70,15 @@ out vec3 vPosition; // In worldspace
 out vec3 vNormal; // In worldspace
 out vec3 vViewDir; // In worldspace
 out mat3 TBN;
+out mat3 WorldViewMat;
 
 void main()
 {
 	vTexCoord = aTexCoord;
 	vPosition = vec3(uWorldMatrix * vec4(aPosition, 1.0));
 	vNormal = vec3(transpose(inverse(uWorldMatrix)) * vec4(aNormal, 1.0));
-	vViewDir = uCameraPosition - aPosition;
+	vViewDir = uCameraPosition - vPosition;
+	WorldViewMat = mat3(uWorldMatrix);
 
 	vec3 T = normalize(vec3(uWorldMatrix * vec4(aTangent,   0.0)));
     vec3 B = normalize(vec3(uWorldMatrix * vec4(aBitangent, 0.0)));
@@ -94,6 +96,7 @@ in vec3 vPosition;
 in vec3 vNormal;
 in vec3 vViewDir;
 in mat3 TBN;
+in mat3 WorldViewMat;
 
 struct Light
 {
@@ -115,6 +118,7 @@ layout(binding = 0, std140) uniform GlobalParams
 uniform sampler2D uTexture;
 uniform samplerCube uSkybox;
 uniform sampler2D uNormal;
+uniform sampler2D uHeight;
 
 layout(location = 0) out vec4 oFinalRender;
 
@@ -147,10 +151,34 @@ vec3 CalculatePointLight(Light light)
 	return vec3(brightness) * light.color;
 }
 
+vec2 reliefMapping(vec2 texCoords, vec3 viewDir)
+{
+	 int numSteps = 15;
+ 
+	 // Compute the view ray in texture space
+	vec3 rayTexspace = transpose(TBN) * inverse(WorldViewMat) * viewDir;
+	 // Increment
+	 vec3 rayIncrementTexspace;
+	 rayIncrementTexspace.xy = 5.5 * rayTexspace.xy / abs(rayTexspace.z * textureSize(uHeight, 0).x);
+	 rayIncrementTexspace.z = 1.0/numSteps;
+	 // Sampling state
+	 vec3 samplePositionTexspace = vec3(texCoords, 0.0);
+	 float sampledDepth = 1.0 - texture(uHeight, samplePositionTexspace.xy).r;
+	 // Linear search
+	 for (int i = 0; i < numSteps && samplePositionTexspace.z < sampledDepth; ++i)
+	 {
+		 samplePositionTexspace += rayIncrementTexspace;
+		 sampledDepth = 1.0 - texture(uHeight, samplePositionTexspace.xy).r;
+	 }
+	 return samplePositionTexspace.xy;
+}
+
 void main()
 {
-	vec4 objectColor = texture(uTexture, vTexCoord);
-	vec3 normals = texture(uNormal, vTexCoord).rgb;
+	vec2 textCoord = reliefMapping(vTexCoord, vViewDir);
+
+	vec4 objectColor = texture(uTexture, textCoord);
+	vec3 normals = texture(uNormal, textCoord).rgb;
 	normals = normals * 2.0 - 1.0;
 	normals = normalize(inverse(transpose(TBN)) * normals);
 
@@ -185,7 +213,7 @@ void main()
 	oFinalRender = mix(vec4(lightFactor, 1.0) * objectColor, reflections, 0.5);*/
 	oFinalRender = vec4(lightFactor, 1.0) * objectColor;
 	//oFinalRender = vec4(normals, 1.0);
-	//oFinalRender = objectColor;
+
 
 	gl_FragDepth = gl_FragCoord.z - 0.2;
 }

@@ -319,11 +319,12 @@ void Init(App* app)
     app->blackTexIdx = LoadTexture2D(app, "color_black.png");
     app->normalTexIdx = LoadTexture2D(app, "color_normal.png");
     app->magentaTexIdx = LoadTexture2D(app, "color_magenta.png");
+    app->heightMapTexIdx = LoadTexture2D(app, "CubeHeight/Height.png");
 
     // --------------------------------
 
     app->patrick_index = LoadModel(app, "Patrick/Patrick.obj");
-    app->cliff_index = LoadModel(app, "AK47/AK47.obj");
+    app->cubeHeight_index = LoadModel(app, "CubeHeight/Cube_obj.obj");
     app->cube_index = LoadModel(app, "Cube/Cube.obj");
 
     app->LoadQuad();
@@ -335,12 +336,13 @@ void Init(App* app)
                               app->patrick_index });
     app->entities.push_back({ TransformPositionRotationScale(vec3(5.0f, 0.0f, -20.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)),
                               app->patrick_index });*/
-    app->entities.push_back({ TransformPositionRotationScale(vec3(0.0f, 0.0f, 0.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(1.0f)),
-                              app->cliff_index });
+    app->entities.push_back({ TransformPositionRotationScale(vec3(0.0f, 0.0f, 0.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(0.5f)),
+                              app->cubeHeight_index });
 
    //app->lights.push_back({ LightType_Point, vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(0.0f, 5.0f, -20.0f), 20.0f, 1.0f });
     //app->lights.push_back({ LightType_Point, vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(5.0f, 7.0f, 0.0f), 14.0f, 0.7f });
     app->lights.push_back({ LightType_Directional, vec3(1.0f, 1.0f, 1.0f), vec3(1.0f, 0.0f, 0.0f), vec3(0.0f, 10.0f, -3.0f), 0.0f, 1.0f });
+    app->lights.push_back({ LightType_Directional, vec3(1.0f, 1.0f, 1.0f), vec3(-1.0f, 0.0f, 0.0f), vec3(0.0f, 10.0f, -3.0f), 0.0f, 1.0f });
 
 
     /* FORWARD RENDERING SHADER */
@@ -369,6 +371,7 @@ void Init(App* app)
     app->texturedMeshProgram_uTexture = glGetUniformLocation(texturedMeshProgram.handle, "uTexture");
     app->texturedMeshProgram_uSkybox = glGetUniformLocation(texturedMeshProgram.handle, "uSkybox");
     app->texturedMeshProgram_uNormal = glGetUniformLocation(texturedMeshProgram.handle, "uNormal");
+    app->texturedMeshProgram_uHeight = glGetUniformLocation(texturedMeshProgram.handle, "uHeight");
 
     app->texturedMeshWithClippingProgramIdx = LoadProgram(app, "shaders.glsl", "SHOW_TEXTURED_MESH_WITH_CLIPPING");
     Program& texturedMeshWithClippingProgram = app->programs[app->texturedMeshWithClippingProgramIdx];
@@ -1515,6 +1518,10 @@ void Render(App* app)
                     glActiveTexture(GL_TEXTURE2);
                     glBindTexture(GL_TEXTURE_2D, app->textures[submesh_material.bump_texture_index].handle);
                     glUniform1i(app->texturedMeshProgram_uNormal, 2);
+
+                    glActiveTexture(GL_TEXTURE3);
+                    glBindTexture(GL_TEXTURE_2D, app->textures[app->heightMapTexIdx].handle);
+                    glUniform1i(app->texturedMeshProgram_uHeight, 3);
 
                     Submesh& submesh = mesh.submeshes[i];
                     glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.index_offset);
