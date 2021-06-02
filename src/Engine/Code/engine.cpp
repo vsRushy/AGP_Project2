@@ -339,7 +339,7 @@ void Init(App* app)
                               app->patrick_index });
     app->entities.push_back({ TransformPositionRotationScale(vec3(5.0f, 0.0f, -20.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)),
                               app->patrick_index });*/
-    app->entities.push_back({ TransformPositionRotationScale(vec3(0.0f, 0.0f, 0.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(10.0f)),
+    app->entities.push_back({ TransformPositionRotationScale(vec3(0.0f, 00.0f, 0.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(10.0f)),
                               app->cubeHeight_index });
 
    //app->lights.push_back({ LightType_Point, vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(0.0f, 5.0f, -20.0f), 20.0f, 1.0f });

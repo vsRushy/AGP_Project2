@@ -83,7 +83,7 @@ void main()
     vec3 N = normalize(vec3(uWorldMatrix * vec4(vNormal,    0.0)));
 	TBN = mat3(T,B,N);
 
-	vViewDir = uCameraPosition - vPosition;
+	vViewDir = uCameraPosition - aPosition;
 	
 	WorldViewMat = mat3(uWorldMatrix);
 
@@ -157,7 +157,7 @@ vec2 reliefMapping(vec2 texCoords, vec3 viewDir)
 	 int numSteps = 15;
  
 	 // Compute the view ray in texture space
-	vec3 rayTexspace = transpose(inverse(TBN)) * inverse(WorldViewMat) * viewDir;
+	vec3 rayTexspace = TBN * inverse(WorldViewMat) * viewDir;
 	 // Increment
 	 vec3 rayIncrementTexspace;
 	 rayIncrementTexspace.xy = 5.5 * rayTexspace.xy / abs(rayTexspace.z * textureSize(uHeight, 0).x);
@@ -183,7 +183,7 @@ vec2 reliefMapping(vec2 texCoords, vec3 viewDir)
 
 void main()
 {
-	vec2 textCoord = reliefMapping(vTexCoord, vViewDir);
+	vec2 textCoord = reliefMapping(vTexCoord, normalize(vViewDir));
 
 	vec4 objectColor = texture(uTexture, textCoord);
 	vec3 normals = texture(uNormal, textCoord).rgb;
