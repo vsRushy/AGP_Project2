@@ -320,11 +320,14 @@ void Init(App* app)
     app->normalTexIdx = LoadTexture2D(app, "color_normal.png");
     app->magentaTexIdx = LoadTexture2D(app, "color_magenta.png");
     app->heightMapTexIdx = LoadTexture2D(app, "CubeHeight/Height.png");
+    app->heightMapTexIdx = LoadTexture2D(app, "CubeHeight/Height.png");
+    app->normalMapTexIdx = LoadTexture2D(app, "CubeHeight/Normal.png");
+    app->diffuseTexIdx = LoadTexture2D(app, "CubeHeight/Diffuse.png");
 
     // --------------------------------
 
     app->patrick_index = LoadModel(app, "Patrick/Patrick.obj");
-    app->cubeHeight_index = LoadModel(app, "CubeHeight/Cube_obj.obj");
+    app->cubeHeight_index = LoadModel(app, "CubeHeight/Plane.obj");
     app->cube_index = LoadModel(app, "Cube/Cube.obj");
 
     app->LoadQuad();
@@ -336,13 +339,13 @@ void Init(App* app)
                               app->patrick_index });
     app->entities.push_back({ TransformPositionRotationScale(vec3(5.0f, 0.0f, -20.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(2.0f)),
                               app->patrick_index });*/
-    app->entities.push_back({ TransformPositionRotationScale(vec3(0.0f, 0.0f, 0.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(0.5f)),
+    app->entities.push_back({ TransformPositionRotationScale(vec3(0.0f, 0.0f, 0.0f), 60.0f, vec3(0.0f, 1.0f, 0.0f), vec3(10.0f)),
                               app->cubeHeight_index });
 
    //app->lights.push_back({ LightType_Point, vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(0.0f, 5.0f, -20.0f), 20.0f, 1.0f });
     //app->lights.push_back({ LightType_Point, vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(5.0f, 7.0f, 0.0f), 14.0f, 0.7f });
-    app->lights.push_back({ LightType_Directional, vec3(1.0f, 1.0f, 1.0f), vec3(1.0f, 0.0f, 0.0f), vec3(0.0f, 10.0f, -3.0f), 0.0f, 1.0f });
-    app->lights.push_back({ LightType_Directional, vec3(1.0f, 1.0f, 1.0f), vec3(-1.0f, 0.0f, 0.0f), vec3(0.0f, 10.0f, -3.0f), 0.0f, 1.0f });
+    app->lights.push_back({ LightType_Directional, vec3(1.0f, 1.0f, 1.0f), vec3(1.0f, 0.85f, 0.0f), vec3(0.0f, 10.0f, -3.0f), 0.0f, 1.0f });
+    
 
 
     /* FORWARD RENDERING SHADER */

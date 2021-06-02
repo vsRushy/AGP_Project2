@@ -77,14 +77,15 @@ void main()
 	vTexCoord = aTexCoord;
 	vPosition = vec3(uWorldMatrix * vec4(aPosition, 1.0));
 	vNormal = vec3(transpose(inverse(uWorldMatrix)) * vec4(aNormal, 1.0));
-	vViewDir = uCameraPosition - vPosition;
-	WorldViewMat = mat3(uWorldMatrix);
 
 	vec3 T = normalize(vec3(uWorldMatrix * vec4(aTangent,   0.0)));
     vec3 B = normalize(vec3(uWorldMatrix * vec4(aBitangent, 0.0)));
     vec3 N = normalize(vec3(uWorldMatrix * vec4(vNormal,    0.0)));
+	TBN = mat3(T,B,N);
 
-	 TBN = mat3(T,B,N);
+	vViewDir = uCameraPosition - vPosition;
+	
+	WorldViewMat = mat3(uWorldMatrix);
 
 	gl_Position = uWorldViewProjectionMatrix * vec4(aPosition, 1.0);
 }
@@ -156,7 +157,7 @@ vec2 reliefMapping(vec2 texCoords, vec3 viewDir)
 	 int numSteps = 15;
  
 	 // Compute the view ray in texture space
-	vec3 rayTexspace = transpose(TBN) * inverse(WorldViewMat) * viewDir;
+	vec3 rayTexspace = transpose(inverse(TBN)) * inverse(WorldViewMat) * inverse(TBN)*normalize(viewDir);
 	 // Increment
 	 vec3 rayIncrementTexspace;
 	 rayIncrementTexspace.xy = 5.5 * rayTexspace.xy / abs(rayTexspace.z * textureSize(uHeight, 0).x);
@@ -170,7 +171,14 @@ vec2 reliefMapping(vec2 texCoords, vec3 viewDir)
 		 samplePositionTexspace += rayIncrementTexspace;
 		 sampledDepth = 1.0 - texture(uHeight, samplePositionTexspace.xy).r;
 	 }
-	 return samplePositionTexspace.xy;
+	   float afterDepth  = samplePositionTexspace.z - sampledDepth;
+		float beforeDepth = texture(uHeight, samplePositionTexspace.xy).r - samplePositionTexspace.z + sampledDepth;
+ 
+    // interpolation of texture coordinates
+    float weight = afterDepth / (afterDepth - beforeDepth);
+    vec2 finalTexCoords = samplePositionTexspace.xy * weight + samplePositionTexspace.xy * (1.0 - weight);
+
+	 return finalTexCoords;
 }
 
 void main()

@@ -331,6 +331,8 @@ struct App
     u32 normalTexIdx;
     u32 magentaTexIdx;
     u32 heightMapTexIdx;
+    u32 normalMapTexIdx;
+    u32 diffuseTexIdx;
 
     // Camera
     Camera camera;
