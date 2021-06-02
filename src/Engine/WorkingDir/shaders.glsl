@@ -76,7 +76,7 @@ void main()
 {
 	vTexCoord = aTexCoord;
 	vPosition = vec3(uWorldMatrix * vec4(aPosition, 1.0));
-	vNormal = vec3(transpose(inverse(uWorldMatrix)) * vec4(aNormal, 1.0));
+	vNormal = mat3(transpose(inverse(uWorldMatrix))) * aNormal;
 
 	vec3 T = normalize(vec3(uWorldMatrix * vec4(aTangent,   0.0)));
     vec3 B = normalize(vec3(uWorldMatrix * vec4(aBitangent, 0.0)));
@@ -157,7 +157,7 @@ vec2 reliefMapping(vec2 texCoords, vec3 viewDir)
 	 int numSteps = 15;
  
 	 // Compute the view ray in texture space
-	vec3 rayTexspace = transpose(inverse(TBN)) * inverse(WorldViewMat) * inverse(TBN)*normalize(viewDir);
+	vec3 rayTexspace = transpose(inverse(TBN)) * inverse(WorldViewMat) * viewDir;
 	 // Increment
 	 vec3 rayIncrementTexspace;
 	 rayIncrementTexspace.xy = 5.5 * rayTexspace.xy / abs(rayTexspace.z * textureSize(uHeight, 0).x);
