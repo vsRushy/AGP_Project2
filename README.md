@@ -20,6 +20,14 @@ This project consists in creating a deferred renderer for the second assignment 
 
 - **Scroll Wheel:** Zoom In - Zoom Out.
 
+### Options
+
+The user can change the following:
+  - Enable/Disable Debug group mode.
+  - RenderDoc capture.
+  - Enable/Disable deferred rendering.
+  - Modify the light parameters.
+
 ## Features
 
 ### Environment mapping
@@ -47,6 +55,12 @@ This project consists in creating a deferred renderer for the second assignment 
 #### Images
 
 ![Deferred Rendering](https://github.com/vsRushy/AGP_Project2/blob/main/docs/Deferred_Rendering.jpg "Deferred Rendering")
+
+## Disclaimer
+
+The environment mapping, reflective and refractive water, and height map shall only work on forward rendering mode (deferred rendering is disabled).
+
+The release contains two executables. One is for the environment mapping and reflective and refractive water techniques, and the other is for the heightmap technique.
 
 ## Authors
 
