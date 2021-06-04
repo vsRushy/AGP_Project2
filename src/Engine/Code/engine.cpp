@@ -982,11 +982,6 @@ void Gui(App* app)
 
     ImGui::Separator();
 
-    ImGui::Image((ImTextureID)app->waterReflectionColorAttachment, ImVec2(100.0f, 100.0f), { 0, 1 }, { 1, 0 });
-    ImGui::Image((ImTextureID)app->waterRefractionColorAttachment, ImVec2(100.0f, 100.0f), { 0, 1 }, { 1, 0 });
-
-    ImGui::Separator();
-
     if (app->mode == Mode_Deferred)
     {
         const char* items[] = { "Position", "Normals", "Diffuse", "Depth", "Final Render" };
