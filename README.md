@@ -5,6 +5,7 @@
 This project consists in creating a deferred renderer for the second assignment of the Advanced Graphics Programming subject at UPC.
 
 **GitHub repository:** Click [here](https://github.com/vsRushy/AGP_Project2).
+**Releases:** Click [here](https://github.com/vsRushy/AGP_Project2/releases).
 
 ## Controls
 
@@ -20,9 +21,31 @@ This project consists in creating a deferred renderer for the second assignment 
 
 ## Features
 
-### Environment mapping and reflective/refractive water
+### Environment mapping
+
+#### Images
+
+![Environment mapping](https://github.com/vsRushy/AGP_Project2/blob/main/docs/Environment_Mapping.jpg "Environment mapping")
+
+### Reflective and refractive water
+
+#### Images
+
+![Reflective and refractive water](https://github.com/vsRushy/AGP_Project2/blob/main/docs/ReflectiveRefractive_Water.jpg "Reflective and refractive water")
 
 ### Heighmap
+
+#### Images
+
+![Heightmap 1](https://github.com/vsRushy/AGP_Project2/blob/main/docs/Heightmap_1.jpg "Heightmap 1")
+
+![Heightmap 2](https://github.com/vsRushy/AGP_Project2/blob/main/docs/Heightmap_2.jpg "Heightmap 2")
+
+### Deferred rendering
+
+![Deferred Rendering](https://github.com/vsRushy/AGP_Project2/blob/main/docs/Deferred_Rendering.jpg "Deferred Rendering")
+
+#### Images
 
 ## Authors
 
