@@ -43,9 +43,9 @@ This project consists in creating a deferred renderer for the second assignment 
 
 ### Deferred rendering
 
-![Deferred Rendering](https://github.com/vsRushy/AGP_Project2/blob/main/docs/Deferred_Rendering.jpg "Deferred Rendering")
-
 #### Images
+
+![Deferred Rendering](https://github.com/vsRushy/AGP_Project2/blob/main/docs/Deferred_Rendering.jpg "Deferred Rendering")
 
 ## Authors
 
