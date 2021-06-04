@@ -18,6 +18,12 @@ This project consists in creating a deferred renderer for the second assignment 
 
 - **Scroll Wheel:** Zoom In - Zoom Out.
 
+## Features
+
+### Environment mapping and reflective/refractive water
+
+### Heighmap
+
 ## Authors
 
 - Marcos Freixas, Gerard.
