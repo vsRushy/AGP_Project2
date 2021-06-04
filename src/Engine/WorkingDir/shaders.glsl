@@ -217,9 +217,9 @@ void main()
 	vec3 I = normalize(vPosition - uCameraPosition);
 	vec3 R = reflect(I, normalize(vNormal));
 
-	/*vec4 reflections = vec4(texture(uSkybox, R).rgb, 1.0);
-	oFinalRender = mix(vec4(lightFactor, 1.0) * objectColor, reflections, 0.5);*/
-	oFinalRender = vec4(lightFactor, 1.0) * objectColor;
+	vec4 reflections = vec4(texture(uSkybox, R).rgb, 1.0);
+	oFinalRender = mix(vec4(lightFactor, 1.0) * objectColor, reflections, 0.5);
+	//oFinalRender = vec4(lightFactor, 1.0) * objectColor;
 	//oFinalRender = vec4(normals, 1.0);
 
 
